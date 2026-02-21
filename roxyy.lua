@@ -1,5 +1,3 @@
--- notifyonkill / L.notifyonkill isnt hooked to a toggle..
--- 2/19/26
 local repo = 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -23,7 +21,7 @@ local HudGui = PlayerGui:WaitForChild("HudScreenGui")
 local Hud = HudGui.Main.DisplayStatus
 
 local player = LocalPlayer
-
+L.HideSleevesEnabled = false
 L.AimbotEnabled = false
 L.StickyAim = false
 L.WallCheck = false
@@ -50,7 +48,7 @@ L.AimbotType = "Closest To Mouse"
 L.Smoothness = 0.1
 L.HideArmsEnabled = false
 L.ArmTransparencyOriginals = {}
-
+L.AimVelocity = 1200
 L.TEAM = {
 	PHANTOMS = Color3.fromRGB(155,182,255),
 	GHOSTS = Color3.fromRGB(231,183,88)
@@ -87,7 +85,12 @@ L.DynamicFOVEnabled = false
 L.DynamicFOVMultiplier = 1.85
 L.DynamicFOVSpeedIn = 0.05
 L.DynamicFOVSpeedOut = 0.05
-
+L.SelectedSleeveTexture = "rbxassetid://2163189692"
+local SleeveTextureIds = {
+	Default = "rbxassetid://2163189692",
+	Beach = "rbxassetid://7582881674",
+	Camo = "rbxassetid://819001409"
+}
 L.ChamsType = "AlwaysOnTop"
 L.CurrentFOVRadius = L.FOVRadius
 
@@ -99,8 +102,7 @@ L.RayParams = RaycastParams.new()
 L.RayParams.FilterType = Enum.RaycastFilterType.Exclude
 L.RayParams.IgnoreWater = true
 
-L.VisibilityCache = {}
-L.VisibilityInterval = 0.08
+
 
 L.TARGET_WALKSPEED = 24
 L.WalkSpeedEnabled = false
@@ -113,7 +115,7 @@ L.WeaponMasterEnabled = false
 
 L.ArmHighlights = {}
 L.ArmsMaterialEnabled = false
-L.ArmsMaterialColor = Color3.fromRGB(80,200,255)
+L.ArmsMaterialColor = Color3.fromRGB(131,147,255)
 L.ArmsMaterialEnum = Enum.Material.ForceField
 L.ArmOriginals = {}
 
@@ -125,14 +127,14 @@ L.MaterialMap = {
 	Metal = Enum.Material.Metal
 }
 
-L.FillColor = Color3.fromRGB(80,200,255)
+L.FillColor = Color3.fromRGB(131,147,255)
 L.OutlineColor = Color3.fromRGB(255,255,255)
 L.HighlightFillTransparency = 0.4
 
 L.WeaponHighlights = {}
 L.WeaponHighlightEnabled = false
 L.WeaponMaterialEnabled = false
-L.WeaponMaterialColor = Color3.fromRGB(80,200,255)
+L.WeaponMaterialColor = Color3.fromRGB(131,147,255)
 L.WeaponMaterialEnum = Enum.Material.ForceField
 L.WeaponMaterialOriginals = {}
 
@@ -148,7 +150,7 @@ L.WeaponMaterialMap = {
 	Metal = Enum.Material.Metal
 }
 
-L.WeaponFillColor = Color3.fromRGB(80,200,255)
+L.WeaponFillColor = Color3.fromRGB(131,147,255)
 L.WeaponOutlineColor = Color3.fromRGB(255,255,255)
 L.WeaponFillTransparency = 0.4
 
@@ -156,7 +158,7 @@ L.OriginalValues = {
 	Ambient = Lighting.Ambient
 }
 
-L.CAmbientColor = Color3.fromRGB(80,200,255)
+L.CAmbientColor = Color3.fromRGB(131,147,255)
 L.ChamsEnabled = false
 L.ViewModelEnabled = false
 
@@ -166,8 +168,7 @@ L.BaseCF = {}
 L.LastScan = 0
 L.ScanInterval = 0.25
 
-L.ChamsColor = Color3.fromRGB(79,199,255)
-L.ChamsHiddenColor = Color3.fromRGB(255,255,0)
+L.ChamsColor = Color3.fromRGB(131,147,255)
 L.ChamsTransparency = 0.5
 L.ChamsShrinkDefault = 1.2
 
@@ -186,72 +187,183 @@ L.NameESPEnabled = false
 L.SkyboxEnabled = false
 L.SelectedSky = "Pink"
 L.Skyboxes = {
-	Space = {
-		Bk = "rbxassetid://159454299",
-		Dn = "rbxassetid://159454296",
-		Ft = "rbxassetid://159454293",
-		Lf = "rbxassetid://159454286",
-		Rt = "rbxassetid://159454300",
-		Up = "rbxassetid://159454288"
-	},
-	Dark = {
-		Bk = "rbxassetid://12064107",
-		Dn = "rbxassetid://12064152",
-		Ft = "rbxassetid://12064121",
-		Lf = "rbxassetid://12063984",
-		Rt = "rbxassetid://12064115",
-		Up = "rbxassetid://12064131"
-	},
-	Pink = {
-		Bk = "rbxassetid://11427769401",
-		Dn = "rbxassetid://11427770685",
-		Ft = "rbxassetid://11427769401",
-		Lf = "rbxassetid://11427769401",
-		Rt = "rbxassetid://11427769401",
-		Up = "rbxassetid://11427771954"
-	},
-	PurpleNebula = {
-		Bk = "rbxassetid://129876530632297",
-		Dn = "rbxassetid://108406529909981",
-		Ft = "rbxassetid://104400530594543",
-		Lf = "rbxassetid://73372229972523",
-		Rt = "rbxassetid://87408857415924",
-		Up = "rbxassetid://137817405681365"
-	},
-	Red = {
-		Bk = "rbxassetid://401664839",
-		Dn = "rbxassetid://401664862",
-		Ft = "rbxassetid://401664960",
-		Lf = "rbxassetid://401664881",
-		Rt = "rbxassetid://401664901",
-		Up = "rbxassetid://401664936"
-	},
-	White = {
-		Bk = "rbxassetid://6213159304",
-		Dn = "rbxassetid://6213218651",
-		Ft = "rbxassetid://6213159304",
-		Lf = "rbxassetid://6213159304",
-		Rt = "rbxassetid://6213159304",
-		Up = "rbxassetid://6213176544"
-	},
-	Cartoon1 = {
-		Bk = "rbxassetid://15114954171",
-		Dn = "rbxassetid://15114958869",
-		Ft = "rbxassetid://15114963740",
-		Lf = "rbxassetid://15114957947",
-		Rt = "rbxassetid://15114955238",
-		Up = "rbxassetid://15114948718"
-	},
-	Cartoon2 = {
-		Bk = "rbxassetid://6295671271",
-		Dn = "rbxassetid://6295671382",
-		Ft = "rbxassetid://6295671136",
-		Lf = "rbxassetid://6295670996",
-		Rt = "rbxassetid://6295671509",
-		Up = "rbxassetid://6295671667"
-	}
+    Space = {
+        Bk = "rbxassetid://159454299",
+        Dn = "rbxassetid://159454296",
+        Ft = "rbxassetid://159454293",
+        Lf = "rbxassetid://159454286",
+        Rt = "rbxassetid://159454300",
+        Up = "rbxassetid://159454288"
+    },
+    Dark = {
+        Bk = "rbxassetid://12064107",
+        Dn = "rbxassetid://12064152",
+        Ft = "rbxassetid://12064121",
+        Lf = "rbxassetid://12063984",
+        Rt = "rbxassetid://12064115",
+        Up = "rbxassetid://12064131"
+    },
+    Pink = {
+        Bk = "rbxassetid://11427769401",
+        Dn = "rbxassetid://11427770685",
+        Ft = "rbxassetid://11427769401",
+        Lf = "rbxassetid://11427769401",
+        Rt = "rbxassetid://11427769401",
+        Up = "rbxassetid://11427771954"
+    },
+    PurpleNebula = {
+        Bk = "rbxassetid://129876530632297",
+        Dn = "rbxassetid://108406529909981",
+        Ft = "rbxassetid://104400530594543",
+        Lf = "rbxassetid://73372229972523",
+        Rt = "rbxassetid://87408857415924",
+        Up = "rbxassetid://137817405681365"
+    },
+    Red = {
+        Bk = "rbxassetid://401664839",
+        Dn = "rbxassetid://401664862",
+        Ft = "rbxassetid://401664960",
+        Lf = "rbxassetid://401664881",
+        Rt = "rbxassetid://401664901",
+        Up = "rbxassetid://401664936"
+    },
+    White = {
+        Bk = "rbxassetid://6213159304",
+        Dn = "rbxassetid://6213218651",
+        Ft = "rbxassetid://6213159304",
+        Lf = "rbxassetid://6213159304",
+        Rt = "rbxassetid://6213159304",
+        Up = "rbxassetid://6213176544"
+    },
+    Cartoon1 = {
+        Bk = "rbxassetid://15114954171",
+        Dn = "rbxassetid://15114958869",
+        Ft = "rbxassetid://15114963740",
+        Lf = "rbxassetid://15114957947",
+        Rt = "rbxassetid://15114955238",
+        Up = "rbxassetid://15114948718"
+    },
+    Cartoon2 = {
+        Bk = "rbxassetid://6295671271",
+        Dn = "rbxassetid://6295671382",
+        Ft = "rbxassetid://6295671136",
+        Lf = "rbxassetid://6295670996",
+        Rt = "rbxassetid://6295671509",
+        Up = "rbxassetid://6295671667"
+    },
+    PurpleClouds = {
+        Bk = "rbxassetid://151165214",
+        Dn = "rbxassetid://151165197",
+        Ft = "rbxassetid://151165224",
+        Lf = "rbxassetid://151165191",
+        Rt = "rbxassetid://151165206",
+        Up = "rbxassetid://151165227"
+    },
+    CloudySkies = {
+        Bk = "rbxassetid://151165214",
+        Dn = "rbxassetid://151165197",
+        Ft = "rbxassetid://151165224",
+        Lf = "rbxassetid://151165191",
+        Rt = "rbxassetid://151165206",
+        Up = "rbxassetid://151165227"
+    },
+    PurpleAndBlue = {
+        Bk = "rbxassetid://149397692",
+        Dn = "rbxassetid://149397686",
+        Ft = "rbxassetid://149397697",
+        Lf = "rbxassetid://149397684",
+        Rt = "rbxassetid://149397688",
+        Up = "rbxassetid://149397702"
+    },
+    VividSkies = {
+        Bk = "rbxassetid://271042516",
+        Dn = "rbxassetid://271077243",
+        Ft = "rbxassetid://271042556",
+        Lf = "rbxassetid://271042310",
+        Rt = "rbxassetid://271042467",
+        Up = "rbxassetid://271077958"
+    },
+    Twighlight = {
+        Bk = "rbxassetid://264908339",
+        Dn = "rbxassetid://264907909",
+        Ft = "rbxassetid://264909420",
+        Lf = "rbxassetid://264909758",
+        Rt = "rbxassetid://264908886",
+        Up = "rbxassetid://264907379"
+    },
+    Vaporwave = {
+        Bk = "rbxassetid://1417494030",
+        Dn = "rbxassetid://1417494146",
+        Ft = "rbxassetid://1417494253",
+        Lf = "rbxassetid://1417494402",
+        Rt = "rbxassetid://1417494499",
+        Up = "rbxassetid://1417494643"
+    },
+    Clouds = {
+        Bk = "rbxassetid://570557514",
+        Dn = "rbxassetid://570557775",
+        Ft = "rbxassetid://570557559",
+        Lf = "rbxassetid://570557620",
+        Rt = "rbxassetid://570557672",
+        Up = "rbxassetid://570557727"
+    },
+    NightSky = {
+        Bk = "rbxassetid://12064107",
+        Dn = "rbxassetid://12064152",
+        Ft = "rbxassetid://12064121",
+        Lf = "rbxassetid://12063984",
+        Rt = "rbxassetid://12064115",
+        Up = "rbxassetid://12064131"
+    },
+    SettingSun = {
+        Bk = "rbxassetid://626460377",
+        Dn = "rbxassetid://626460216",
+        Ft = "rbxassetid://626460513",
+        Lf = "rbxassetid://626473032",
+        Rt = "rbxassetid://626458639",
+        Up = "rbxassetid://626460625"
+    },
+    FadeBlue = {
+        Bk = "rbxassetid://153695414",
+        Dn = "rbxassetid://153695352",
+        Ft = "rbxassetid://153695452",
+        Lf = "rbxassetid://153695320",
+        Rt = "rbxassetid://153695383",
+        Up = "rbxassetid://153695471"
+    },
+    ElegantMorning = {
+        Bk = "rbxassetid://153767241",
+        Dn = "rbxassetid://153767216",
+        Ft = "rbxassetid://153767266",
+        Lf = "rbxassetid://153767200",
+        Rt = "rbxassetid://153767231",
+        Up = "rbxassetid://153767288"
+    },
+    Neptune = {
+        Bk = "rbxassetid://218955819",
+        Dn = "rbxassetid://218953419",
+        Ft = "rbxassetid://218954524",
+        Lf = "rbxassetid://218958493",
+        Rt = "rbxassetid://218957134",
+        Up = "rbxassetid://218950090"
+    },
+    Redshift = {
+        Bk = "rbxassetid://401664839",
+        Dn = "rbxassetid://401664862",
+        Ft = "rbxassetid://401664960",
+        Lf = "rbxassetid://401664881",
+        Rt = "rbxassetid://401664901",
+        Up = "rbxassetid://401664936"
+    },
+    AestheticNight = {
+        Bk = "rbxassetid://1045964490",
+        Dn = "rbxassetid://1045964368",
+        Ft = "rbxassetid://1045964655",
+        Lf = "rbxassetid://1045964655",
+        Rt = "rbxassetid://1045964655",
+        Up = "rbxassetid://1045962969"
+    }
 }
-
 L.NameDrawings = {}
 L.NameHeadCache = {}
 
@@ -267,18 +379,139 @@ L.BoxOutlineThickness = 3
 L.BoxMaxDistance = L.DistanceMax
 
 L.GunshotOverride = false
-L.SelectedSound = "Shutter"
+L.SelectedSound = "Minecraft experience"
 L.SoundVolume = 1
 L.SoundBackup = {}
 L.ValidSoundIds = {}
 
 L.SoundMap = {
-	Shutter = "rbxassetid://9118823101",
-	Neverlose = "rbxassetid://97643101798871",
+	["Minecraft experience"] = "rbxassetid://7151570575",
+	Neverlose = "rbxassetid://8726881116",
 	Gamesense = "rbxassetid://4817809188",
-	["Smoke Detector"] = "rbxassetid://135543502679167",
-	Laser = "rbxassetid://1624609598"
+	One = "rbxassetid://7380502345",
+	Bell = "rbxassetid://6534947240",
+	Rust = "rbxassetid://1255040462",
+	TF2 = "rbxassetid://2868331684",
+	Slime = "rbxassetid://6916371803",
+	["Among Us"] = "rbxassetid://5700183626",
+	Minecraft = "rbxassetid://4018616850",
+	["CS:GO"] = "rbxassetid://6937353691",
+	Saber = "rbxassetid://8415678813",
+	Baimware = "rbxassetid://3124331820",
+	Osu = "rbxassetid://7149255551",
+	["TF2 Critical"] = "rbxassetid://296102734",
+	Bat = "rbxassetid://3333907347",
+	["Call of Duty"] = "rbxassetid://5952120301",
+	Bubble = "rbxassetid://6534947588",
+	Pick = "rbxassetid://1347140027",
+	Pop = "rbxassetid://198598793",
+	Bruh = "rbxassetid://4275842574",
+	["[Bamboo]"] = "rbxassetid://3769434519",
+	Crowbar = "rbxassetid://546410481",
+	Weeb = "rbxassetid://6442965016",
+	Beep = "rbxassetid://8177256015",
+	Bambi = "rbxassetid://8437203821",
+	Stone = "rbxassetid://3581383408",
+	["Old Fatality"] = "rbxassetid://6607142036",
+	Click = "rbxassetid://8053704437",
+	Ding = "rbxassetid://7149516994",
+	Snow = "rbxassetid://6455527632",
+	Laser = "rbxassetid://7837461331",
+	Mario = "rbxassetid://2815207981",
+	Steve = "rbxassetid://4965083997",
+	Snowdrake = "rbxassetid://7834724809",
+	Default = "rbxassetid://4581728529"
 }
+L.HitSoundSelected = "rbxassetid://8726881116"
+L.HitSoundVolume = 1
+L.HitSoundOverride = false
+L.HitSoundBackup = {}
+L.HitSoundMap = {
+	["Minecraft experience"] = "rbxassetid://7151570575",
+	Neverlose = "rbxassetid://8726881116",
+	Gamesense = "rbxassetid://4817809188",
+	One = "rbxassetid://7380502345",
+	Bell = "rbxassetid://6534947240",
+	Rust = "rbxassetid://1255040462",
+	TF2 = "rbxassetid://2868331684",
+	Slime = "rbxassetid://6916371803",
+	["Among Us"] = "rbxassetid://5700183626",
+	Minecraft = "rbxassetid://4018616850",
+	["CS:GO"] = "rbxassetid://6937353691",
+	Saber = "rbxassetid://8415678813",
+	Baimware = "rbxassetid://3124331820",
+	Osu = "rbxassetid://7149255551",
+	["TF2 Critical"] = "rbxassetid://296102734",
+	Bat = "rbxassetid://3333907347",
+	["Call of Duty"] = "rbxassetid://5952120301",
+	Bubble = "rbxassetid://6534947588",
+	Pick = "rbxassetid://1347140027",
+	Pop = "rbxassetid://198598793",
+	Bruh = "rbxassetid://4275842574",
+	["[Bamboo]"] = "rbxassetid://3769434519",
+	Crowbar = "rbxassetid://546410481",
+	Weeb = "rbxassetid://6442965016",
+	Beep = "rbxassetid://8177256015",
+	Bambi = "rbxassetid://8437203821",
+	Stone = "rbxassetid://3581383408",
+	["Old Fatality"] = "rbxassetid://6607142036",
+	Click = "rbxassetid://8053704437",
+	Ding = "rbxassetid://7149516994",
+	Snow = "rbxassetid://6455527632",
+	Laser = "rbxassetid://7837461331",
+	Mario = "rbxassetid://2815207981",
+	Steve = "rbxassetid://4965083997",
+	Snowdrake = "rbxassetid://7834724809",
+	Default = "rbxassetid://4581728529"
+}
+L.KillSoundSelected = "rbxassetid://4817809188"
+L.KillSoundVolume = 1
+L.KillSoundOverride = false
+L.KillSoundBackup = {}
+L.KillSoundMap = {
+	["Minecraft experience"] = "rbxassetid://7151570575",
+	Neverlose = "rbxassetid://8726881116",
+	Gamesense = "rbxassetid://4817809188",
+	One = "rbxassetid://7380502345",
+	Bell = "rbxassetid://6534947240",
+	Rust = "rbxassetid://1255040462",
+	TF2 = "rbxassetid://2868331684",
+	Slime = "rbxassetid://6916371803",
+	["Among Us"] = "rbxassetid://5700183626",
+	Minecraft = "rbxassetid://4018616850",
+	["CS:GO"] = "rbxassetid://6937353691",
+	Saber = "rbxassetid://8415678813",
+	Baimware = "rbxassetid://3124331820",
+	Osu = "rbxassetid://7149255551",
+	["TF2 Critical"] = "rbxassetid://296102734",
+	Bat = "rbxassetid://3333907347",
+	["Call of Duty"] = "rbxassetid://5952120301",
+	Bubble = "rbxassetid://6534947588",
+	Pick = "rbxassetid://1347140027",
+	Pop = "rbxassetid://198598793",
+	Bruh = "rbxassetid://4275842574",
+	["[Bamboo]"] = "rbxassetid://3769434519",
+	Crowbar = "rbxassetid://546410481",
+	Weeb = "rbxassetid://6442965016",
+	Beep = "rbxassetid://8177256015",
+	Bambi = "rbxassetid://8437203821",
+	Stone = "rbxassetid://3581383408",
+	["Old Fatality"] = "rbxassetid://6607142036",
+	Click = "rbxassetid://8053704437",
+	Ding = "rbxassetid://7149516994",
+	Snow = "rbxassetid://6455527632",
+	Laser = "rbxassetid://7837461331",
+	Mario = "rbxassetid://2815207981",
+	Steve = "rbxassetid://4965083997",
+	Snowdrake = "rbxassetid://7834724809",
+	Default = "rbxassetid://4581728529"
+}
+if not L.HitSoundSelected then
+	L.HitSoundSelected = "rbxassetid://8726881116"
+end
+if not L.KillSoundSelected then
+	L.KillSoundSelected = "rbxassetid://4817809188"
+end
 
 local WeaponRoots = {
 	ReplicatedStorage.Content.ProductionContent.WeaponDatabase["TWO HAND BLUNT"],
@@ -375,7 +608,7 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 					if L.WSConnection then return end
 					L.WSConnection = RunService.RenderStepped:Connect(function()
 						if not L.WalkSpeedEnabled then return end
-						if not L.CurrentHumanoid or not L.CurrentHumanoid.Parent then
+						if not L.CurrentHumanoid or not L.CurrentHumanoid:IsDescendantOf(workspace) then
 							local hum = findHumanoid()
 							if hum then hookHumanoid(hum) end
 							return
@@ -449,7 +682,7 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 				end
 				local function restoreArmMaterial()
 					for part, data in pairs(L.ArmOriginals) do
-						if part and part.Parent then
+						if part and part:IsDescendantOf(Camera) then
 							part.Material = data.Material
 							part.Color = data.Color
 						end
@@ -463,34 +696,51 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 						restoreArmMaterial()
 					end
 				end)
-				RunService.Heartbeat:Connect(function()
-					if not L.MasterEnabled then return end
-					SetSleeveSlotsTransparency(1)
-					for part, h in pairs(L.ArmHighlights) do
-						if not part or not part.Parent or not L.HighlightEnabled then
-							pcall(function() h:Destroy() end)
-							L.ArmHighlights[part] = nil
-						end
-					end
-					if not L.HighlightEnabled then return end
-					for _, obj in ipairs(Camera:GetDescendants()) do
-						if obj:IsA("MeshPart") and obj.Name == "SkinTone" then
-							CreateHighlight(obj)
-						end
-					end
-				end)
-				local function modelHasSleeves(model)
-					for _, d in ipairs(model:GetDescendants()) do
-						if d:IsA("MeshPart") and d.Name == "Sleeves" then return true end
-					end
-				end
-				local function getWeaponModel()
-					for _, model in ipairs(Camera:GetChildren()) do
-						if model:IsA("Model") and not modelHasSleeves(model) then
-							return model
-						end
-					end
-				end
+RunService.Heartbeat:Connect(function()
+	if not L.MasterEnabled then
+		for part, h in pairs(L.ArmHighlights) do
+			pcall(function() h:Destroy() end)
+			L.ArmHighlights[part] = nil
+		end
+		return
+	end
+
+	if L.HideSleevesEnabled then
+		SetSleeveSlotsTransparency(1)
+	end
+
+	for part, h in pairs(L.ArmHighlights) do
+		if not part or not part:IsDescendantOf(Camera) or not L.HighlightEnabled then
+			pcall(function() h:Destroy() end)
+			L.ArmHighlights[part] = nil
+		end
+	end
+
+	if not L.HighlightEnabled then return end
+
+	for _, obj in ipairs(Camera:GetDescendants()) do
+		if obj:IsA("MeshPart") and obj.Name == "SkinTone" then
+			CreateHighlight(obj)
+		end
+	end
+end)
+
+local function modelHasSleeves(model)
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("MeshPart") and d.Name == "Sleeves" then
+			return true
+		end
+	end
+end
+
+local function getWeaponModel()
+	for _, model in ipairs(Camera:GetChildren()) do
+		if model:IsA("Model") and not modelHasSleeves(model) then
+			return model
+		end
+	end
+end
+
 				local function clearWeaponHighlights()
 					for _, h in pairs(L.WeaponHighlights) do pcall(function() h:Destroy() end) end
 					table.clear(L.WeaponHighlights)
@@ -510,7 +760,7 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 				RunService.Heartbeat:Connect(function()
 					if not L.WeaponMasterEnabled then return end
 					for model, h in pairs(L.WeaponHighlights) do
-						if not model or not model.Parent or not L.WeaponHighlightEnabled then
+						if not model or not model:IsDescendantOf(Camera) or not L.WeaponHighlightEnabled then
 							pcall(function() h:Destroy() end)
 							L.WeaponHighlights[model] = nil
 						end
@@ -536,7 +786,7 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 				end
 				local function restoreWeaponMaterial()
 					for part, data in pairs(L.WeaponMaterialOriginals) do
-						if part and part.Parent then
+						if part and part:IsDescendantOf(Camera) then
 							part.Material = data.Material
 							part.Color = data.Color
 						end
@@ -553,7 +803,6 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 						restoreWeaponMaterial()
 					end
 				end)
-
 
 				local SnapOutline = Drawing.new("Line")
 				SnapOutline.Thickness = 3
@@ -577,11 +826,18 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 				FOVCircle.Color = L.FOVColor
 				FOVCircle.Transparency = 1
 				FOVCircle.Visible = false
+				local function isOnScreen(part)
+					local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+					return onScreen
+				end
 				local function isVisible(part)
 					if not L.WallCheck then
 						return true
 					end
-					if not part or not part:IsA("BasePart") or not part.Parent then
+					if not part or not part:IsA("BasePart") or not part:IsDescendantOf(workspace) then
+						return false
+					end
+					if not isOnScreen(part) then
 						return false
 					end
 					local origin = Camera.CFrame.Position
@@ -610,9 +866,19 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 					return false
 				end
 				local LocalTeam = nil
+				local validPatternSleeves = nil
 				local function getLocalTeam()
+					if validPatternSleeves and validPatternSleeves:IsDescendantOf(Camera) then
+						local tex = validPatternSleeves:FindFirstChild("Slot1")
+						if tex and tex:IsA("Texture") then
+							local c = tex.Color3
+							if c == L.TEAM.PHANTOMS then return "PHANTOMS"
+							elseif c == L.TEAM.GHOSTS then return "GHOSTS" end
+						end
+					end
 					for _, obj in ipairs(Camera:GetDescendants()) do
 						if obj:IsA("MeshPart") and obj.Name == "Sleeves" then
+							validPatternSleeves = obj
 							for _, tex in ipairs(obj:GetChildren()) do
 								if tex:IsA("Texture") and tex.Name == "Slot1" then
 									local c = tex.Color3
@@ -629,13 +895,11 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 				end
 				local function isEnemy(part)
 					if not LocalTeam then return false end
-					if not part or not part:IsA("MeshPart") then return false end
-					if not part.Parent then return false end
+					if not part or not part:IsDescendantOf(workspace) then return false end
+					local pparent = part.Parent
 					local torso
-					for _, p in ipairs(part.Parent:GetChildren()) do
-						if p:IsA("MeshPart")
-							and p.MeshId
-							and p.MeshId:find(L.MESH_IDS.Torso) then
+					for _, p in ipairs(pparent:GetChildren()) do
+						if p:IsA("MeshPart") and p.MeshId and p.MeshId:find(L.MESH_IDS.Torso) then
 							torso = p
 							break
 						end
@@ -649,19 +913,43 @@ L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[L.SilentAimPart]
 					end
 					return false
 				end
+				local function checkEnemyByModel(model)
+					local torso = L.DistanceTorsoCache and L.DistanceTorsoCache[model]
+					if not torso or not torso:IsDescendantOf(model) then
+						for _,v in ipairs(model:GetDescendants()) do
+							if v:IsA("MeshPart") and v.MeshId and v.MeshId:find(L.MESH_IDS.Torso) then
+								torso = v
+								if L.DistanceTorsoCache then L.DistanceTorsoCache[model] = v end
+								break
+							end
+						end
+					end
+					if not torso then return false end
+					if not LocalTeam then return false end
+					local c = torso.Color
+					if LocalTeam == "PHANTOMS" then return c == L.BODY_COLOR.GHOSTS
+					elseif LocalTeam == "GHOSTS" then return c == L.BODY_COLOR.PHANTOMS end
+					return false
+				end
+				L.AimPartCache = L.AimPartCache or {}
+				local function getCachedTargetPart(model)
+					local c = L.AimPartCache[model]
+					if c and c:IsDescendantOf(model) and c.MeshId:find(L.TARGET_MESH_ID) then return c end
+					for _, v in ipairs(model:GetDescendants()) do
+						if v:IsA("MeshPart") and v.MeshId and v.MeshId:find(L.TARGET_MESH_ID) then
+							L.AimPartCache[model] = v
+							return v
+						end
+					end
+					return nil
+				end
 				local function getTargetParts()
 					local t = {}
-					for _, folder in ipairs(PlayersFolder:GetChildren()) do
-						for _, model in ipairs(folder:GetChildren()) do
-							for _, sub in ipairs(model:GetChildren()) do
-								for _, part in ipairs(sub:GetChildren()) do
-									if part:IsA("MeshPart")
-										and part.MeshId
-										and part.MeshId:find(L.TARGET_MESH_ID)
-										and isEnemy(part) then
-											t[#t+1] = part
-									end
-								end
+					for model, _ in pairs(L.NameDrawings or {}) do
+						if checkEnemyByModel(model) then
+							local part = getCachedTargetPart(model)
+							if part then
+								t[#t+1] = part
 							end
 						end
 					end
@@ -672,7 +960,7 @@ local function getClosestTarget()
 
 	local origin
 	if L.FovPositionMethod == "Gun Barrel" then
-		if L.HasKnife or not L.GunBarrel or not L.GunBarrel.Parent then
+		if L.HasKnife or not L.GunBarrel or not L.GunBarrel:IsDescendantOf(Camera) then
 			return nil
 		end
 
@@ -693,7 +981,7 @@ local function getClosestTarget()
 	local shortest = math.huge
 
 	for _, part in ipairs(getTargetParts()) do
-		if part and part.Parent and isVisible(part) then
+		if part and part:IsDescendantOf(workspace) and isVisible(part) then
 			local worldDist = (camPos - part.Position).Magnitude
 			if worldDist <= L.MaxAimDistance then
 				local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
@@ -737,89 +1025,77 @@ end
 					end
 				end)
 				RunService.Heartbeat:Connect(function()
-					LocalTeam = getLocalTeam()
+					local newTeam = getLocalTeam()
+					if LocalTeam ~= newTeam then
+						table.clear(L.EnemyCache)
+					end
+					LocalTeam = newTeam
 				end)
 				
-				local function applyHideArms()
-					for _, model in ipairs(getArmModels()) do
-						for _, part in ipairs(model:GetDescendants()) do
-							if part:IsA("BasePart") then
-								if not L.ArmTransparencyOriginals[part] then
-									L.ArmTransparencyOriginals[part] = part.Transparency
-								end
-								part.Transparency = 1
-							end
-						end
-					end
+local function applyHideArms()
+	for _, model in ipairs(getArmModels()) do
+		for _, part in ipairs(model:GetDescendants()) do
+			if part:IsA("BasePart") and part.Name ~= "Sleeves" then
+				if not L.ArmTransparencyOriginals[part] then
+					L.ArmTransparencyOriginals[part] = part.Transparency
 				end
-				local function restoreHideArms()
-					for part, transparency in pairs(L.ArmTransparencyOriginals) do
-						if part and part.Parent then
-							part.Transparency = transparency
-						end
-					end
-					table.clear(L.ArmTransparencyOriginals)
-				end
-				RunService.Heartbeat:Connect(function()
-					if not L.MasterEnabled then
-						restoreHideArms()
-						return
-					end
-					if L.HideArmsEnabled then
-						applyHideArms()
-					else
-						restoreHideArms()
-					end
-				end)
+				part.Transparency = 1
+			end
+		end
+	end
+end
+local function restoreHideArms()
+	for part, transparency in pairs(L.ArmTransparencyOriginals) do
+		if part and part:IsDescendantOf(Camera) then
+			part.Transparency = transparency
+		end
+	end
+	table.clear(L.ArmTransparencyOriginals)
+
+	if L.HideSleevesEnabled then
+		SetSleeveSlotsTransparency(1)
+	end
+end
+RunService.Heartbeat:Connect(function()
+	if not L.MasterEnabled then
+		restoreHideArms()
+		SetSleeveSlotsTransparency(0)
+		return
+	end
+
+	if L.HideArmsEnabled then
+		applyHideArms()
+	else
+		restoreHideArms()
+	end
+end)
 local insert = table.insert
 local ipairs = ipairs
 local pairs = pairs
 local clock = os.clock
 
 L.ActiveChams = L.ActiveChams or {}
+L.ChamsTicks = L.ChamsTicks or {}
+L.CachedOnScreen = L.CachedOnScreen or {}
 L.EnemyCache = L.EnemyCache or {}
-L.VisibilityCache = L.VisibilityCache or {}
+
 L.StreamingHold = L.StreamingHold or {}
 local STREAM_HOLD_TIME = 0.35
 
-local function isOnScreen(part)
-	local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
-	return onScreen
+local function getTorso(model)
+	local c=L.DistanceTorsoCache[model]
+	if c and c:IsDescendantOf(model) then return c end
+	for _,v in ipairs(model:GetDescendants()) do
+		if v:IsA("MeshPart") and v.MeshId and v.MeshId:find(L.MESH_IDS.Torso) then
+			L.DistanceTorsoCache[model]=v
+			return v
+		end
+	end
 end
 
 
-local function isVisibleChams(part)
-	if not part or not part:IsA("BasePart") or not part.Parent then return false end
-	local now = clock()
-	local cached = L.VisibilityCache[part]
-	if cached and now - cached.t < L.VisibilityInterval then
-		return cached.v
-	end
-	L.RayParams.FilterDescendantsInstances = { LocalPlayer.Character, Camera }
-	local origin = Camera.CFrame.Position
-	local targetPos = part.Position
-	local dir = targetPos - origin
-	local dist = dir.Magnitude
-	if dist <= 0 then
-		L.VisibilityCache[part] = { v = true, t = now }
-		return true
-	end
-	if dist > 2500 then
-		L.VisibilityCache[part] = { v = false, t = now }
-		return false
-	end
-	local result = workspace:Raycast(origin, dir.Unit * (dist + 0.25), L.RayParams)
-	local visible
-	if not result then
-		visible = true
-	elseif result.Instance:IsDescendantOf(part.Parent) then
-		visible = true
-	else
-		visible = (result.Position - targetPos).Magnitude <= (part.Size.Magnitude * 0.6)
-	end
-	L.VisibilityCache[part] = { v = visible, t = now }
-	return visible
-end
+
+
 
 local function clearChams(model)
 	local boxes = L.ActiveChams[model]
@@ -831,6 +1107,8 @@ local function clearChams(model)
 		end
 	end
 	L.ActiveChams[model] = nil
+	L.ChamsTicks[model] = nil
+	L.CachedOnScreen[model] = nil
 end
 
 local function isValidModel(model)
@@ -852,18 +1130,17 @@ local function isEnemyModel(model)
 	return false
 end
 
-local function createBox(part, shrink)
-	local boxes = L.ActiveChams[part.Parent]
-	if boxes then
-		for i = 1, #boxes do
-			local b = boxes[i]
-			if b.Adornee == part then
-				return b
-			end
-		end
-	else
+local function createBox(model, part, shrink)
+	local boxes = L.ActiveChams[model]
+	if not boxes then
 		boxes = {}
-		L.ActiveChams[part.Parent] = boxes
+		L.ActiveChams[model] = boxes
+	end
+	for i = 1, #boxes do
+		local b = boxes[i]
+		if b.Adornee == part then
+			return b
+		end
 	end
 	local box = Instance.new("BoxHandleAdornment")
 	box.Adornee = part
@@ -882,10 +1159,11 @@ local function applyChams(model)
 	local shrink = (L.ChamsType == "Occluded") and (L.ChamsShrinkDefault / 1.2) or L.ChamsShrinkDefault
 	local boxes = {}
 	L.ActiveChams[model] = boxes
+	local color = L.ChamsColor
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") then
-			local box = createBox(part, shrink)
-			box.Color3 = isVisibleChams(part) and L.ChamsColor or L.ChamsHiddenColor
+			local box = createBox(model, part, shrink)
+			box.Color3 = color
 		end
 	end
 end
@@ -902,14 +1180,7 @@ RunService.Heartbeat:Connect(function()
 	local now = clock()
 	if now - lastUpdate < 0.09 then return end
 	lastUpdate = now
-	if now - lastCacheClean > 2 then
-		for part, data in pairs(L.VisibilityCache) do
-			if not part or not part.Parent or now - data.t > 2 then
-				L.VisibilityCache[part] = nil
-			end
-		end
-		lastCacheClean = now
-	end
+	
 
 	local colorChanged = lastColor ~= L.ChamsColor
 	local transparencyChanged = lastTransparency ~= L.ChamsTransparency
@@ -932,17 +1203,31 @@ RunService.Heartbeat:Connect(function()
 			end
 		else
 			L.StreamingHold[model] = nil
+			local torso = getTorso(model)
+			
+			local ticks = L.ChamsTicks[model] or 0
+			ticks = ticks + 1
+			L.ChamsTicks[model] = ticks
+			
+			if ticks >= 5 then
+				L.ChamsTicks[model] = 0
+				local onScreen = false
+				if torso then
+					onScreen = isOnScreen(torso)
+				end
+				L.CachedOnScreen[model] = onScreen
+			end
+
+			local onScreen = L.CachedOnScreen[model] or false
+			local finalColor = L.ChamsColor
+
 			for i = 1, #boxes do
 				local b = boxes[i]
 				local a = b.Adornee
 				if a then
-					if isOnScreen(a) then
-	local visible = isVisibleChams(a)
-	b.Color3 = visible and L.ChamsColor or L.ChamsHiddenColor
-else
-	b.Color3 = L.ChamsHiddenColor
-end
-
+					if b.Color3 ~= finalColor then
+						b.Color3 = finalColor
+					end
 					if transparencyChanged then
 						b.Transparency = L.ChamsTransparency
 					end
@@ -964,8 +1249,12 @@ end
 	lastType = L.ChamsType
 end)
 
+L.ChamsHooked = L.ChamsHooked or {}
 local function hookModelRealtime(model)
 	if not isValidModel(model) then return end
+	if L.ChamsHooked[model] then return end
+	L.ChamsHooked[model] = true
+
 	local function refresh()
 		L.EnemyCache[model] = nil
 		if L.ChamsEnabled and isEnemyModel(model) then
@@ -975,12 +1264,28 @@ local function hookModelRealtime(model)
 		end
 	end
 	refresh()
+	
 	model.DescendantAdded:Connect(function(d)
 		if not L.ChamsEnabled or not d:IsA("BasePart") or not isEnemyModel(model) then return end
 		local shrink = (L.ChamsType == "Occluded") and (L.ChamsShrinkDefault / 1.2) or L.ChamsShrinkDefault
-		local box = createBox(d, shrink)
-		box.Color3 = isVisibleChams(d) and L.ChamsColor or L.ChamsHiddenColor
+		local box = createBox(model, d, shrink)
+		box.Color3 = L.ChamsColor
 	end)
+
+	model.DescendantRemoving:Connect(function(d)
+		if not d:IsA("BasePart") then return end
+		local boxes = L.ActiveChams[model]
+		if boxes then
+			for i = #boxes, 1, -1 do
+				local b = boxes[i]
+				if not b or b.Adornee == d or not b.Parent then
+					if b then b:Destroy() end
+					table.remove(boxes, i)
+				end
+			end
+		end
+	end)
+
 	model.AncestryChanged:Connect(function()
 		L.StreamingHold[model] = nil
 		refresh()
@@ -992,11 +1297,12 @@ local function processChams(model)
 	L.EnemyCache[model] = nil
 	hookModelRealtime(model)
 	if L.ChamsEnabled and isEnemyModel(model) then
+		local color = L.ChamsColor
 		for _, part in ipairs(model:GetDescendants()) do
 			if part:IsA("BasePart") then
 				local shrink = (L.ChamsType == "Occluded") and (L.ChamsShrinkDefault / 1.2) or L.ChamsShrinkDefault
-				local box = createBox(part, shrink)
-				box.Color3 = isVisibleChams(part) and L.ChamsColor or L.ChamsHiddenColor
+				local box = createBox(model, part, shrink)
+				box.Color3 = color
 				box.Transparency = L.ChamsTransparency
 				box.AlwaysOnTop = (L.ChamsType == "AlwaysOnTop")
 				box.ZIndex = box.AlwaysOnTop and 10 or 0
@@ -1018,6 +1324,7 @@ local function hookChamsFolder(folder)
 		if not m then return end
 		clearChams(m)
 		L.EnemyCache[m] = nil
+		L.ChamsHooked[m] = nil
 	end)
 end
 
@@ -1033,22 +1340,13 @@ PlayersFolder.ChildAdded:Connect(function(folder)
 	end
 end)
 
-				local function getDistanceTorso(model)
-					local c=L.DistanceTorsoCache[model]
-					if c and c.Parent then return c end
-					for _,v in ipairs(model:GetDescendants()) do
-						if v:IsA("MeshPart") and v.MeshId and v.MeshId:find(L.MESH_IDS.Torso) then
-							L.DistanceTorsoCache[model]=v
-							return v
-						end
-					end
-				end
 				local function createDistance(model)
 					if L.DistanceDrawings[model] then return end
 					local d=Drawing.new("Text")
 					d.Center=true
 					d.Outline=true
 					d.Size=13
+					if table.find(SafeFonts, L.CurrentFont) then d.Font = L.CurrentFont end
 					d.Color=L.DistanceTextColor
 					d.Visible=false
 					L.DistanceDrawings[model]=d
@@ -1084,48 +1382,10 @@ end)
 						folder.ChildRemoved:Connect(removeDistance)
 					end
 				end)
-				RunService.RenderStepped:Connect(function()
-					L.DistanceTeamTick+=1
-					if L.DistanceTeamTick>=30 then
-						L.DistanceTeamTick=0
-						LocalTeam=getLocalTeam()
-					end
-					if not L.DistanceESPEnabled then
-						for _,t in pairs(L.DistanceDrawings) do
-							t.Visible=false
-						end
-						return
-					end
-					local camPos=Camera.CFrame.Position
-					for model,text in pairs(L.DistanceDrawings) do
-						if not model:IsDescendantOf(PlayersFolder) then
-							removeDistance(model)
-							continue
-						end
-						local torso=getDistanceTorso(model)
-						if not torso or not isEnemy(torso) then
-							text.Visible=false
-							continue
-						end
-						local dist=(camPos-torso.Position).Magnitude
-						if dist>L.DistanceMax then
-							text.Visible=false
-							continue
-						end
-						local pos,vis=Camera:WorldToViewportPoint(torso.Position-Vector3.new(0,3.5,0))
-						if not vis then
-							text.Visible=false
-							continue
-						end
-						text.Position=Vector2.new(pos.X,pos.Y)
-						text.Text=math.floor(dist).."s"
-						text.Color=L.DistanceTextColor
-						text.Visible=true
-					end
-				end)
+
 				local function getNameHead(model)
 					local c = L.NameHeadCache[model]
-					if c and c.Parent then return c end
+					if c and c:IsDescendantOf(model) then return c end
 					for _, v in ipairs(model:GetDescendants()) do
 						if v:IsA("MeshPart") and v.MeshId and v.MeshId:find(L.MESH_IDS.Head) then
 							L.NameHeadCache[model] = v
@@ -1152,6 +1412,7 @@ end
 					t.Center = true
 					t.Outline = true
 					t.Size = 13
+					if table.find(SafeFonts, L.CurrentFont) then t.Font = L.CurrentFont end
 					t.Color = Color3.new(1,1,1)
 					t.Visible = false
 					L.NameDrawings[model] = t
@@ -1187,49 +1448,7 @@ end
 						folder.ChildRemoved:Connect(removeName)
 					end
 				end)
-				local SCREEN_OFFSET_Y = 22
-RunService.RenderStepped:Connect(function()
-	if not L.NameESPEnabled then
-		for _, t in pairs(L.NameDrawings) do
-			t.Visible = false
-		end
-		return
-	end
-
-	for model, text in pairs(L.NameDrawings) do
-		if not model:IsDescendantOf(PlayersFolder) then
-			removeName(model)
-			continue
-		end
-
-		local torso = getDistanceTorso(model)
-		if not torso or not isEnemy(torso) then
-			text.Visible = false
-			continue
-		end
-
-		local name = getPlayerName(model)
-
-		if not name then
-			text.Visible = false
-			continue
-		end
-
-		local pos, vis = Camera:WorldToViewportPoint(torso.Position + Vector3.new(0, 3.5, 0))
-		if not vis then
-			text.Visible = false
-			continue
-		end
-
-		text.Position = Vector2.new(pos.X, pos.Y)
-		text.Text = name
-		text.Visible = true
-	end
-end)
-
-
-
-RunService.RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function(dt)
 	local mousePos = UserInputService:GetMouseLocation()
 	local baseFOV = L.FOVRadius
 	local targetFOV = baseFOV
@@ -1245,7 +1464,7 @@ RunService.RenderStepped:Connect(function()
 	local validFovOrigin = false
 
 	if L.FovPositionMethod == "Gun Barrel" then
-		if not L.HasKnife and L.GunBarrel and L.GunBarrel.Parent then
+		if not L.HasKnife and L.GunBarrel and L.GunBarrel:IsDescendantOf(Camera) then
 			local forwardOffset = 7.5
 			local worldPos = L.GunBarrel.Position + (L.GunBarrel.CFrame.LookVector * forwardOffset)
 			local v, onScreen = Camera:WorldToViewportPoint(worldPos)
@@ -1271,62 +1490,53 @@ RunService.RenderStepped:Connect(function()
 	end
 
 	if not L.AimbotEnabled or not L.HoldingKey or not validFovOrigin then
-		if L.KillConnection then
-			L.KillConnection:Disconnect()
-			L.KillConnection = nil
-		end
-		L.LastLockedModel = nil
 		L.LockedTarget = nil
 		return
 	end
 
+	local now = os.clock()
+
 	if L.StickyAim then
-		if not L.LockedTarget or not L.LockedTarget.Parent then
-			L.LockedTarget = getClosestTarget()
+		if not L.LockedTarget or not L.LockedTarget:IsDescendantOf(workspace) then
+			if now >= L.NextTargetUpdate then
+				L.LockedTarget = getClosestTarget()
+				L.CachedTarget = L.LockedTarget
+				L.NextTargetUpdate = now + L.TARGET_UPDATE_RATE
+			else
+				L.LockedTarget = L.CachedTarget
+			end
 		end
 	else
-		L.LockedTarget = getClosestTarget()
-	end
-
-	if L.KillNotifyEnabled and L.LockedTarget then
-		local model = L.LockedTarget:FindFirstAncestorOfClass("Model")
-		if model and model ~= L.LastLockedModel then
-			L.LastLockedModel = model
-			local cachedName = getPlayerName(model)
-			if cachedName then
-				L.NameCache[model] = cachedName
-			end
-			if L.KillConnection then
-				L.KillConnection:Disconnect()
-				L.KillConnection = nil
-			end
-			L.KillConnection = model.AncestryChanged:Connect(function(_, parent)
-				if not parent then
-					if L.KillNotifyEnabled then
-						local name = L.NameCache[model] or "Unknown"
-						local torso = getDistanceTorso(model)
-						local dist = torso and math.floor((Camera.CFrame.Position - torso.Position).Magnitude) or 0
-						Library:Notify("Killed "..name.." from "..dist.." studs away", 4)
-					end
-					if L.KillConnection then
-						L.KillConnection:Disconnect()
-						L.KillConnection = nil
-					end
-					L.LastLockedModel = nil
-					L.LockedTarget = nil
-				end
-			end)
+		if now >= L.NextTargetUpdate then
+			L.LockedTarget = getClosestTarget()
+			L.CachedTarget = L.LockedTarget
+			L.NextTargetUpdate = now + L.TARGET_UPDATE_RATE
+		else
+			L.LockedTarget = L.CachedTarget
 		end
 	end
 
-	if L.LockedTarget then
-		local pos = Camera:WorldToViewportPoint(L.LockedTarget.Position)
-		local targetPos = Vector2.new(pos.X, pos.Y)
-		local delta = (targetPos - mousePos) * L.Smoothness
-		mousemoverel(delta.X, delta.Y)
-	end
-end)
+if L.LockedTarget then
+	local pos = Camera:WorldToViewportPoint(L.LockedTarget.Position)
+	local targetPos = Vector2.new(pos.X, pos.Y)
 
+	local diff = targetPos - mousePos
+	local dist = diff.Magnitude
+
+	if dist > 0 then
+		local maxStep = L.AimVelocity * dt
+
+		local move
+		if dist <= maxStep then
+			move = diff
+		else
+			move = diff.Unit * maxStep
+		end
+
+		mousemoverel(move.X, move.Y)
+	end
+end
+end)
 
 				local OriginalSky = Lighting:FindFirstChild("OriginalSkyBackup")
 				if not OriginalSky then
@@ -1375,12 +1585,12 @@ RunService.RenderStepped:Connect(function(dt)
 	if L.LockedTarget then
 		L.CachedTarget = L.LockedTarget
 	elseif now >= L.NextTargetUpdate then
-		L.CachedTarget = getClosestTarget()
+		L.CachedTarget = getClosestTarget() or L.CachedTarget
 		L.NextTargetUpdate = now + L.TARGET_UPDATE_RATE
 	end
 
 	local target = L.CachedTarget
-	if not target then
+	if not target or not target:IsDescendantOf(workspace) then
 		SnapLine.Visible = false
 		SnapOutline.Visible = false
 		return
@@ -1396,7 +1606,7 @@ RunService.RenderStepped:Connect(function(dt)
 	local origin
 
 	if L.SnapLineMethod == "Gun Barrel" then
-		if L.HasKnife or not L.GunBarrel or not L.GunBarrel.Parent then
+		if L.HasKnife or not L.GunBarrel or not L.GunBarrel:IsDescendantOf(Camera) then
 			SnapLine.Visible = false
 			SnapOutline.Visible = false
 			return
@@ -1412,6 +1622,15 @@ RunService.RenderStepped:Connect(function(dt)
 		origin = Vector2.new(v.X, v.Y)
 	else
 		origin = UserInputService:GetMouseLocation()
+	end
+
+	if not L.HoldingKey then
+		local dist = (Vector2.new(pos.X, pos.Y) - origin).Magnitude
+		if dist > L.FOVRadius then
+			SnapLine.Visible = false
+			SnapOutline.Visible = false
+			return
+		end
 	end
 
 	local targetPos = Vector2.new(pos.X, pos.Y)
@@ -1481,7 +1700,7 @@ end)
 				)
 				local function reset()
 					for root, cf in pairs(L.BaseCF) do
-						if root and root.Parent then
+						if root and root:IsDescendantOf(Camera) then
 							root.CFrame = cf
 						end
 					end
@@ -1535,55 +1754,7 @@ end)
 						folder.ChildRemoved:Connect(removeBox)
 					end
 				end)
-				RunService.RenderStepped:Connect(function()
-					if not L.BoxESPEnabled then
-						for _, b in pairs(L.BoxDrawings) do
-							b.Visible = false
-						end
-						for _, o in pairs(L.BoxOutlineDrawings) do
-							o.Visible = false
-						end
-						return
-					end
-					local camPos = Camera.CFrame.Position
-					for model, box in pairs(L.BoxDrawings) do
-						if not model:IsDescendantOf(PlayersFolder) then
-							removeBox(model)
-							continue
-						end
-						local torso = getDistanceTorso(model)
-						if not torso or not isEnemy(torso) then
-							box.Visible = false
-							L.BoxOutlineDrawings[model].Visible = false
-							continue
-						end
-						local dist = (camPos - torso.Position).Magnitude
-						if dist > L.BoxMaxDistance then
-							box.Visible = false
-							L.BoxOutlineDrawings[model].Visible = false
-							continue
-						end
-						local topPos, topVis = Camera:WorldToViewportPoint(torso.Position + Vector3.new(0, 3, 0))
-						local bottomPos, bottomVis = Camera:WorldToViewportPoint(torso.Position - Vector3.new(0, 3.5, 0))
-						if not topVis or not bottomVis then
-							box.Visible = false
-							L.BoxOutlineDrawings[model].Visible = false
-							continue
-						end
-						local height = math.abs(topPos.Y - bottomPos.Y)
-						local width = height * 0.55
-						local x = topPos.X - width / 2
-						local y = topPos.Y
-						box.Size = Vector2.new(width, height)
-						box.Position = Vector2.new(x, y)
-						box.Color = L.BoxColor
-						box.Visible = true
-						local outline = L.BoxOutlineDrawings[model]
-						outline.Size = box.Size
-						outline.Position = box.Position
-						outline.Visible = true
-					end
-				end)
+
 				for _, root in ipairs(WeaponRoots) do
 					for _, obj in ipairs(root:GetDescendants()) do
 						if obj:IsA("ModuleScript") then
@@ -1644,12 +1815,12 @@ end)
 				local AmmoLabel = Instance.new("TextLabel")
 				AmmoLabel.Name = "AmmoCounter"
 				AmmoLabel.AnchorPoint = Vector2.new(0.5, 1)
-				AmmoLabel.Position = UDim2.new(0.5, 0, 0.95, 0)
+				AmmoLabel.Position = UDim2.new(0.5, 0, 0.95, -350)
 				AmmoLabel.Size = UDim2.new(0, 150, 0, 50)
 				AmmoLabel.BackgroundTransparency = 1
 				AmmoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 				AmmoLabel.Font = Enum.Font.RobotoMono
-				AmmoLabel.TextSize = 24
+				AmmoLabel.TextSize = 15
 				AmmoLabel.Text = "0/0"
 				AmmoLabel.Visible = false
 				AmmoLabel.TextStrokeTransparency = 0
@@ -1709,7 +1880,6 @@ end)
 					return 1
 				end
 
-
 				local function hookHealthModel(model)
 					if not model:IsA("Model") then return end
 					createHealth(model)
@@ -1737,40 +1907,84 @@ end)
 					end
 				end)
 
-				RunService.RenderStepped:Connect(function()
-					if not L.HealthESPEnabled then
-						for _, h in pairs(L.HealthDrawings) do h.Visible = false end
-						for _, o in pairs(L.HealthOutlineDrawings) do o.Visible = false end
-						return
-					end
+				local lastESPUpdate = 0
+				RunService.RenderStepped:Connect(function(dt)
+					local now = os.clock()
+					local distEnabled = L.DistanceESPEnabled
+					local nameEnabled = L.NameESPEnabled
+					local boxEnabled = L.BoxESPEnabled
+					local healthEnabled = L.HealthESPEnabled
+
+					-- throttle expensive checks to max ~60 FPS
+					if now - lastESPUpdate < 1/60 then return end
+					lastESPUpdate = now
+
+					for _, t in pairs(L.DistanceDrawings) do if not distEnabled then t.Visible = false end end
+					for _, t in pairs(L.NameDrawings) do if not nameEnabled then t.Visible = false end end
+					for _, b in pairs(L.BoxDrawings) do if not boxEnabled then b.Visible = false end end
+					for _, o in pairs(L.BoxOutlineDrawings) do if not boxEnabled then o.Visible = false end end
+					for _, h in pairs(L.HealthDrawings) do if not healthEnabled then h.Visible = false end end
+					for _, o in pairs(L.HealthOutlineDrawings) do if not healthEnabled then o.Visible = false end end
+
+					if not (distEnabled or nameEnabled or boxEnabled or healthEnabled) then return end
 
 					local camPos = Camera.CFrame.Position
 					local maxDist = L.DistanceMax or 750
 
-					for model in pairs(L.HealthDrawings) do
+					for model, _ in pairs(L.DistanceDrawings) do
+						local textName = L.NameDrawings[model]
+						local textDist = L.DistanceDrawings[model]
+						local box = L.BoxDrawings[model]
+						local boxOutline = L.BoxOutlineDrawings[model]
+						local healthBar = L.HealthDrawings[model]
+						local healthOutline = L.HealthOutlineDrawings[model]
+
 						if not model:IsDescendantOf(PlayersFolder) then
-							removeHealth(model)
+							if textName then textName.Visible = false end
+							if textDist then textDist.Visible = false end
+							if box then box.Visible = false end
+							if boxOutline then boxOutline.Visible = false end
+							if healthBar then healthBar.Visible = false end
+							if healthOutline then healthOutline.Visible = false end
 							continue
 						end
 
-						local torso = getDistanceTorso(model)
+						local torso = getTorso(model)
 						if not torso or not isEnemy(torso) then
-							L.HealthDrawings[model].Visible = false
-							L.HealthOutlineDrawings[model].Visible = false
+							if textName then textName.Visible = false end
+							if textDist then textDist.Visible = false end
+							if box then box.Visible = false end
+							if boxOutline then boxOutline.Visible = false end
+							if healthBar then healthBar.Visible = false end
+							if healthOutline then healthOutline.Visible = false end
 							continue
 						end
 
-						if (camPos - torso.Position).Magnitude > maxDist then
-							L.HealthDrawings[model].Visible = false
-							L.HealthOutlineDrawings[model].Visible = false
+						local dist = (camPos - torso.Position).Magnitude
+						if dist > maxDist or not isOnScreen(torso) then
+							if textName then textName.Visible = false end
+							if textDist then textDist.Visible = false end
+							if box then box.Visible = false end
+							if boxOutline then boxOutline.Visible = false end
+							if healthBar then healthBar.Visible = false end
+							if healthOutline then healthOutline.Visible = false end
 							continue
 						end
 
-						local topPos, topVis = Camera:WorldToViewportPoint(torso.Position + Vector3.new(0, 3, 0))
-						local bottomPos, bottomVis = Camera:WorldToViewportPoint(torso.Position - Vector3.new(0, 3.5, 0))
+						local topWorld = torso.Position + Vector3.new(0, 3, 0)
+						local bottomWorld = torso.Position - Vector3.new(0, 3.5, 0)
+						local nameWorld = torso.Position + Vector3.new(0, 3.5, 0)
+
+						local topPos, topVis = Camera:WorldToViewportPoint(topWorld)
+						local bottomPos, bottomVis = Camera:WorldToViewportPoint(bottomWorld)
+
 						if not topVis or not bottomVis then
-							L.HealthDrawings[model].Visible = false
-							L.HealthOutlineDrawings[model].Visible = false
+							if textName then textName.Visible = false end
+							if textDist then textDist.Visible = false end
+							if box then box.Visible = false end
+							if boxOutline then boxOutline.Visible = false end
+							if healthBar then healthBar.Visible = false end
+							if healthOutline then healthOutline.Visible = false end
 							continue
 						end
 
@@ -1779,21 +1993,57 @@ end)
 						local x = topPos.X - width / 2
 						local y = topPos.Y
 
-						local healthScale = getHealthScale(model)
-						local barHeight = height * healthScale
-						local barX = x - 5
-						local barY = y + (height - barHeight)
+						if textName and nameEnabled then
+							local name = getPlayerName(model)
+							if name then
+								local namePos, _ = Camera:WorldToViewportPoint(nameWorld)
+								textName.Position = Vector2.new(namePos.X, namePos.Y - 15)
+								textName.Text = name
+								textName.Visible = true
+							else
+								textName.Visible = false
+							end
+						elseif textName then textName.Visible = false end
 
-						local bar = L.HealthDrawings[model]
-						bar.Size = Vector2.new(BAR_WIDTH, barHeight)
-						bar.Position = Vector2.new(barX, barY)
-						bar.Color = L.HealthLowColor:Lerp(L.HealthHighColor, healthScale)
-						bar.Visible = true
+						if textDist and distEnabled then
+							textDist.Position = Vector2.new(bottomPos.X, bottomPos.Y)
+							textDist.Text = math.floor(dist).."s"
+							textDist.Color = L.DistanceTextColor
+							textDist.Visible = true
+						elseif textDist then textDist.Visible = false end
 
-						local outline = L.HealthOutlineDrawings[model]
-						outline.Size = Vector2.new(OUTLINE_WIDTH, height + 2)
-						outline.Position = Vector2.new(barX - 1, y - 1)
-						outline.Visible = true
+						if box and boxOutline and boxEnabled then
+							box.Size = Vector2.new(width, height)
+							box.Position = Vector2.new(x, y)
+							box.Color = L.BoxColor
+							box.Visible = true
+
+							boxOutline.Size = box.Size
+							boxOutline.Position = box.Position
+							boxOutline.Visible = true
+						elseif box then
+							box.Visible = false
+							boxOutline.Visible = false
+						end
+
+						if healthBar and healthOutline and healthEnabled then
+							local healthScale = getHealthScale(model)
+							local barHeight = height * healthScale
+							local barX = x - 5
+							local barY = y + (height - barHeight)
+
+							healthBar.Size = Vector2.new(BAR_WIDTH, barHeight)
+							healthBar.Position = Vector2.new(barX, barY)
+							healthBar.Color = L.HealthLowColor:Lerp(L.HealthHighColor, healthScale)
+							healthBar.Visible = true
+
+							healthOutline.Size = Vector2.new(OUTLINE_WIDTH, height + 2)
+							healthOutline.Position = Vector2.new(barX - 1, y - 1)
+							healthOutline.Visible = true
+						elseif healthBar then
+							healthBar.Visible = false
+							healthOutline.Visible = false
+						end
 					end
 				end)
 local function applyFontSafe(drawing, font)
@@ -1815,8 +2065,12 @@ local function updateAllFonts(fontId)
 end
 local BARREL_MESH_ID = "12272787618"
 RunService.Heartbeat:Connect(function()
-	if L.SnapLineMethod ~= "Gun Barrel" then
+	if L.SnapLineMethod ~= "Gun Barrel" and L.FovPositionMethod ~= "Gun Barrel" and L.SilentSnapOriginMethod ~= "Gun Barrel" and L.SilentFOVOriginMethod ~= "Gun Barrel" and L.CrosshairPositionMode ~= "Gun Barrel" then
 		L.GunBarrel = nil
+		return
+	end
+
+	if L.GunBarrel and L.GunBarrel:IsDescendantOf(Camera) then
 		return
 	end
 
@@ -1875,7 +2129,7 @@ local function getDefaultCrosshairCenter(camera)
         return Vector2.new(size.X/2, size.Y/2)
 
     elseif L.CrosshairPositionMode == "Gun Barrel" then
-        if L.HasKnife or not L.GunBarrel or not L.GunBarrel.Parent then
+        if L.HasKnife or not L.GunBarrel or not L.GunBarrel:IsDescendantOf(Camera) then
             return nil
         end
 
@@ -1897,17 +2151,22 @@ local function getCrosshairCenter()
     local camera = Workspace.CurrentCamera
     if not camera then return Vector2.new(0,0) end
 
-    if L.CrosshairLockOnTarget then
+    if L.CrosshairLockOnTarget and L.AimbotEnabled then
         local now = os.clock()
 
-        if L.LockedTarget then
-            cachedTarget = L.LockedTarget
-        elseif now >= nextTargetUpdate then
-            cachedTarget = getClosestTarget()
-            nextTargetUpdate = now + L.TARGET_UPDATE_RATE
+        if not cachedTarget or not cachedTarget:IsDescendantOf(workspace) then
+            if now >= nextTargetUpdate then
+                cachedTarget = getClosestTarget()
+                nextTargetUpdate = now + L.TARGET_UPDATE_RATE
+            end
+        else
+            if now >= nextTargetUpdate then
+                cachedTarget = getClosestTarget() or cachedTarget
+                nextTargetUpdate = now + L.TARGET_UPDATE_RATE
+            end
         end
 
-        if cachedTarget and cachedTarget.Parent then
+        if cachedTarget and cachedTarget:IsDescendantOf(workspace) then
             local pos, onScreen = camera:WorldToViewportPoint(cachedTarget.Position)
             if onScreen then
                 return Vector2.new(pos.X, pos.Y)
@@ -1967,7 +2226,7 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
 end)
---// Drawing Objects
+
 local SilentSnapOutline = Drawing.new("Line")
 SilentSnapOutline.Thickness = 3
 SilentSnapOutline.Color = Color3.new(0,0,0)
@@ -2018,7 +2277,7 @@ end
 
 local function GetSilentScreenOrigin()
 	if L.SilentFOVOriginMethod == "Gun Barrel" then
-		if L.GunBarrel and L.GunBarrel.Parent then
+		if L.GunBarrel and L.GunBarrel:IsDescendantOf(Camera) then
 			local p = L.GunBarrel.Position + (L.GunBarrel.CFrame.LookVector * 7.5)
 			local v, onScreen = Camera:WorldToViewportPoint(p)
 			if onScreen then
@@ -2032,32 +2291,11 @@ local function GetSilentScreenOrigin()
 end
 
 local function SilentGetLocalTeam()
-	for _, obj in ipairs(Camera:GetDescendants()) do
-		if obj:IsA("MeshPart") and obj.Name == "Sleeves" then
-			for _, tex in ipairs(obj:GetChildren()) do
-				if tex:IsA("Texture") and tex.Name == "Slot1" then
-					if tex.Color3 == L.TEAM.PHANTOMS then
-						return "PHANTOMS"
-					elseif tex.Color3 == L.TEAM.GHOSTS then
-						return "GHOSTS"
-					end
-				end
-			end
-		end
-	end
+	return LocalTeam or getLocalTeam()
 end
 
 local function SilentIsEnemy(part)
-	if not SilentLocalTeam or not part or not part.Parent then return false end
-	for _, p in ipairs(part.Parent:GetChildren()) do
-		if p:IsA("MeshPart") and p.MeshId and p.MeshId:find(L.SILENT_MESH_IDS.Torso) then
-			return SilentLocalTeam == "PHANTOMS"
-				and p.Color == L.BODY_COLOR.GHOSTS
-				or SilentLocalTeam == "GHOSTS"
-				and p.Color == L.BODY_COLOR.PHANTOMS
-		end
-	end
-	return false
+	return isEnemy(part)
 end
 
 local function SilentIsVisible(part)
@@ -2072,20 +2310,25 @@ local function SilentIsVisible(part)
 	return not result or result.Instance:IsDescendantOf(part.Parent)
 end
 
+L.SilentAimPartCache = L.SilentAimPartCache or {}
+local function getCachedSilentTargetPart(model)
+	local c = L.SilentAimPartCache[model]
+	if c and c:IsDescendantOf(model) and c.MeshId:find(L.SILENT_TARGET_MESH) then return c end
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("MeshPart") and v.MeshId and v.MeshId:find(L.SILENT_TARGET_MESH) then
+			L.SilentAimPartCache[model] = v
+			return v
+		end
+	end
+	return nil
+end
+
 local function SilentGetTargetParts()
 	local t = {}
-	for _, folder in ipairs(PlayersFolder:GetChildren()) do
-		for _, model in ipairs(folder:GetChildren()) do
-			for _, sub in ipairs(model:GetChildren()) do
-				for _, part in ipairs(sub:GetChildren()) do
-					if part:IsA("MeshPart")
-						and part.MeshId
-						and part.MeshId:find(L.SILENT_TARGET_MESH)
-						and SilentIsEnemy(part) then
-						t[#t+1] = part
-					end
-				end
-			end
+	for model, _ in pairs(L.NameDrawings or {}) do
+		if checkEnemyByModel(model) then
+			local p = getCachedSilentTargetPart(model)
+			if p then t[#t+1] = p end
 		end
 	end
 	return t
@@ -2195,6 +2438,7 @@ RunService.Heartbeat:Connect(function()
 end)
 
 RunService.RenderStepped:Connect(function()
+	local now = os.clock()
 	local base = L.SilentFOVRadius
 	local target = (L.SilentDynamicFOV and L.SilentHolding) and base * 1.5 or base
 	L.SilentCurrentFOV += (target - L.SilentCurrentFOV) * 0.15
@@ -2211,29 +2455,162 @@ RunService.RenderStepped:Connect(function()
 		SilentFOVCircle.Color = L.SilentFOVColor
 	end
 
-	local snapTarget = L:GetSilentClosestTarget()
-	if L.SilentSnapEnabled and snapTarget and valid then
-		local pos = Camera:WorldToViewportPoint(snapTarget.Position)
-		SilentSnapLine.Visible = true
-		SilentSnapOutline.Visible = true
-		SilentSnapLine.From = origin
-		SilentSnapLine.To = Vector2.new(pos.X,pos.Y)
-		SilentSnapOutline.From = origin
-		SilentSnapOutline.To = Vector2.new(pos.X,pos.Y)
+	local snapTarget = nil
+	if L.SilentSnapEnabled and valid then
+		if not L.SilentNextTargetUpdate then L.SilentNextTargetUpdate = 0 end
+		if now >= L.SilentNextTargetUpdate then
+			snapTarget = L:GetSilentClosestTarget()
+			L.SilentCachedTarget = snapTarget
+			L.SilentNextTargetUpdate = now + L.TARGET_UPDATE_RATE
+		else
+			snapTarget = L.SilentCachedTarget
+		end
+		
+		if snapTarget and snapTarget:IsDescendantOf(workspace) then
+			local pos, onScreen = Camera:WorldToViewportPoint(snapTarget.Position)
+			if onScreen then
+				local dist = (Vector2.new(pos.X, pos.Y) - origin).Magnitude
+				if L.SilentHolding or dist <= (L.SilentCurrentFOV * 1.5) then
+					SilentSnapLine.Visible = true
+					SilentSnapOutline.Visible = true
+					SilentSnapLine.From = origin
+					SilentSnapLine.To = Vector2.new(pos.X,pos.Y)
+					SilentSnapOutline.From = origin
+					SilentSnapOutline.To = Vector2.new(pos.X,pos.Y)
+				else
+					SilentSnapLine.Visible = false
+					SilentSnapOutline.Visible = false
+				end
+			else
+				SilentSnapLine.Visible = false
+				SilentSnapOutline.Visible = false
+			end
+		else
+			SilentSnapLine.Visible = false
+			SilentSnapOutline.Visible = false
+		end
 	else
 		SilentSnapLine.Visible = false
 		SilentSnapOutline.Visible = false
 	end
 end)
+
+local function applyHitSound(s)
+	if not s:IsA("Sound") then return end
+	if s.Name ~= "hitmarker" then return end
+	if not L.HitSoundBackup[s] then
+		L.HitSoundBackup[s] = {Id=s.SoundId,Volume=s.Volume}
+	end
+	local id = L.HitSoundMap[L.HitSoundSelected]
+	if id and s.SoundId ~= id then
+		s.SoundId = id
+	end
+	s.Volume = L.HitSoundVolume
+end
+
+local function restoreHitSound(s)
+	local old = L.HitSoundBackup[s]
+	if old then
+		s.SoundId = old.Id
+		s.Volume = old.Volume
+		L.HitSoundBackup[s] = nil
+	end
+end
+
+local function applyKillSound(s)
+	if not s:IsA("Sound") then return end
+	if s.Name ~= "killshot" and s.Name ~= "headshotkill" then return end
+	if not L.KillSoundBackup[s] then
+		L.KillSoundBackup[s] = {Id=s.SoundId,Volume=s.Volume}
+	end
+	local id = L.KillSoundMap[L.KillSoundSelected]
+	if id and s.SoundId ~= id then
+		s.SoundId = id
+	end
+	s.Volume = L.KillSoundVolume
+end
+
+local function restoreKillSound(s)
+	local old = L.KillSoundBackup[s]
+	if old then
+		s.SoundId = old.Id
+		s.Volume = old.Volume
+		L.KillSoundBackup[s] = nil
+	end
+end
+local CachedSlots = {}
+local OriginalColors = {}
+
+local function CacheSleeves()
+	table.clear(CachedSlots)
+	table.clear(OriginalColors)
+	for _, obj in ipairs(Camera:GetDescendants()) do
+		if obj:IsA("MeshPart") and obj.Name == "Sleeves" then
+			for _, tex in ipairs(obj:GetChildren()) do
+				if tex:IsA("Texture") and tex.Name == "Slot1" then
+					table.insert(CachedSlots, tex)
+					OriginalColors[tex] = tex.Color3
+				end
+			end
+		end
+	end
+end
+
+local function Apply()
+	if #CachedSlots == 0 then
+		CacheSleeves()
+	end
+
+	local texId
+	if L.MasterEnabled then
+		texId = SleeveTextureIds[L.SelectedSleeveTexture or "Default"]
+	else
+		texId = SleeveTextureIds.Default
+	end
+
+	if not texId then
+		warn("sleeves arent found.. WTF!!")
+		return
+	end
+
+	for _, tex in ipairs(CachedSlots) do
+		if tex:IsDescendantOf(Camera) then
+			tex.Texture = texId
+			if L.MasterEnabled and L.SleeveColor then
+				tex.Color3 = L.SleeveColor
+			else
+				tex.Color3 = OriginalColors[tex] or tex.Color3
+			end
+		end
+	end
+end
+
+Camera.DescendantAdded:Connect(function(obj)
+	if obj:IsA("Texture") and obj.Name == "Slot1" then
+		if obj.Parent and obj.Parent:IsA("MeshPart") and obj.Parent.Name == "Sleeves" then
+			table.insert(CachedSlots, obj)
+			OriginalColors[obj] = obj.Color3
+			Apply()
+		end
+	end
+end)
+
+local lastState = L.MasterEnabled
+game:GetService("RunService").Stepped:Connect(function()
+	if L.MasterEnabled ~= lastState then
+		lastState = L.MasterEnabled
+		Apply()
+	end
+end)
 				local Window = Library:CreateWindow({
-					Title = "                         roxx / phantom forces          DEV",
+					Title = "                                          $$ roxy.win $$",
 					Center = true,
 					AutoShow = true,
 					MenuFadeTime = 0.1,
 					Resizable = true,
 					ShowCustomCursor = false,
 					NotifySide = "Left",
-					Size = UDim2.new(0, 600, 0, 450)
+					Size = UDim2.new(0, 800, 0, 600)
 				})
 				local Tabs = {
 					A = Window:AddTab("Legitbot"),
@@ -2280,17 +2657,17 @@ end)
 						L.WallCheck = v
 					end
 				})
-				Aimbot:AddSlider("SmoothnessSliderA", {
-					Text = "Smoothness",
-					Default = 1,
-					Min = 0,
-					Max = 8,
-					Rounding = 0,
-					Compact = true,
-					Callback = function(v)
-						L.Smoothness = math.clamp(v / 10, 0.01, 1)
-					end
-				})
+Aimbot:AddSlider("SmoothnessSlider", {
+	Text = "Smoothness",
+	Default = 1.2,
+	Min = 0.3,
+	Max = 2.5,
+	Rounding = 1,
+	Compact = true,
+	Callback = function(v)
+		L.AimVelocity = v * 1000
+	end
+})
 				Aimbot:AddSlider("MaxDistanceB", {
 					Text = "Max Distance",
 					Default = 500,
@@ -2394,7 +2771,6 @@ Aimbot:AddDropdown('FovPositionMethod', {
 	end
 })
 
-
 				local walkspeedtoggle = LOCALP:AddToggle("WALKSPEEDLOCK", {
 					Text = "Walkspeed Modifier",
 					Default = false,
@@ -2442,9 +2818,8 @@ Aimbot:AddDropdown('FovPositionMethod', {
 					Callback = function(Value)
 						L.MasterEnabled = Value
 						if Value then
-							SetSleeveSlotsTransparency(1)
+							warn("nigers")
 						else
-							SetSleeveSlotsTransparency(0)
 							ClearAll()
 							restoreArmMaterial()
 						end
@@ -2462,7 +2837,7 @@ Aimbot:AddDropdown('FovPositionMethod', {
 					end
 				})
 				ArmsHighlight:AddColorPicker("ArmFillCP", {
-					Default = Color3.fromRGB(80, 200, 255),
+					Default = Color3.fromRGB(131,147,255),
 					Title = "Fill Color",
 					Transparency = nil,
 					Callback = function(value)
@@ -2508,7 +2883,7 @@ Aimbot:AddDropdown('FovPositionMethod', {
 					end
 				})
 				ArmsMaterial:AddColorPicker("ArmMaterialCP", {
-					Default = Color3.fromRGB(80, 200, 255),
+					Default = Color3.fromRGB(131,147,255),
 					Title = "Material Color",
 					Callback = function(value)
 						L.ArmsMaterialColor = value
@@ -2524,6 +2899,19 @@ Aimbot:AddDropdown('FovPositionMethod', {
 						end
 					end
 				})
+				ESP2:AddToggle('HideSleevesToggle', {
+	Text = 'Hide Sleeves',
+	Default = false,
+	Callback = function(Value)
+		L.HideSleevesEnabled = Value
+
+		if Value then
+			SetSleeveSlotsTransparency(1)
+		else
+			SetSleeveSlotsTransparency(0)
+		end
+	end
+})
 				ESP2:AddDropdown('ArmMaterialDropdown', {
 					Values = { 'ForceField', 'Neon', 'SmoothPlastic', 'Glass', 'Metal' },
 					Default = 1,
@@ -2533,6 +2921,27 @@ Aimbot:AddDropdown('FovPositionMethod', {
 						L.ArmsMaterialEnum = L.MaterialMap[Value] or Enum.Material.ForceField
 					end
 				})
+ESP2:AddDropdown('SleeveTextureDropdown', {
+	Values = {'Default','Beach','Camo'},
+	Default = 1,
+	Multi = false,
+	Text = 'Sleeves Texture',
+	Callback = function(Value)
+		L.SelectedSleeveTexture = Value
+		Apply()
+	end
+})
+ESP2:AddLabel('Sleeves Color'):AddColorPicker('SleeveColorP', {
+	Default = Color3.new(1, 1, 1),
+	Title = 'Sleeve Color',
+	Transparency = nil,
+	Callback = function(Value)
+		L.SleeveColor = Value
+		if L.MasterEnabled then
+			Apply()
+		end
+	end
+})
 				ESP2:AddDivider()
 				ESP2:AddToggle('WeaponVisualsToggle', {
 					Text = 'Toggle Weapon Visuals',
@@ -2597,14 +3006,14 @@ Aimbot:AddDropdown('FovPositionMethod', {
 					Text = 'Weapon Material',
 					Default = false,
 					Callback = function(Value)
-						L.WeaponMaterialEnabled = Value
+						L.WeaponMaterialEnabled = Value 
 						if not Value or not L.WeaponMasterEnabled then
 							restoreWeaponMaterial()
 						end
 					end
 				})
 				WeaponMaterial:AddColorPicker("WeaponMaterialCP", {
-					Default = Color3.fromRGB(80, 200, 255),
+					Default = Color3.fromRGB(131,147,255),
 					Title = "Material Color",
 					Callback = function(value)
 						L.WeaponMaterialColor = value
@@ -2686,18 +3095,25 @@ Aimbot:AddDropdown('FovPositionMethod', {
 						end
 					end
 				})
-				ESP3:AddDropdown('SkyboxSelectionDropdown', {
-					Values = { "Space", "Dark", "Pink", "PurpleNebula", "Red", "White", "Cartoon1", "Cartoon2" },
-					Default = 3,
-					Multi = false,
-					Text = 'Skybox Selection',
-					Callback = function(value)
-						L.SelectedSky = value
-						if L.SkyboxEnabled then
-							ApplySky(L.SelectedSky)
-						end
-					end
-				})
+ESP3:AddDropdown('SkyboxSelectionDropdown', {
+    Values = (function()
+        local skyKeys = {}
+        for k, _ in pairs(L.Skyboxes) do
+            table.insert(skyKeys, k)
+        end
+        table.sort(skyKeys)
+        return skyKeys
+    end)(),
+    Default = 3,
+    Multi = false,
+    Text = 'Skybox Selection',
+    Callback = function(value)
+        L.SelectedSky = value
+        if L.SkyboxEnabled then
+            ApplySky(L.SelectedSky)
+        end
+    end
+})
 				local CHAMSESP1 = ESP1:AddToggle('ChamsESP', {
 					Text = 'Player Chams',
 					Default = false,
@@ -2724,17 +3140,10 @@ Aimbot:AddDropdown('FovPositionMethod', {
 					end
 				})
 				CHAMSESP1:AddColorPicker("ChamsESPCP", {
-					Default = Color3.fromRGB(79, 199, 255),
-					Title = "Chams Color ( Visible )",
+					Default = Color3.fromRGB(131,146,255),
+					Title = "Chams Color",
 					Callback = function(v)
 						L.ChamsColor = v
-					end
-				})
-				CHAMSESP1:AddColorPicker("ChamsESPCP2", {
-					Default = Color3.fromRGB(255, 255, 0),
-					Title = "Chams Color ( Not Visible )",
-					Callback = function(v)
-						L.ChamsHiddenColor = v
 					end
 				})
 				local NAMEVISUALS = ESP1:AddToggle('ShowPlayerTags', {
@@ -2906,15 +3315,8 @@ local ExtraTab = TabBox:AddTab('Extra')
 					end
 				})
 
-
-
-
-
-
-
 				local BulletTab = TabBox:AddTab('Bullets')
 				local SoundTab = TabBox:AddTab('Sound')
-
 
 				SoundTab:AddToggle('GunShotSound', {
 					Text = 'Gunshot Sound Override',
@@ -2924,14 +3326,51 @@ local ExtraTab = TabBox:AddTab('Extra')
 					end
 				})
 				SoundTab:AddDropdown('GunShotSoundIds', {
-					Values = {'Shutter','Neverlose','Gamesense','Smoke Detector','Laser'},
-					Default = 1,
-					Multi = false,
-					Text = 'Sound Selection',
-					Callback = function(v)
-						L.SelectedSound = v
-					end
-				})
+	Values = {
+		'Minecraft experience',
+		'Neverlose',
+		'Gamesense',
+		'One',
+		'Bell',
+		'Rust',
+		'TF2',
+		'Slime',
+		'Among Us',
+		'Minecraft',
+		'CS:GO',
+		'Saber',
+		'Baimware',
+		'Osu',
+		'TF2 Critical',
+		'Bat',
+		'Call of Duty',
+		'Bubble',
+		'Pick',
+		'Pop',
+		'Bruh',
+		'[Bamboo]',
+		'Crowbar',
+		'Weeb',
+		'Beep',
+		'Bambi',
+		'Stone',
+		'Old Fatality',
+		'Click',
+		'Ding',
+		'Snow',
+		'Laser',
+		'Mario',
+		'Steve',
+		'Snowdrake',
+		'Default'
+	},
+	Default = "",
+	Multi = false,
+	Text = 'Sound Selection',
+	Callback = function(v)
+		L.SelectedSound = v
+	end
+})
 				SoundTab:AddSlider("SoundVolumeSlider", {
 					Text = "Volume",
 					Default = 1,
@@ -2943,6 +3382,130 @@ local ExtraTab = TabBox:AddTab('Extra')
 						L.SoundVolume = v
 					end
 				})
+
+SoundTab:AddToggle('HitSoundShot', {
+	Text = 'Hit Sound Override',
+	Default = false,
+	Callback = function(v)
+		L.HitSoundOverride = v
+		local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+		for _, root in ipairs(playerGui:GetChildren()) do
+			for _, s in ipairs(root:GetDescendants()) do
+				if s:IsA("Sound") and s.Name=="hitmarker" then
+					if v then
+						applyHitSound(s)
+					else
+						restoreHitSound(s)
+					end
+				end
+			end
+		end
+	end
+})
+
+SoundTab:AddDropdown('HitSoundShotDropdown', {
+	Values = { "Minecraft experience","Neverlose","Gamesense","One","Bell","Rust","TF2","Slime","Among Us","Minecraft","CS:GO","Saber","Baimware","Osu","TF2 Critical","Bat","Call of Duty","Bubble","Pick","Pop","Bruh","[Bamboo]","Crowbar","Weeb","Beep","Bambi","Stone","Old Fatality","Click","Ding","Snow","Laser","Mario","Steve","Snowdrake","Default" },
+	Default = L.HitSoundSelected,
+	Multi = false,
+	Text = 'Sound Selection',
+	Callback = function(v)
+		L.HitSoundSelected = v
+		if L.HitSoundOverride then
+			local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+			for _, root in ipairs(playerGui:GetChildren()) do
+				for _, s in ipairs(root:GetDescendants()) do
+					if s:IsA("Sound") and s.Name=="hitmarker" then
+						applyHitSound(s)
+					end
+				end
+			end
+		end
+	end
+})
+
+SoundTab:AddSlider("HitSoundVolumeSlider", {
+	Text = "Volume",
+	Default = 1,
+	Min = 0,
+	Max = 10,
+	Rounding = 1,
+	Compact = true,
+	Callback = function(v)
+		L.HitSoundVolume = v
+		if L.HitSoundOverride then
+			local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+			for _, root in ipairs(playerGui:GetChildren()) do
+				for _, s in ipairs(root:GetDescendants()) do
+					if s:IsA("Sound") and s.Name=="hitmarker" then
+						applyHitSound(s)
+					end
+				end
+			end
+		end
+	end
+})
+
+SoundTab:AddToggle('KillSoundShot', {
+	Text = 'Kill Sound Override',
+	Default = false,
+	Callback = function(v)
+		L.KillSoundOverride = v
+		local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+		for _, root in ipairs(playerGui:GetChildren()) do
+			for _, s in ipairs(root:GetDescendants()) do
+				if s:IsA("Sound") and (s.Name=="killshot" or s.Name=="headshotkill") then
+					if v then
+						applyKillSound(s)
+					else
+						restoreKillSound(s)
+					end
+				end
+			end
+		end
+	end
+})
+
+SoundTab:AddDropdown('KillSoundShotDropdown', {
+	Values = { "Minecraft experience","Neverlose","Gamesense","One","Bell","Rust","TF2","Slime","Among Us","Minecraft","CS:GO","Saber","Baimware","Osu","TF2 Critical","Bat","Call of Duty","Bubble","Pick","Pop","Bruh","[Bamboo]","Crowbar","Weeb","Beep","Bambi","Stone","Old Fatality","Click","Ding","Snow","Laser","Mario","Steve","Snowdrake","Default" },
+	Default = L.KillSoundSelected or "Default",
+	Multi = false,
+	Text = 'Sound Selection',
+	Callback = function(v)
+		L.KillSoundSelected = v
+		if L.KillSoundOverride then
+			local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+			for _, root in ipairs(playerGui:GetChildren()) do
+				for _, s in ipairs(root:GetDescendants()) do
+					if s:IsA("Sound") and (s.Name=="killshot" or s.Name=="headshotkill") then
+						applyKillSound(s)
+					end
+				end
+			end
+		end
+	end
+})
+
+SoundTab:AddSlider("KillSoundVolumeSlider", {
+	Text = "Volume",
+	Default = 1,
+	Min = 0,
+	Max = 10,
+	Rounding = 1,
+	Compact = true,
+	Callback = function(v)
+		L.KillSoundVolume = v
+		if L.KillSoundOverride then
+			local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+			for _, root in ipairs(playerGui:GetChildren()) do
+				for _, s in ipairs(root:GetDescendants()) do
+					if s:IsA("Sound") and (s.Name=="killshot" or s.Name=="headshotkill") then
+						applyKillSound(s)
+					end
+				end
+			end
+		end
+	end
+})
 
 L.CrosshairLockOnTarget = false
 L.CrosshairEnabled = false
@@ -2968,6 +3531,7 @@ ESP4:AddToggle('CrosshairToggle1',{
 		L.CrosshairColor=v
 	end
 })
+
 ESP4:AddToggle('CrosshairSpinToggle',{
 	Text='Spin',
 	Default=L.CrosshairSpin,
@@ -2975,21 +3539,22 @@ ESP4:AddToggle('CrosshairSpinToggle',{
 		L.CrosshairSpin=v
 	end
 })
+
 ESP4:AddToggle('CrosshairLockOnTarget',{
-    Text='Lock On Target',
-    Tooltip="Locks Crosshair On Aimbot Target",
-    Default=false,
-    Callback=function(v)
-        L.CrosshairLockOnTarget = v
-    end
+	Text='Lock On Target',
+	Tooltip="Locks Crosshair On Aimbot Target",
+	Default=false,
+	Callback=function(v)
+		L.CrosshairLockOnTarget = v
+	end
 })
+
 ESP4:AddToggle('CrosshairRemoveIGCH',{
 	Text='No Crosshair',
 	Tooltip="Hides in-game crosshair",
 	Default=false,
 	Callback=function(v)
 		local crosshairs = player.PlayerGui.HudScreenGui.Main.DisplayCrosshairs
-
 		local parts = {
 			crosshairs.Up,
 			crosshairs.Center,
@@ -2997,7 +3562,6 @@ ESP4:AddToggle('CrosshairRemoveIGCH',{
 			crosshairs.Left,
 			crosshairs.Right,
 		}
-
 		for _, part in ipairs(parts) do
 			if part then
 				part.Visible = not v
@@ -3005,6 +3569,7 @@ ESP4:AddToggle('CrosshairRemoveIGCH',{
 		end
 	end
 })
+
 ESP4:AddSlider("CrossHairSizeSlider",{
 	Text="Crosshair Size",
 	Default=L.CrosshairSize,
@@ -3052,13 +3617,14 @@ ESP4:AddSlider("CrosshairGap",{
 		L.CrosshairGap=v
 	end
 })
+
 ESP4:AddDropdown('CrosshairStyles',{
-	Values = {'1','2','3'},
-	Default = '1',
-	Multi = false,
-	Text = 'Crosshair Style',
-	Callback = function(v)
-		L.CrosshairStyle = v
+	Values={'1','2','3'},
+	Default='1',
+	Multi=false,
+	Text='Crosshair Style',
+	Callback=function(v)
+		L.CrosshairStyle=v
 	end
 })
 
@@ -3072,297 +3638,316 @@ ESP4:AddDropdown('CrosshairScreenPosition',{
 	end
 })
 
-
-
-
-
-
-
-local SilentToggle = Silent:AddToggle("ToggleSilent", {
-	Text = "Toggle Silent",
-	Default = false,
-	Callback = function(v)
-		L.SilentEnabled = v
+local SilentToggle = Silent:AddToggle("ToggleSilent",{
+	Text="Toggle Silent",
+	Default=false,
+	Callback=function(v)
+		L.SilentEnabled=v
 		if not v then
-			L.SilentHolding = false
+			L.SilentHolding=false
 			L:StopSilentAim()
 		end
 	end
 })
 
-SilentToggle:AddKeyPicker("AimbotToggleKeybind", {
-	Default = "MB2",
-	Mode = "Hold",
-	SyncToggleState = false,
-	Text = "Silent Aim",
-	Callback = function()
-		L.SilentHolding = true
+SilentToggle:AddKeyPicker("AimbotToggleKeybind",{
+	Default="MB2",
+	Mode="Hold",
+	SyncToggleState=false,
+	Text="Silent Aim",
+	Callback=function()
+		L.SilentHolding=true
 		if L.SilentEnabled then
 			L:StartSilentAim()
 		end
 	end,
-	ChangedCallback = function()
-		L.SilentHolding = false
+	ChangedCallback=function()
+		L.SilentHolding=false
 		L:StopSilentAim()
 	end
 })
 
-Silent:AddToggle("SilentStickyAimToggle", {
-	Text = "Sticky Aim",
-	Default = false,
-	Callback = function(v)
-		L.SilentSticky = v
+Silent:AddToggle("SilentStickyAimToggle",{
+	Text="Sticky Aim",
+	Default=false,
+	Callback=function(v)
+		L.SilentSticky=v
 	end
 })
 
-Silent:AddToggle("SilentWallCheckToggle", {
-	Text = "Wall Check",
-	Default = false,
-	Callback = function(v)
-		L.SilentWallCheck = v
+Silent:AddToggle("SilentWallCheckToggle",{
+	Text="Wall Check",
+	Default=false,
+	Callback=function(v)
+		L.SilentWallCheck=v
 	end
 })
 
-Silent:AddSlider("SilentRedirectChanceSlider", {
-	Text = "Hit Chance",
-	Default = 50,
-	Min = 1,
-	Max = 100,
-	Rounding = 0,
-	Compact = true,
-	Suffix = "%",
-	Callback = function(v)
-		L.SilentHitChance = v
+Silent:AddSlider("SilentRedirectChanceSlider",{
+	Text="Hit Chance",
+	Default=50,
+	Min=1,
+	Max=100,
+	Rounding=0,
+	Compact=true,
+	Suffix="%",
+	Callback=function(v)
+		L.SilentHitChance=v
 	end
 })
 
-Silent:AddSlider("SilentMaxDistanceB", {
-	Text = "Max Distance",
-	Default = 500,
-	Min = 1,
-	Max = 1000,
-	Rounding = 0,
-	Compact = true,
-	Suffix = "stds",
-	Callback = function(v)
-		L.SilentMaxDistance = v
+Silent:AddSlider("SilentMaxDistanceB",{
+	Text="Max Distance",
+	Default=500,
+	Min=1,
+	Max=1000,
+	Rounding=0,
+	Compact=true,
+	Suffix="stds",
+	Callback=function(v)
+		L.SilentMaxDistance=v
 	end
 })
 
-Silent:AddDropdown("SilentAimPartSelection", {
-	Values = { "Head", "Torso" },
-	Default = 1,
-	Multi = false,
-	Text = "Aimbot Bone",
-	Callback = function(Value)
-		L.SilentAimPart = Value
-		L.SILENT_TARGET_MESH = L.SILENT_MESH_IDS[Value]
+Silent:AddDropdown("SilentAimPartSelection",{
+	Values={"Head","Torso"},
+	Default=1,
+	Multi=false,
+	Text="Aimbot Bone",
+	Callback=function(v)
+		L.SilentAimPart=v
+		L.SILENT_TARGET_MESH=L.SILENT_MESH_IDS[v]
 	end
 })
 
-Silent:AddDropdown("SilentTypeDropdown", {
-	Values = { "Closest To Mouse", "Closest To You" },
-	Default = 1,
-	Multi = false,
-	Text = "Target Priority",
-	Callback = function(Value)
-		L.SilentPriority = Value
+Silent:AddDropdown("SilentTypeDropdown",{
+	Values={"Closest To Mouse","Closest To You"},
+	Default=1,
+	Multi=false,
+	Text="Target Priority",
+	Callback=function(v)
+		L.SilentPriority=v
 	end
 })
 
 Silent:AddDivider()
 
-local SnapLine2 = Silent:AddToggle("SilentSnapLineToggle", {
-	Text = "Snap Line",
-	Default = false,
-	Callback = function(v)
-		L.SilentSnapEnabled = v
+local SnapLine2 = Silent:AddToggle("SilentSnapLineToggle",{
+	Text="Snap Line",
+	Default=false,
+	Callback=function(v)
+		L.SilentSnapEnabled=v
 	end
 })
 
-SnapLine2:AddColorPicker("SilentSnapLineColor", {
-	Default = Color3.fromRGB(255, 255, 255),
-	Title = "Line Color",
-	Callback = function(v)
-		L.SilentSnapColor = v
+SnapLine2:AddColorPicker("SilentSnapLineColor",{
+	Default=Color3.fromRGB(255,255,255),
+	Title="Line Color",
+	Callback=function(v)
+		L.SilentSnapColor=v
 	end
 })
 
-local SilentFovToggle = Silent:AddToggle("SilentToggleFOV", {
-	Text = "Show FOV",
-	Default = false,
-	Callback = function(v)
-		L.SilentShowFOV = v
+local SilentFovToggle = Silent:AddToggle("SilentToggleFOV",{
+	Text="Show FOV",
+	Default=false,
+	Callback=function(v)
+		L.SilentShowFOV=v
 	end
 })
 
-Silent:AddToggle("SilentDynamicFOVToggle", {
-	Text = "Dynamic FOV",
-	Default = false,
-	Callback = function(v)
-		L.SilentDynamicFOV = v
+Silent:AddToggle("SilentDynamicFOVToggle",{
+	Text="Dynamic FOV",
+	Default=false,
+	Callback=function(v)
+		L.SilentDynamicFOV=v
 	end
 })
 
-SilentFovToggle:AddColorPicker("SilentL.FOVColor", {
-	Default = Color3.fromRGB(255, 255, 255),
-	Title = "FOV Color",
-	Callback = function(v)
-		L.SilentFOVColor = v
+SilentFovToggle:AddColorPicker("SilentL.FOVColor",{
+	Default=Color3.fromRGB(255,255,255),
+	Title="FOV Color",
+	Callback=function(v)
+		L.SilentFOVColor=v
 	end
 })
 
-Silent:AddSlider("SilentFOVSize1", {
-	Text = "Size",
-	Default = 120,
-	Min = 0,
-	Max = 500,
-	Rounding = 0,
-	Suffix = "px",
-	Compact = true,
-	Callback = function(v)
-		L.SilentFOVRadius = v
+Silent:AddSlider("SilentFOVSize1",{
+	Text="Size",
+	Default=120,
+	Min=0,
+	Max=500,
+	Rounding=0,
+	Suffix="px",
+	Compact=true,
+	Callback=function(v)
+		L.SilentFOVRadius=v
 	end
 })
 
-Silent:AddDropdown("SilentSnapLineMethod", {
-	Values = { "Gun Barrel", "Mouse" },
-	Default = 1,
-	Multi = false,
-	Text = "Snap From",
-	Callback = function(v)
-		L.SilentSnapOriginMethod = v
+Silent:AddDropdown("SilentSnapLineMethod",{
+	Values={"Gun Barrel","Mouse"},
+	Default=1,
+	Multi=false,
+	Text="Snap From",
+	Callback=function(v)
+		L.SilentSnapOriginMethod=v
 	end
 })
 
-Silent:AddDropdown("SilentFovPositionMethod", {
-	Values = { "Gun Barrel", "Mouse" },
-	Default = 1,
-	Multi = false,
-	Text = "Fov Position",
-	Callback = function(v)
-		L.SilentFOVOriginMethod = v
+Silent:AddDropdown("SilentFovPositionMethod",{
+	Values={"Gun Barrel","Mouse"},
+	Default=1,
+	Multi=false,
+	Text="Fov Position",
+	Callback=function(v)
+		L.SilentFOVOriginMethod=v
 	end
 })
 
+game:GetService("Players").LocalPlayer.PlayerGui.DescendantAdded:Connect(function(c)
+	if c:IsA("Sound") then
+		if c.Name=="hitmarker" and L.HitSoundOverride then
+			applyHitSound(c)
+		elseif (c.Name=="killshot" or c.Name=="headshotkill") and L.KillSoundOverride then
+			applyKillSound(c)
+		end
+	end
+end)
 
+RunService.RenderStepped:Connect(function()
+	if not extracount.Value then
+		AmmoLabel.Visible=false
+		return
+	end
+	local currentAmmo=tonumber(Hud.TextMagCount.Text) or 0
+	local spareAmmo=tonumber(Hud.TextSpareCount.Text) or 0
+	AmmoLabel.Text=currentAmmo.."/"..spareAmmo
+	AmmoLabel.Visible=(currentAmmo~=0 or spareAmmo~=0)
+end)
 
+pcall(function()
+	workspace.StreamingEnabled=false
+end)
 
+Library:SetWatermarkVisibility(true)
 
+local FrameTimer=tick()
+local FrameCounter=0
+local FPS=60
+local GetPing=(function()
+	return math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
+end)
+local CanDoPing=pcall(function()
+	return GetPing()
+end)
 
+local WatermarkConnection=RunService.RenderStepped:Connect(function()
+	FrameCounter+=1
+	if (tick()-FrameTimer)>=1 then
+		FPS=FrameCounter
+		FrameTimer=tick()
+		FrameCounter=0
+	end
+	if CanDoPing then
+		Library:SetWatermark(('roxy.win / dev | %d fps | %d ms'):format(math.floor(FPS),GetPing()))
+	else
+		Library:SetWatermark(('roxy.win | %d fps'):format(math.floor(FPS)))
+	end
+end)
 
+Library:OnUnload(function()
+	Library:Notify('Closing roxx..',5.5)
+	L.AimbotEnabled=false
+	L.ShowFOV=false
+	L.ChamsEnabled=false
+	L.BoxESPEnabled=false
+	L.CrosshairEnabled=false
+	L.GunshotOverride=false
+	L.SkyboxEnabled=false
+	L.NameESPEnabled=false
+	L.DistanceESPEnabled=false
+	L.ViewModelEnabled=false
+	L.WeaponMasterEnabled=false
+	L.HealthESPEnabled=false
+	L.SnapEnabled=false
+	L.KillNotifyEnabled=false
+	L.WalkSpeedEnabled=false
+	L.MasterEnabled=false
+	L.HighlightEnabled=false
+	AmmoLabel.Visible=false
+	WatermarkConnection:Disconnect()
+	Library.Unloaded=true
+end)
 
+local MenuGroup=Tabs['UI Settings']:AddLeftGroupbox('Menu')
 
+MenuGroup:AddToggle("KeybindMenuOpen",{
+	Default=Library.KeybindFrame.Visible,
+	Text="Open Keybind Menu",
+	Callback=function(v)
+		Library.KeybindFrame.Visible=v
+	end
+})
 
+MenuGroup:AddToggle("ShowCustomCursor",{
+	Text="Custom Cursor",
+	Default=false,
+	Callback=function(v)
+		Library.ShowCustomCursor=v
+	end
+})
 
+MenuGroup:AddDivider()
+MenuGroup:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind",{Default="RightShift",NoUI=true,Text="Menu keybind"})
+MenuGroup:AddButton("Unload",function()
+	Library:Unload()
+end)
 
-
-				RunService.RenderStepped:Connect(function()
-					if not extracount.Value then
-						AmmoLabel.Visible = false
-						return
-					end
-
-					local currentAmmo = tonumber(Hud.TextMagCount.Text) or 0
-					local spareAmmo = tonumber(Hud.TextSpareCount.Text) or 0
-					AmmoLabel.Text = currentAmmo.."/"..spareAmmo
-
-					AmmoLabel.Visible = (currentAmmo ~= 0 or spareAmmo ~= 0)
-				end)
-				pcall(function()
-					workspace.StreamingEnabled = false
-				end)
-				Library:SetWatermarkVisibility(true)
-				local FrameTimer = tick()
-				local FrameCounter = 0;
-				local FPS = 60;
-				local GetPing = (function() return math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()) end)
-				local CanDoPing = pcall(function() return GetPing(); end)
-				local WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(function()
-					FrameCounter += 1;
-					if (tick() - FrameTimer) >= 1 then
-						FPS = FrameCounter;
-						FrameTimer = tick();
-						FrameCounter = 0;
-					end;
-					if CanDoPing then
-						Library:SetWatermark(('roxx / dev | %d fps | %d ms'):format(
-							math.floor(FPS),
-							GetPing()
-						));
-					else
-						Library:SetWatermark(('roxx | %d fps'):format(
-							math.floor(FPS)
-						));
-					end
-				end);
-				Library:OnUnload(function()
-					Library:Notify('Closing roxx..',5.5)
-					L.AimbotEnabled = false
-					L.ShowFOV = false
-					L.ChamsEnabled = false
-					L.BoxESPEnabled = false
-					L.CrosshairEnabled = false
-					L.GunshotOverride = false
-					L.BoxESPEnabled = false
-					L.SkyboxEnabled = false
-					L.NameESPEnabled = false
-					L.DistanceESPEnabled = false
-					L.ViewModelEnabled = false
-					L.ChamsEnabled = false
-					L.WeaponMasterEnabled = false
-					L.HealthESPEnabled = false
-					L.SnapEnabled = false
-					L.KillNotifyEnabled = false
-					L.WalkSpeedEnabled = false
-					L.MasterEnabled = false
-					L.CrosshairEnabled = false
-					AmmoLabel.Visible = false
-					L.HighlightEnabled = false
-					WatermarkConnection:Disconnect()
-					Library.Unloaded = true
-				end)
-				local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
-				MenuGroup:AddToggle("KeybindMenuOpen", { Default = Library.KeybindFrame.Visible, Text = "Open Keybind Menu", Callback = function(value) Library.KeybindFrame.Visible = value end})
-				MenuGroup:AddToggle("ShowCustomCursor", {Text = "Custom Cursor", Default = false, Callback = function(Value) Library.ShowCustomCursor = Value end})
-				MenuGroup:AddDivider()
-				MenuGroup:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
-				MenuGroup:AddButton("Unload", function() Library:Unload() end)
-
-
-				local text = "you're a developer.."
-                local color = "rgb(240,117,255)"
-
-                local label = MenuGroup:AddLabel("")
-                label.RichText = true
+local text="you're a developer.."
+local color="rgb(162,174,255)"
+local label=MenuGroup:AddLabel("")
+label.RichText=true
 
 task.spawn(function()
 	while true do
-		for i = 1, #text do
-			label:SetText('<font color="' .. color .. '">' .. text:sub(1, i) .. '</font>')
-			task.wait(0.04)
+		for i=1,#text do
+			label:SetText('<font color="'..color..'">'..text:sub(1,i)..'</font>')
+			task.wait(0.05)
 		end
-
-		task.wait(0.2)
-
-		for i = #text - 1, 0, -1 do
-			label:SetText('<font color="' .. color .. '">' .. text:sub(1, i) .. '</font>')
-			task.wait(0.04)
+		task.wait(0.3)
+		for i=#text-1,0,-1 do
+			label:SetText('<font color="'..color..'">'..text:sub(1,i)..'</font>')
+			task.wait(0.05)
 		end
-
 		task.wait(0.1)
 	end
 end)
 
+local baseTitle = "                                          "
+local current = "$$ roxy.win $$"
+local flickerChar = "$$"
 
-				Library.ToggleKeybind = Options.MenuKeybind
-				ThemeManager:SetLibrary(Library)
-				SaveManager:SetLibrary(Library)
-				SaveManager:IgnoreThemeSettings()
-				SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
-				ThemeManager:SetFolder('Roxx')
-				SaveManager:SetFolder('Roxx/Phantom-Forces')
-				SaveManager:SetSubFolder('specific-place')
-				SaveManager:BuildConfigSection(Tabs['UI Settings'])
-				ThemeManager:ApplyToTab(Tabs['UI Settings'])
-				SaveManager:LoadAutoloadConfig()
+task.spawn(function()
+	local visible = true
+	while true do
+		local left = visible and flickerChar or "  "
+		local right = visible and flickerChar or "  "
+		local middle = current:sub(3, #current-2)
+		Window:SetWindowTitle(baseTitle .. left .. middle .. right)
+		visible = not visible
+		task.wait(0.5)
+	end
+end)
+
+Library.ToggleKeybind=Options.MenuKeybind
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({'MenuKeybind'})
+ThemeManager:SetFolder('Roxx')
+SaveManager:SetFolder('Roxx/Phantom-Forces')
+SaveManager:SetSubFolder('specific-place')
+SaveManager:BuildConfigSection(Tabs['UI Settings'])
+ThemeManager:ApplyToTab(Tabs['UI Settings'])
+SaveManager:LoadAutoloadConfig()
