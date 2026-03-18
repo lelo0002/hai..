@@ -6439,11 +6439,11 @@ do
         end
 
         local NotifyLabel = Library:CreateLabel({
-            AnchorPoint = Side == "left" and Vector2.new(0, 0) or Vector2.new(1, 0);
-            Position = TextPosition;
+            AnchorPoint = Side == "left" and Vector2.new(0, 0) or Side == "right" and Vector2.new(1, 0) or Vector2.new(0.5, 0);
+            Position = Side == "bottom" and UDim2.new(0.5, 0, 0, 0) or TextPosition;
             Size = UDim2.new(1, TextSizeOffsetX, 1, TextSizeOffsetY);
             Text = (Data.Title == "" and "" or "[" .. Data.Title .. "] ") .. tostring(Data.Description);
-            TextXAlignment = Side == "left" and Enum.TextXAlignment.Left or Enum.TextXAlignment.Right;
+            TextXAlignment = Side == "left" and Enum.TextXAlignment.Left or Side == "right" and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center;
             TextSize = 14;
             ZIndex = 11003;
             RichText = true;
@@ -6451,11 +6451,11 @@ do
         })
 
         local SideColor = Library:Create("Frame", {
-            AnchorPoint = Side == "left" and Vector2.new(0, 0) or Vector2.new(1, 0);
-            Position = Side == "left" and UDim2.new(0, -1, 0, -1) or UDim2.new(1, -1, 0, -1);
+            AnchorPoint = Side == "left" and Vector2.new(0, 0) or Side == "right" and Vector2.new(1, 0) or Vector2.new(0, 1);
+            Position = Side == "left" and UDim2.new(0, -1, 0, -1) or Side == "right" and UDim2.new(1, -1, 0, -1) or UDim2.new(0, -1, 1, 1);
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Size = UDim2.new(0, 3, 1, 2);
+            Size = (Side == "left" or Side == "right") and UDim2.new(0, 3, 1, 2) or UDim2.new(1, 2, 0, 3);
             ZIndex = 11004;
             Parent = NotifyOuter;
         })
