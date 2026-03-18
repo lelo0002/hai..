@@ -3539,30 +3539,6 @@ do
                 { BorderColor3 = "Black" }
             )
 
-            Outer.MouseEnter:Connect(function()
-                if Outer.Visible then
-                    TweenService:Create(Inner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundColor3 = Library.MainColor:Lerp(Color3.new(1, 1, 1), 0.05) }):Play()
-                end
-            end)
-
-            Outer.MouseLeave:Connect(function()
-                if Outer.Visible then
-                    TweenService:Create(Inner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundColor3 = Library.MainColor }):Play()
-                end
-            end)
-
-            Outer.InputBegan:Connect(function(Input)
-                if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and Outer.Visible then
-                    TweenService:Create(Inner, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundColor3 = Library.MainColor:Lerp(Color3.new(1, 1, 1), 0.1) }):Play()
-                end
-            end)
-
-            Outer.InputEnded:Connect(function(Input)
-                if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and Outer.Visible then
-                    TweenService:Create(Inner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Erratic), { BackgroundColor3 = Library.MainColor }):Play()
-                end
-            end)
-
             return Outer, Inner, Label
         end
 
@@ -4128,13 +4104,8 @@ do
 
             ToggleLabel.TextColor3 = Toggle.Risky and Library.RiskColor or Color3.new(1, 1, 1)
 
-            local TargetColor = Toggle.Value and Library.AccentColor or Library.MainColor
-            local TargetBorder = Toggle.Value and Library.AccentColorDark or Library.OutlineColor
-
-            TweenService:Create(ToggleInner, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { 
-                BackgroundColor3 = TargetColor,
-                BorderColor3 = TargetBorder
-            }):Play()
+            ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor
+            ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor
 
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and "AccentColor" or "MainColor"
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and "AccentColorDark" or "OutlineColor"
@@ -5117,10 +5088,6 @@ do
             Library.OpenedFrames[ListOuter] = true
             DropdownArrow.Rotation = 180
 
-            local TargetHeight = math.clamp(GetTableSize(Dropdown.Values) * (20 * DPIScale), 0, MAX_DROPDOWN_ITEMS * (20 * DPIScale)) + 1
-            ListOuter.Size = UDim2.fromOffset(DropdownOuter.AbsoluteSize.X + 0.5, 0)
-            TweenService:Create(ListOuter, TweenInfo.new(0.3, Enum.EasingStyle.QuartOut), { Size = UDim2.fromOffset(DropdownOuter.AbsoluteSize.X + 0.5, TargetHeight) }):Play()
-
             RecalculateListSize()
         end
 
@@ -5135,14 +5102,9 @@ do
                 ItemList.Visible = true
             end
 
+            ListOuter.Visible = false
             Library.OpenedFrames[ListOuter] = nil
             DropdownArrow.Rotation = 0
-
-            local Tween = TweenService:Create(ListOuter, TweenInfo.new(0.3, Enum.EasingStyle.QuartOut), { Size = UDim2.fromOffset(ListOuter.Size.X.Offset, 0) })
-            Tween:Play()
-            Tween.Completed:Wait()
-
-            ListOuter.Visible = false
         end
 
         function Dropdown:OnChanged(Func)
@@ -6278,14 +6240,6 @@ do
     Library.WatermarkText = WatermarkLabel
     Library:MakeDraggable(Library.Watermark)
 
-    task.spawn(function()
-        while task.wait() do
-            if WatermarkOuter.Visible then
-                Gradient.Rotation = (Gradient.Rotation + 1) % 360
-            end
-        end
-    end)
-
     function Library:SetWatermarkVisibility(Bool)
         Library.Watermark.Visible = Bool
     end
@@ -6333,7 +6287,7 @@ do
         SortOrder = Enum.SortOrder.LayoutOrder;
         Parent = Library.RightNotificationArea;
     })
-    
+
     Library.BottomNotificationArea = Library:Create("Frame", {
         AnchorPoint = Vector2.new(0.5, 1);
         BackgroundTransparency = 1;
@@ -6391,13 +6345,6 @@ do
         local XSize, YSize = Library:GetTextBounds(Data.Description, Library.Font, 14)
         YSize = YSize + 7
 
-        local ParentArea = Library.RightNotificationArea
-        if Side == "left" then
-            ParentArea = Library.LeftNotificationArea
-        elseif Side == "bottom" then
-            ParentArea = Library.BottomNotificationArea
-        end
-
         local NotifyOuter = Library:Create("Frame", {
             BorderColor3 = Color3.new(0, 0, 0);
             Size = UDim2.new(0, 0, 0, YSize);
@@ -6405,7 +6352,7 @@ do
             ZIndex = 11000;
             Visible = false;
             Name = "Notif";
-            Parent = ParentArea;
+            Parent = Side == "left" and Library.LeftNotificationArea or Side == "right" and Library.RightNotificationArea or Library.BottomNotificationArea;
         })
 
         local NotifyInner = Library:Create("Frame", {
@@ -6572,9 +6519,16 @@ do
         NotifyOuter.Visible = true
         
         if Side == "bottom" then
-            local TargetSize = UDim2.new(0, XSize * DPIScale + 8 + 4 + ExtraWidth, 0, YSize)
-            NotifyOuter.Size = UDim2.new(0, 1, 0, YSize) -- Start as a line
-            TweenService:Create(NotifyOuter, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = TargetSize }):Play()
+            NotifyOuter.Size = UDim2.new(0, 0, 0, YSize)
+            
+            local TargetX = XSize * DPIScale + 8 + 4 + ExtraWidth
+            
+            -- Expansion animation: Line -> Full width
+            local LineTween = TweenService:Create(NotifyOuter, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, TargetX, 0, YSize)
+            })
+            
+            LineTween:Play()
         else
             pcall(NotifyOuter.TweenSize, NotifyOuter, UDim2.new(0, XSize * DPIScale + 8 + 4 + ExtraWidth, 0, YSize), "Out", "Quad", 0.4, true)
         end
@@ -6649,12 +6603,6 @@ function Library:CreateWindow(...)
         Parent = ScreenGui;
         Name = "Window";
     })
-    
-    local WindowScale = Library:Create("UIScale", {
-        Scale = 1;
-        Parent = Outer;
-    })
-
     LibraryMainOuterFrame = Outer
     Library:MakeDraggable(Outer, 25, true)
     if WindowInfo.Resizable then Library:MakeResizable(Outer, Library.MinSize) end
@@ -7351,7 +7299,7 @@ function Library:CreateWindow(...)
             BackgroundColor3 = "MainColor";
         })
 
-        local TabFrame = Library:Create("CanvasGroup", {
+        local TabFrame = Library:Create("Frame", {
             Name = "TabFrame",
             BackgroundTransparency = 1;
             Position = UDim2.new(0, 0, 0, 0);
@@ -7612,15 +7560,7 @@ end
             Blocker.BackgroundTransparency = 0
             TabButton.BackgroundColor3 = Library.MainColor
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = "MainColor"
-            
             TabFrame.Visible = true
-            TabFrame.GroupTransparency = 1
-            TabFrame.Position = UDim2.new(0, 0, 0, 5) -- Small offset for slide
-            
-            TweenService:Create(TabFrame, TweenInfo.new(0.3, Enum.EasingStyle.QuartOut), { 
-                GroupTransparency = 0,
-                Position = UDim2.new(0, 0, 0, 0)
-            }):Play()
 
             Tab:Resize()
         end
@@ -8094,12 +8034,6 @@ end
 
                 TweenService:Create(Desc, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { [Prop] = Toggled and Cache[Prop] or 1 }):Play()
             end
-        end
-
-        local WindowScale = Outer:FindFirstChildWhichIsA("UIScale")
-        if WindowScale then
-            WindowScale.Scale = Toggled and 0.9 or 1
-            TweenService:Create(WindowScale, TweenInfo.new(FadeTime, Enum.EasingStyle.QuartOut), { Scale = Toggled and 1 or 0.9 }):Play()
         end
 
         task.wait(FadeTime)
