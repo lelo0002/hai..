@@ -1,3 +1,4 @@
+print("executed ts nigga")
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6613,6 +6614,8 @@ function Library:CreateWindow(...)
         Parent = Inner,
     })
 
+    Window.LogoLabel = WindowLogo
+
     Library:AddToRegistry(WindowLogo, {
         ImageColor3 = "AccentColor";
     })
@@ -6755,23 +6758,29 @@ function Library:CreateWindow(...)
     end
 
     function Window:SetLogo(NewImage)
+        local LogoLabel = self.LogoLabel
+        if not LogoLabel then return end
+
         if tonumber(NewImage) then
             NewImage = "rbxassetid://" .. NewImage
         end
 
-        assert(typeof(NewImage) == "string", "Image must be a string.")
-
-        local Icon = Library:GetCustomIcon(NewImage)
-        if not Icon then
-            WindowLogo.Visible = false
+        if typeof(NewImage) ~= "string" then
+            LogoLabel.Visible = false
             return
         end
 
-        WindowLogo.Image = Icon.Url
-        WindowLogo.ImageRectOffset = Icon.ImageRectOffset
-        WindowLogo.ImageRectSize = Icon.ImageRectSize
+        local Icon = Library:GetCustomIcon(NewImage)
+        if not Icon then
+            LogoLabel.Visible = false
+            return
+        end
 
-        WindowLogo.Visible = true
+        LogoLabel.Image = Icon.Url
+        LogoLabel.ImageRectOffset = Icon.ImageRectOffset
+        LogoLabel.ImageRectSize = Icon.ImageRectSize
+
+        LogoLabel.Visible = true
     end
 
     function Window:AddDialog(Idx, Info)
