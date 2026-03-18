@@ -6455,7 +6455,7 @@ do
             Position = Side == "left" and UDim2.new(0, -1, 0, -1) or Side == "right" and UDim2.new(1, -1, 0, -1) or UDim2.new(0, -1, 1, 1);
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Size = (Side == "left" or Side == "right") and UDim2.new(0, 3, 1, 2) or UDim2.new(1, 2, 0, 3);
+            Size = (Side == "left" or Side == "right") and UDim2.new(0, 3, 1, 2) or UDim2.new(1, 2, 0, 2);
             ZIndex = 11004;
             Parent = NotifyOuter;
         })
