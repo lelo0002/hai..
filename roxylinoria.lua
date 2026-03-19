@@ -6728,9 +6728,9 @@ function Library:CreateWindow(...)
         Position = UDim2.fromScale(0, 0);
         Size = UDim2.fromScale(1, 1);
         ScaleType = Enum.ScaleType.Stretch;
-        ZIndex = 3;
+        ZIndex = 5;
         BackgroundTransparency = 1;
-        ImageTransparency = 0.45;
+        ImageTransparency = 0.8;
         Parent = TabContainer;
         Visible = true;
     })
