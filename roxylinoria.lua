@@ -1133,7 +1133,7 @@ local Templates = { -- TO-DO: do it for missing elements.
         ShowCustomCursor = true,
         UnlockMouseWhileOpen = true,
         Center = false,
-        BackgroundImage = "102968398767986"
+        BackgroundImage = "117916139430835"
     },
 
     --// Elements \\--
