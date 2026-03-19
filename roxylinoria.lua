@@ -1,4 +1,4 @@
-warn('fuck this shit')
+warn('fuck this sh1t')
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
