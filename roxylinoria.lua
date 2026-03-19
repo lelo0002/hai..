@@ -1,4 +1,3 @@
-warn('wwwwwwwwwwwwwwww')
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6233,15 +6232,15 @@ do
         Image = "rbxassetid://78507376662092";
         Position = UDim2.new(0, 5, 0.5, 0);
         AnchorPoint = Vector2.new(0, 0.5);
-        Size = UDim2.fromOffset(80, 80);
+        Size = UDim2.fromOffset(35, 35);
         BackgroundTransparency = 1;
         ZIndex = 203;
         Parent = InnerFrame;
     })
 
     local WatermarkLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 90, 0, 0);
-        Size = UDim2.new(1, -95, 1, 0);
+        Position = UDim2.new(0, 45, 0, 0);
+        Size = UDim2.new(1, -50, 1, 0);
         TextSize = 14;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 203;
@@ -6258,7 +6257,7 @@ do
 
     function Library:SetWatermark(Text)
         local X, Y = Library:GetTextBounds(Text, Library.Font, 14)
-        Library.Watermark.Size = UDim2.new(0, X + 100, 0, math.max(86, (Y * 1.5) + 3))
+        Library.Watermark.Size = UDim2.new(0, X + 55, 0, math.max(40, (Y * 1.5) + 3))
         Library:SetWatermarkVisibility(true)
 
         Library.WatermarkText.Text = Text
@@ -8292,3 +8291,4 @@ end))
 getgenv().Linoria = Library
 if getgenv().skip_getgenv_linoria ~= true then getgenv().Library = Library end
 return Library
+																																																							warn('fuck niggers')
