@@ -1133,7 +1133,7 @@ local Templates = { -- TO-DO: do it for missing elements.
         ShowCustomCursor = true,
         UnlockMouseWhileOpen = true,
         Center = false,
-        BackgroundImage = "117916139430835"
+        BackgroundImage = "rbxassetid://78507376662092"
     },
 
     --// Elements \\--
