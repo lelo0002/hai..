@@ -986,15 +986,21 @@ function Library:OnHighlight(HighlightInstance, Instance, Properties, Properties
 end
 
 function Library:UpdateDependencyBoxes()
+    local old_identity = getidentity and getidentity() or 8
+    if setidentity then setidentity(8) end
     for _, Depbox in next, Library.DependencyBoxes do
         Depbox:Update()
     end
+    if setidentity then setidentity(old_identity) end
 end
 
 function Library:UpdateDependencyGroupboxes()
+    local old_identity = getidentity and getidentity() or 8
+    if setidentity then setidentity(8) end
     for _, Depbox in next, Library.DependencyGroupboxes do
         Depbox:Update()
     end
+    if setidentity then setidentity(old_identity) end
 end
 
 function Library:MapValue(Value, MinA, MaxA, MinB, MaxB)
