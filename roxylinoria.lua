@@ -1,3 +1,4 @@
+-- w
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -284,6 +285,7 @@ local Library = {
     Notify = nil;
     NotifySide = "Left";
     ShowCustomCursor = true;
+    HideImages = false;
     ShowToggleFrameInKeybinds = true;
     NotifyOnError = false; -- true = Library:Notify for SafeCallback (still warns in the developer console)
 
@@ -6258,7 +6260,17 @@ do
 
     function Library:SetWatermark(Text)
         local X, Y = Library:GetTextBounds(Text, Library.Font, 14)
-        Library.Watermark.Size = UDim2.new(0, X + 38, 0, (Y * 1.5) + 3)
+        if Library.HideImages then
+            WatermarkIcon.Visible = false
+            Library.Watermark.Size = UDim2.new(0, X + 8, 0, (Y * 1.5) + 3)
+            Library.WatermarkText.Position = UDim2.new(0, 4, 0, 0)
+            Library.WatermarkText.Size = UDim2.new(1, -8, 1, 0)
+        else
+            WatermarkIcon.Visible = true
+            Library.Watermark.Size = UDim2.new(0, X + 38, 0, (Y * 1.5) + 3)
+            Library.WatermarkText.Position = UDim2.new(0, 33, 0, 0)
+            Library.WatermarkText.Size = UDim2.new(1, -38, 1, 0)
+        end
         Library:SetWatermarkVisibility(true)
 
         Library.WatermarkText.Text = Text
@@ -6745,6 +6757,7 @@ function Library:CreateWindow(...)
         Parent = TabContainer;
         Visible = true;
     })
+    Library.BackgroundImage = BackgroundImage
 
     Library:AddToRegistry(TabContainer, {
         BackgroundColor3 = "MainColor";
@@ -6777,7 +6790,11 @@ function Library:CreateWindow(...)
         BackgroundImage.ImageRectOffset = Icon.ImageRectOffset
         BackgroundImage.ImageRectSize = Icon.ImageRectSize
 
-        BackgroundImage.Visible = true
+        if not Library.HideImages then
+            BackgroundImage.Visible = true
+        else
+            BackgroundImage.Visible = false
+        end
     end
 
     if WindowInfo.BackgroundImage and WindowInfo.BackgroundImage ~= "" then
