@@ -1,4 +1,4 @@
--- hmmmmmm
+-- fuck this is clean im gonna nut
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -1327,6 +1327,7 @@ do
             ZIndex = 6;
             Parent = ToggleLabel;
         })
+        KeyPicker.DisplayFrame = PickOuter
 
         local PickInner = Library:Create("Frame", {
             BackgroundColor3 = Library.BackgroundColor;
@@ -1454,11 +1455,12 @@ do
                 local transparency = bool and 0 or 1
                 TweenService:Create(KeybindsToggleLabel, TweenInfoQuick, { TextTransparency = transparency, TextStrokeTransparency = transparency }):Play()
                 
+                local boxTrans = KeybindsToggle.Normal and 1 or transparency
                 if KeybindsToggleOuter then
-                    TweenService:Create(KeybindsToggleOuter, TweenInfoQuick, { BackgroundTransparency = transparency }):Play()
+                    TweenService:Create(KeybindsToggleOuter, TweenInfoQuick, { BackgroundTransparency = boxTrans }):Play()
                 end
                 if KeybindsToggleInner then
-                    TweenService:Create(KeybindsToggleInner, TweenInfoQuick, { BackgroundTransparency = transparency }):Play()
+                    TweenService:Create(KeybindsToggleInner, TweenInfoQuick, { BackgroundTransparency = boxTrans }):Play()
                 end
 
                 if not bool then
