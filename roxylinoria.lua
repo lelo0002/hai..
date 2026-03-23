@@ -286,7 +286,7 @@ local Library = {
     NotifySide = "Left";
     ShowCustomCursor = true;
     HideImages = false;
-    ShowToggleFrameInKeybinds = true;
+    ShowToggleFrameInKeybinds = false;
     NotifyOnError = false; -- true = Library:Notify for SafeCallback (still warns in the developer console)
 
     -- addons --
@@ -1734,6 +1734,10 @@ do
                 end
 
                 KeyPicker.Toggled = true
+            end
+
+            if KeyPicker.SyncToggleState then
+                ParentObj:SetValue(KeyPicker.Toggled)
             end
 
             Library:SafeCallback(KeyPicker.Callback, KeyPicker.Toggled)
