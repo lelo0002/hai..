@@ -1,4 +1,4 @@
--- gg 3/25/w26 v2
+-- gg 3/25/26 v2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -1514,7 +1514,9 @@ do
         end
 
         UpdateMenuOuterPos()
-        ToggleLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateMenuOuterPos)
+        if ToggleLabel then
+            ToggleLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateMenuOuterPos)
+        end
 
         local ModeSelectInner = Library:Create("Frame", {
             BackgroundColor3 = Library.BackgroundColor;
@@ -6268,20 +6270,22 @@ do
     end
 
     function Library:SetWatermark(Text)
+        Text = tostring(Text or "")
         local X, Y = Library:GetTextBounds(Text, Library.Font, 14)
+
         if Library.HideImages then
-            WatermarkIcon.Visible = false
+            if WatermarkIcon then WatermarkIcon.Visible = false end
             Library.Watermark.Size = UDim2.new(0, X + 8, 0, (Y * 1.5) + 3)
             Library.WatermarkText.Position = UDim2.new(0, 4, 0, 0)
             Library.WatermarkText.Size = UDim2.new(1, -8, 1, 0)
         else
-            WatermarkIcon.Visible = true
+            if WatermarkIcon then WatermarkIcon.Visible = true end
             Library.Watermark.Size = UDim2.new(0, X + 38, 0, (Y * 1.5) + 3)
             Library.WatermarkText.Position = UDim2.new(0, 33, 0, 0)
             Library.WatermarkText.Size = UDim2.new(1, -38, 1, 0)
         end
-        Library:SetWatermarkVisibility(true)
 
+        Library:SetWatermarkVisibility(true)
         Library.WatermarkText.Text = Text
     end
 end
@@ -7514,9 +7518,12 @@ do
         end
 
         for _, Side in next, { LeftSide, RightSide } do
-            Side:WaitForChild("UIListLayout"):GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Side.CanvasSize = UDim2.fromOffset(0, Side.UIListLayout.AbsoluteContentSize.Y)
-            end)
+            local layout = Side:WaitForChild("UIListLayout", 5)
+            if layout then
+                layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    Side.CanvasSize = UDim2.fromOffset(0, layout.AbsoluteContentSize.Y)
+                end)
+            end
         end
 
         function Tab:Resize()
