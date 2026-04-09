@@ -1,4 +1,4 @@
--- gg 3/25/26 v2
+-- gg 3/25/26 v21
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -7332,6 +7332,20 @@ function Library:CreateWindow(...)
             Parent = TabButton;
         })
 
+        local TabAccent = Library:Create("Frame", {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 0, 0, 0);
+            Size = UDim2.new(1, 0, 0, 2);
+            BackgroundTransparency = 1;
+            ZIndex = 2;
+            Parent = TabButton;
+        })
+
+        Library:AddToRegistry(TabAccent, {
+            BackgroundColor3 = "AccentColor";
+        })
+
         local Blocker = Library:Create("Frame", {
             BackgroundColor3 = Library.MainColor;
             BorderSizePixel = 0;
@@ -7612,6 +7626,8 @@ end
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = "MainColor"
             TabFrame.Visible = true
 
+            TweenService:Create(TabAccent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
+
             Tab:Resize()
         end
         Tab.Show = Tab.ShowTab
@@ -7621,6 +7637,8 @@ end
             TabButton.BackgroundColor3 = Library.BackgroundColor
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = "BackgroundColor"
             TabFrame.Visible = false
+
+            TweenService:Create(TabAccent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
         end
         Tab.Hide = Tab.HideTab
 
