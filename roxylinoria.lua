@@ -1,4 +1,4 @@
--- gg 3/25/26 v21
+-- gg 3/25/26 v2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -7336,7 +7336,7 @@ function Library:CreateWindow(...)
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 2);
+            Size = UDim2.new(1, 0, 0, 1);
             BackgroundTransparency = 1;
             ZIndex = 2;
             Parent = TabButton;
@@ -7626,7 +7626,7 @@ end
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = "MainColor"
             TabFrame.Visible = true
 
-            TweenService:Create(TabAccent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
+            TweenService:Create(TabAccent, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
 
             Tab:Resize()
         end
@@ -7638,7 +7638,7 @@ end
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = "BackgroundColor"
             TabFrame.Visible = false
 
-            TweenService:Create(TabAccent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+            TweenService:Create(TabAccent, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
         end
         Tab.Hide = Tab.HideTab
 
