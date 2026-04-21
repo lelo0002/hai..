@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>roxy.win / deployment guide</title>
+    <style>
+        :root {
+            --bg-dark: #0B0B0B;
+            --bg-card: rgba(11, 11, 11, 0.85); /* Slightly transparent for the ASCII behind it */
+            --border-color: #222222;
+            --text-main: #EEEEEE;
+            --text-dim: #888888;
+            --accent-blue: #508BCF;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Consolas', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            overflow: hidden; /* Prevent scroll from ASCII */
+        }
+
+        /* ASCII Background */
+        .bg-ascii {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent-blue);
+            opacity: 0.08; /* Very subtle, professional watermark */
+            font-family: 'Consolas', monospace;
+            font-size: 2vw; /* Scales cleanly to fit screen */
+            line-height: 1.15;
+            z-index: -1;
+            white-space: pre;
+            pointer-events: none;
+            text-align: center;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 480px;
+            padding: 30px 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px); /* Sleek glass effect over the ASCII */
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 15px;
+            margin: 0;
+            color: var(--text-main);
+            font-weight: normal;
+        }
+
+        .status {
+            font-size: 11px;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .steps {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+        }
+
+        .steps li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #CCCCCC;
+        }
+
+        .step-num {
+            color: var(--accent-blue);
+            font-weight: normal;
+            margin-right: 12px;
+            white-space: nowrap;
+        }
+
+        .highlight {
+            color: var(--text-main);
+        }
+
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            text-align: center;
+            text-decoration: none;
+            font-size: 12px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .download-btn:hover {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px rgba(80, 139, 207, 0.3);
+        }
+
+        /* Fixed Discord Icon to the outer screen bounds */
+        .discord-link {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            opacity: 0.3;
+            transition: opacity 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .discord-link:hover {
+            opacity: 1;
+        }
+
+        .discord-link svg {
+            fill: var(--text-main);
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ASCII Watermark Background -->
+    <pre class="bg-ascii">
+██████╗  ██████╗ ██╗  ██╗██╗   ██╗     ██╗    ██╗██╗███╗   ██╗
+██╔══██╗██╔═══██╗╚██╗██╔╝╚██╗ ██╔╝     ██║    ██║██║████╗  ██║
+██████╔╝██║   ██║ ╚███╔╝  ╚████╔╝      ██║ █╗ ██║██║██╔██╗ ██║
+██╔══██╗██║   ██║ ██╔██╗   ╚██╔╝       ██║███╗██║██║██║╚██╗██║
+██║  ██║╚██████╔╝██╔╝ ██╗   ██║    ██╗ ╚███╔███╔╝██║██║ ╚████║
+╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝    ╚═╝  ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝
+    </pre>
+
+    <!-- Main UI Container -->
+    <div class="container">
+        <div class="header">
+            <h1>roxy.win</h1>
+            <div class="status">Deployment Guide</div>
+        </div>
+
+        <ul class="steps">
+            <li>
+                <span class="step-num">[ 01 ]</span>
+                <span>Download the target <span class="highlight">.rar archive</span> from the secure GoFile network link provided below and extract its contents to a local directory.</span>
+            </li>
+            <li>
+                <span class="step-num">[ 02 ]</span>
+                <span>Locate the executable and run <span class="highlight">Loader.exe</span> explicitly as <span class="highlight">Administrator</span> to ensure kernel allocation privileges.</span>
+            </li>
+            <li>
+                <span class="step-num">[ 03 ]</span>
+                <span>Authenticate by redeeming your access key, then execute the <span class="highlight">PERMANENT SPOOF</span> deployment sequence.</span>
+            </li>
+            <li>
+                <span class="step-num">[ 04 ]</span>
+                <span>Enjoy your fully virtualized hardware environment.</span>
+            </li>
+        </ul>
+
+        <a href="https://gofile.io/d/6iPQx8" target="_blank" class="download-btn">Access GoFile Download</a>
+    </div>
+
+    <!-- Outer Screen Discord Link -->
+    <a href="https://discord.gg/8HduxFhm5y" target="_blank" class="discord-link" title="Join our Discord">
+        <svg viewBox="0 0 127.14 96.36" xmlns="http://www.w3.org/2000/svg">
+            <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a67.55,67.55,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-18.9-80.21ZM42.56,65.3c-5.36,0-9.8-4.83-9.8-10.79s4.38-10.79,9.8-10.79,9.85,4.84,9.8,10.79c0,5.96-4.43,10.79-9.8,10.79Zm42.05,0c-5.36,0-9.8-4.83-9.8-10.79s4.38-10.79,9.8-10.79,9.85,4.84,9.8,10.79C94.45,60.47,90,65.3,84.61,65.3Z"/>
+        </svg>
+    </a>
+
+</body>
+</html>
