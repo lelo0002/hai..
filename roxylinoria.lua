@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github
+-- gg 3/25/26 v223 -- hurry the fuck up github2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6111,10 +6111,9 @@ do
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.75,
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Size = UDim2.fromOffset(350, 350),
+        ImageTransparency = 0.6,
+        Position = UDim2.new(0, -25, 0, -25),
+        Size = UDim2.new(1, 50, 1, 50),
         ZIndex = 99,
         Parent = KeybindOuter,
     })
@@ -6206,10 +6205,9 @@ do
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.75,
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Size = UDim2.fromOffset(350, 350),
+        ImageTransparency = 0.6,
+        Position = UDim2.new(0, -25, 0, -25),
+        Size = UDim2.new(1, 50, 1, 50),
         ZIndex = 199,
         Parent = WatermarkOuter,
     })
