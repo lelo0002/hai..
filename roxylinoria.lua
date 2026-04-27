@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up githu112b
+-- gg 3/25/26 v223 -- hurry the fuck up github
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6106,30 +6106,19 @@ do
         Parent = ScreenGui;
     })
 
-    local KeybindGlow1 = Library:Create("ImageLabel", {
-        Name = "KeybindGlow1",
+    local KeybindGlow = Library:Create("ImageLabel", {
+        Name = "KeybindGlow",
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.65,
-        Position = UDim2.new(0, -20, 0, -20),
-        Size = UDim2.new(1, 40, 1, 40),
+        ImageTransparency = 0.75,
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Size = UDim2.fromOffset(350, 350),
         ZIndex = 99,
         Parent = KeybindOuter,
     })
-    local KeybindGlow2 = Library:Create("ImageLabel", {
-        Name = "KeybindGlow2",
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://1316045217",
-        ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.85,
-        Position = UDim2.new(0, -40, 0, -40),
-        Size = UDim2.new(1, 80, 1, 80),
-        ZIndex = 98,
-        Parent = KeybindOuter,
-    })
-    Library:AddToRegistry(KeybindGlow1, { ImageColor3 = "AccentColor" }, true)
-    Library:AddToRegistry(KeybindGlow2, { ImageColor3 = "AccentColor" }, true)
+    Library:AddToRegistry(KeybindGlow, { ImageColor3 = "AccentColor" }, true)
 
     local KeybindInner = Library:Create("Frame", {
         BackgroundColor3 = Library.MainColor;
@@ -6212,30 +6201,19 @@ do
         Parent = WatermarkOuter;
     })
 
-    local WatermarkGlow1 = Library:Create("ImageLabel", {
-        Name = "WatermarkGlow1",
+    local WatermarkGlow = Library:Create("ImageLabel", {
+        Name = "WatermarkGlow",
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.65,
-        Position = UDim2.new(0, -20, 0, -20),
-        Size = UDim2.new(1, 40, 1, 40),
+        ImageTransparency = 0.75,
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Size = UDim2.fromOffset(350, 350),
         ZIndex = 199,
         Parent = WatermarkOuter,
     })
-    local WatermarkGlow2 = Library:Create("ImageLabel", {
-        Name = "WatermarkGlow2",
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://1316045217",
-        ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.85,
-        Position = UDim2.new(0, -40, 0, -40),
-        Size = UDim2.new(1, 80, 1, 80),
-        ZIndex = 198,
-        Parent = WatermarkOuter,
-    })
-    Library:AddToRegistry(WatermarkGlow1, { ImageColor3 = "AccentColor" }, true)
-    Library:AddToRegistry(WatermarkGlow2, { ImageColor3 = "AccentColor" }, true)
+    Library:AddToRegistry(WatermarkGlow, { ImageColor3 = "AccentColor" }, true)
 
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = "AccentColor";
