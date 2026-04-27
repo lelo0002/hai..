@@ -1,4 +1,4 @@
--- gg 4/27/26 fuck you github
+-- gg 3/25/26 v223 -- fuckk gitrbubbbb
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -555,83 +555,57 @@ function Library:CreateLabel(Properties, IsHud)
     return Library:Create(_Instance, Properties)
 end
 
-function Library:MakeDraggable(Instance, Cutoff, IsMainWindow)
+function Library:MakeDraggable(Instance, Cutoff, IsMainWindow, Smooth)
     Instance.Active = true
 
-    if Library.IsMobile == false then
-        Instance.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                if IsMainWindow == true and Library.CantDragForced == true then
-                    return
-                end
-           
-                local ObjPos = Vector2.new(
-                    Mouse.X - Instance.AbsolutePosition.X,
-                    Mouse.Y - Instance.AbsolutePosition.Y
-                )
+    local Dragging = false
+    local DragInput, DragStart, StartPos
 
-                if ObjPos.Y > (Cutoff or 40) then
-                    return
-                end
-
-                while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                    Instance.Position = UDim2.new(
-                        0,
-                        Mouse.X - ObjPos.X + (Instance.Size.X.Offset * Instance.AnchorPoint.X),
-                        0,
-                        Mouse.Y - ObjPos.Y + (Instance.Size.Y.Offset * Instance.AnchorPoint.Y)
-                    )
-
-                    RunService.RenderStepped:Wait()
-                end
-            end
-        end)
-    else
-        local Dragging, DraggingInput, DraggingStart, StartPosition
-
-        InputService.TouchStarted:Connect(function(Input)
-            if IsMainWindow == true and Library.CantDragForced == true then
-                Dragging = false
-                return
-            end
-
-            if not Dragging and Library:MouseIsOverFrame(Instance, Input) and (IsMainWindow == true and (Library.CanDrag == true and Library.Window.Holder.Visible == true) or true) then
-                DraggingInput = Input
-                DraggingStart = Input.Position
-                StartPosition = Instance.Position
-
-                local OffsetPos = Input.Position - DraggingStart
-                if OffsetPos.Y > (Cutoff or 40) then
-                    Dragging = false
-                    return
-                end
-
-                Dragging = true
-            end
-        end)
-        InputService.TouchMoved:Connect(function(Input)
-            if IsMainWindow == true and Library.CantDragForced == true then
-                Dragging = false
-                return
-            end
-
-            if Input == DraggingInput and Dragging and (IsMainWindow == true and (Library.CanDrag == true and Library.Window.Holder.Visible == true) or true) then
-                local OffsetPos = Input.Position - DraggingStart
-
-                Instance.Position = UDim2.new(
-                    StartPosition.X.Scale,
-                    StartPosition.X.Offset + OffsetPos.X,
-                    StartPosition.Y.Scale,
-                    StartPosition.Y.Offset + OffsetPos.Y
-                )
-            end
-        end)
-        InputService.TouchEnded:Connect(function(Input)
-            if Input == DraggingInput then 
-                Dragging = false
-            end
-        end)
+    local function Update(Input)
+        if not Dragging then return end
+        local Delta = Input.Position - DragStart
+        local TargetPos = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+        
+        if Smooth then
+            TweenService:Create(Instance, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = TargetPos }):Play()
+        else
+            Instance.Position = TargetPos
+        end
     end
+
+    Instance.InputBegan:Connect(function(Input)
+        if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) then
+            if IsMainWindow and Library.CantDragForced then return end
+            
+            local ObjPos = Input.Position - Vector3.new(Instance.AbsolutePosition.X, Instance.AbsolutePosition.Y, 0)
+            if ObjPos.Y > (Cutoff or 40) then return end
+            
+            Dragging = true
+            DragStart = Input.Position
+            StartPos = Instance.Position
+            DragInput = Input
+
+            local Connection
+            Connection = InputService.InputEnded:Connect(function(EndInput)
+                if EndInput == Input or EndInput.UserInputType == Enum.UserInputType.MouseButton1 or EndInput.UserInputType == Enum.UserInputType.Touch then
+                    Dragging = false
+                    Connection:Disconnect()
+                end
+            end)
+        end
+    end)
+
+    Instance.InputChanged:Connect(function(Input)
+        if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+            DragInput = Input
+        end
+    end)
+
+    Library:GiveSignal(RunService.RenderStepped:Connect(function()
+        if Dragging and DragInput then
+            Update(DragInput)
+        end
+    end))
 end
 
 function Library:MakeDraggableUsingParent(Instance, Parent, Cutoff, IsMainWindow)
@@ -6211,6 +6185,19 @@ do
         Parent = WatermarkOuter;
     })
 
+    local WatermarkGlow = Library:Create("ImageLabel", {
+        Name = "WatermarkGlow",
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageColor3 = Library.AccentColor,
+        ImageTransparency = 0.5,
+        Position = UDim2.new(0, -10, 0, -10),
+        Size = UDim2.new(1, 20, 1, 20),
+        ZIndex = 199,
+        Parent = WatermarkOuter,
+    })
+    Library:AddToRegistry(WatermarkGlow, { ImageColor3 = "AccentColor" })
+
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = "AccentColor";
     })
@@ -6263,7 +6250,7 @@ do
 
     Library.Watermark = WatermarkOuter
     Library.WatermarkText = WatermarkLabel
-    Library:MakeDraggable(Library.Watermark)
+    Library:MakeDraggable(Library.Watermark, nil, false, true)
 
     function Library:SetWatermarkVisibility(Bool)
         Library.Watermark.Visible = Bool
@@ -6641,7 +6628,7 @@ function Library:CreateWindow(...)
         Name = "Window";
     })
     LibraryMainOuterFrame = Outer
-    Library:MakeDraggable(Outer, 25, true)
+    Library:MakeDraggable(Outer, 25, true, true)
     if WindowInfo.Resizable then Library:MakeResizable(Outer, Library.MinSize) end
 
     local Glow = Library:Create("ImageLabel", {
@@ -6783,6 +6770,19 @@ function Library:CreateWindow(...)
         ZIndex = 2;
         Parent = MainSectionInner;
     })
+
+    local TabContainerGlow = Library:Create("ImageLabel", {
+        Name = "TabContainerGlow",
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageColor3 = Library.AccentColor,
+        ImageTransparency = 0.7,
+        Position = UDim2.new(0, -15, 0, -15),
+        Size = UDim2.new(1, 30, 1, 30),
+        ZIndex = 1,
+        Parent = TabContainer,
+    })
+    Library:AddToRegistry(TabContainerGlow, { ImageColor3 = "AccentColor" })
     
     local InnerVideoBackground = Library:Create("VideoFrame", {
         BackgroundColor3 = Library.MainColor;
@@ -7651,10 +7651,23 @@ end
             TabFrame.Visible = true
 
             Window.TabGlider.Visible = true
-            TweenService:Create(Window.TabGlider, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-                Position = UDim2.new(0, TabButton.Position.X.Offset, 0, 0),
-                Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
-            }):Play()
+            
+            local function UpdateGlider()
+                local TargetX = TabButton.AbsolutePosition.X - Window.TabButtonContainer.AbsolutePosition.X
+                TweenService:Create(Window.TabGlider, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                    Position = UDim2.new(0, TargetX, 0, 0),
+                    Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
+                }):Play()
+            end
+
+            if TabButton.AbsolutePosition.X == 0 then
+                task.spawn(function()
+                    repeat task.wait() until TabButton.AbsolutePosition.X ~= 0
+                    UpdateGlider()
+                end)
+            else
+                UpdateGlider()
+            end
 
             Tab:Resize()
         end
