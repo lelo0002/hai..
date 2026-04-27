@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github1
+-- gg 3/25/26 v223 -- hurry the fuck up githu112b
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -445,11 +445,7 @@ function Library:GetBetterColor(Color: Color3, Add: number): Color3
     )
 end
 
-function Library:GetGlowTransparency()
-    local c = Library.AccentColor
-    local brightness = 0.299 * c.R + 0.587 * c.G + 0.114 * c.B
-    return math.clamp(0.4 + brightness * 0.4, 0.4, 0.95)
-end
+
 
 
 --// Library Functions \\--
@@ -6110,23 +6106,30 @@ do
         Parent = ScreenGui;
     })
 
-    local KeybindGlow = Library:Create("ImageLabel", {
-        Name = "KeybindGlow",
+    local KeybindGlow1 = Library:Create("ImageLabel", {
+        Name = "KeybindGlow1",
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = Library:GetGlowTransparency(),
-        Position = UDim2.new(0, -15, 0, -15),
-        Size = UDim2.new(1, 30, 1, 30),
-        ScaleType = Enum.ScaleType.Slice,
-        SliceCenter = Rect.new(10, 10, 10, 10),
+        ImageTransparency = 0.65,
+        Position = UDim2.new(0, -20, 0, -20),
+        Size = UDim2.new(1, 40, 1, 40),
         ZIndex = 99,
         Parent = KeybindOuter,
     })
-    Library:AddToRegistry(KeybindGlow, { 
-        ImageColor3 = "AccentColor",
-        ImageTransparency = function() return Library:GetGlowTransparency() end
-    }, true)
+    local KeybindGlow2 = Library:Create("ImageLabel", {
+        Name = "KeybindGlow2",
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageColor3 = Library.AccentColor,
+        ImageTransparency = 0.85,
+        Position = UDim2.new(0, -40, 0, -40),
+        Size = UDim2.new(1, 80, 1, 80),
+        ZIndex = 98,
+        Parent = KeybindOuter,
+    })
+    Library:AddToRegistry(KeybindGlow1, { ImageColor3 = "AccentColor" }, true)
+    Library:AddToRegistry(KeybindGlow2, { ImageColor3 = "AccentColor" }, true)
 
     local KeybindInner = Library:Create("Frame", {
         BackgroundColor3 = Library.MainColor;
@@ -6209,23 +6212,30 @@ do
         Parent = WatermarkOuter;
     })
 
-    local WatermarkGlow = Library:Create("ImageLabel", {
-        Name = "WatermarkGlow",
+    local WatermarkGlow1 = Library:Create("ImageLabel", {
+        Name = "WatermarkGlow1",
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = Library:GetGlowTransparency(),
-        Position = UDim2.new(0, -15, 0, -15),
-        Size = UDim2.new(1, 30, 1, 30),
-        ScaleType = Enum.ScaleType.Slice,
-        SliceCenter = Rect.new(10, 10, 10, 10),
+        ImageTransparency = 0.65,
+        Position = UDim2.new(0, -20, 0, -20),
+        Size = UDim2.new(1, 40, 1, 40),
         ZIndex = 199,
         Parent = WatermarkOuter,
     })
-    Library:AddToRegistry(WatermarkGlow, { 
-        ImageColor3 = "AccentColor",
-        ImageTransparency = function() return Library:GetGlowTransparency() end
-    }, true)
+    local WatermarkGlow2 = Library:Create("ImageLabel", {
+        Name = "WatermarkGlow2",
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageColor3 = Library.AccentColor,
+        ImageTransparency = 0.85,
+        Position = UDim2.new(0, -40, 0, -40),
+        Size = UDim2.new(1, 80, 1, 80),
+        ZIndex = 198,
+        Parent = WatermarkOuter,
+    })
+    Library:AddToRegistry(WatermarkGlow1, { ImageColor3 = "AccentColor" }, true)
+    Library:AddToRegistry(WatermarkGlow2, { ImageColor3 = "AccentColor" }, true)
 
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = "AccentColor";
@@ -6660,23 +6670,30 @@ function Library:CreateWindow(...)
     Library:MakeDraggable(Outer, 25, true, true)
     if WindowInfo.Resizable then Library:MakeResizable(Outer, Library.MinSize) end
 
-    local Glow = Library:Create("ImageLabel", {
-        Name = "Glow",
+    local Glow1 = Library:Create("ImageLabel", {
+        Name = "Glow1",
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = Library:GetGlowTransparency(),
+        ImageTransparency = 0.65,
         Position = UDim2.new(0, -25, 0, -25),
         Size = UDim2.new(1, 50, 1, 50),
-        ScaleType = Enum.ScaleType.Slice,
-        SliceCenter = Rect.new(10, 10, 10, 10),
         ZIndex = 0,
         Parent = Outer,
     })
-    Library:AddToRegistry(Glow, { 
-        ImageColor3 = "AccentColor",
-        ImageTransparency = function() return Library:GetGlowTransparency() end
+    local Glow2 = Library:Create("ImageLabel", {
+        Name = "Glow2",
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageColor3 = Library.AccentColor,
+        ImageTransparency = 0.85,
+        Position = UDim2.new(0, -50, 0, -50),
+        Size = UDim2.new(1, 100, 1, 100),
+        ZIndex = -1,
+        Parent = Outer,
     })
+    Library:AddToRegistry(Glow1, { ImageColor3 = "AccentColor" })
+    Library:AddToRegistry(Glow2, { ImageColor3 = "AccentColor" })
 
     local Inner = Library:Create("Frame", {
         BackgroundColor3 = Library.MainColor;
@@ -6810,18 +6827,13 @@ function Library:CreateWindow(...)
         BackgroundTransparency = 1,
         Image = "rbxassetid://1316045217",
         ImageColor3 = Library.AccentColor,
-        ImageTransparency = Library:GetGlowTransparency() + 0.2,
-        Position = UDim2.new(0, -15, 0, -15),
-        Size = UDim2.new(1, 30, 1, 30),
-        ScaleType = Enum.ScaleType.Slice,
-        SliceCenter = Rect.new(10, 10, 10, 10),
+        ImageTransparency = 0.75,
+        Position = UDim2.new(0, -20, 0, -20),
+        Size = UDim2.new(1, 40, 1, 40),
         ZIndex = 1,
         Parent = TabContainer,
     })
-    Library:AddToRegistry(TabContainerGlow, { 
-        ImageColor3 = "AccentColor",
-        ImageTransparency = function() return math.clamp(Library:GetGlowTransparency() + 0.2, 0, 0.99) end
-    })
+    Library:AddToRegistry(TabContainerGlow, { ImageColor3 = "AccentColor" })
     
     local InnerVideoBackground = Library:Create("VideoFrame", {
         BackgroundColor3 = Library.MainColor;
