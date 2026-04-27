@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github
+-- gg 4/27/26 fuck you github
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6644,6 +6644,19 @@ function Library:CreateWindow(...)
     Library:MakeDraggable(Outer, 25, true)
     if WindowInfo.Resizable then Library:MakeResizable(Outer, Library.MinSize) end
 
+    local Glow = Library:Create("ImageLabel", {
+        Name = "Glow",
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageColor3 = Library.AccentColor,
+        ImageTransparency = 0.5,
+        Position = UDim2.new(0, -25, 0, -25),
+        Size = UDim2.new(1, 50, 1, 50),
+        ZIndex = 0,
+        Parent = Outer,
+    })
+    Library:AddToRegistry(Glow, { ImageColor3 = "AccentColor" })
+
     local Inner = Library:Create("Frame", {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.AccentColor;
@@ -6709,13 +6722,38 @@ function Library:CreateWindow(...)
         Parent = MainSectionInner;
     })
 
+    local TabButtonContainer = Library:Create("Frame", {
+        BackgroundTransparency = 1;
+        Size = UDim2.new(1, 0, 1, 0);
+        AutomaticSize = Enum.AutomaticSize.X;
+        Parent = TabArea;
+    })
+
+    Window.TabButtonContainer = TabButtonContainer
+
     local TabListLayout = Library:Create("UIListLayout", {
         Padding = UDim.new(0, WindowInfo.TabPadding);
         FillDirection = Enum.FillDirection.Horizontal;
         HorizontalAlignment = Enum.HorizontalAlignment.Center;
         SortOrder = Enum.SortOrder.LayoutOrder;
         VerticalAlignment = Enum.VerticalAlignment.Center;
+        Parent = TabButtonContainer;
+    })
+
+    local TabGlider = Library:Create("Frame", {
+        BackgroundColor3 = Library.AccentColor;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 0, 0, 0);
+        Size = UDim2.new(0, 0, 0, 1);
+        ZIndex = 10;
         Parent = TabArea;
+        Visible = false;
+    })
+
+    Window.TabGlider = TabGlider
+
+    Library:AddToRegistry(TabGlider, {
+        BackgroundColor3 = "AccentColor";
     })
 
     Library:Create("Frame", {
@@ -7316,7 +7354,7 @@ function Library:CreateWindow(...)
             BorderColor3 = Library.OutlineColor;
             Size = UDim2.new(0, TabButtonWidth + 8 + 4, 0.85, 0);
             ZIndex = 1;
-            Parent = TabArea;
+            Parent = Window.TabButtonContainer;
         })
 
         Library:AddToRegistry(TabButton, {
@@ -7330,20 +7368,6 @@ function Library:CreateWindow(...)
             Text = Tab.Name;
             ZIndex = 1;
             Parent = TabButton;
-        })
-
-        local TabAccent = Library:Create("Frame", {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 1);
-            BackgroundTransparency = 1;
-            ZIndex = 2;
-            Parent = TabButton;
-        })
-
-        Library:AddToRegistry(TabAccent, {
-            BackgroundColor3 = "AccentColor";
         })
 
         local Blocker = Library:Create("Frame", {
@@ -7626,7 +7650,11 @@ end
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = "MainColor"
             TabFrame.Visible = true
 
-            TweenService:Create(TabAccent, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
+            Window.TabGlider.Visible = true
+            TweenService:Create(Window.TabGlider, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0, TabButton.Position.X.Offset, 0, 0),
+                Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
+            }):Play()
 
             Tab:Resize()
         end
@@ -7637,8 +7665,6 @@ end
             TabButton.BackgroundColor3 = Library.BackgroundColor
             Library.RegistryMap[TabButton].Properties.BackgroundColor3 = "BackgroundColor"
             TabFrame.Visible = false
-
-            TweenService:Create(TabAccent, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
         end
         Tab.Hide = Tab.HideTab
 
