@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github23
+-- fuck github, fuck you and fuck everyone
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6106,18 +6106,7 @@ do
         Parent = ScreenGui;
     })
 
-    local KeybindGlow = Library:Create("ImageLabel", {
-        Name = "KeybindGlow",
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://1316045217",
-        ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.6,
-        Position = UDim2.new(0, -25, 0, -25),
-        Size = UDim2.new(1, 50, 1, 50),
-        ZIndex = 99,
-        Parent = KeybindOuter,
-    })
-    Library:AddToRegistry(KeybindGlow, { ImageColor3 = "AccentColor" }, true)
+
 
     local KeybindInner = Library:Create("Frame", {
         BackgroundColor3 = Library.MainColor;
@@ -6200,18 +6189,7 @@ do
         Parent = WatermarkOuter;
     })
 
-    local WatermarkGlow = Library:Create("ImageLabel", {
-        Name = "WatermarkGlow",
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://1316045217",
-        ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.6,
-        Position = UDim2.new(0, -25, 0, -25),
-        Size = UDim2.new(1, 50, 1, 50),
-        ZIndex = 199,
-        Parent = WatermarkOuter,
-    })
-    Library:AddToRegistry(WatermarkGlow, { ImageColor3 = "AccentColor" }, true)
+
 
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = "AccentColor";
@@ -7681,7 +7659,7 @@ end
             
             local function UpdateGlider()
                 local TargetX = TabButton.AbsolutePosition.X - Window.TabButtonContainer.AbsolutePosition.X
-                TweenService:Create(Window.TabGlider, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                TweenService:Create(Window.TabGlider, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
                     Position = UDim2.new(0, TargetX, 0, 0),
                     Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
                 }):Play()
