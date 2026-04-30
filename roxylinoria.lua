@@ -8389,10 +8389,10 @@ Library.PlayerList = {
     CurrentTarget = nil,
     Elements = {},
     FilterText = "",
+    PlayersData = {}
 }
 
 function Library.PlayerList:Build(Tab)
-    -- Make the tab full width by overriding Resize
     local oldResize = Tab.Resize
     function Tab:Resize(...)
         oldResize(self, ...)
@@ -8410,7 +8410,7 @@ function Library.PlayerList:Build(Tab)
     -- 1. Listbox Frame
     local ListboxHolder = Library:Create("Frame", {
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, -4, 0, 320),
+        Size = UDim2.new(1, -4, 0, 240),
         Parent = Left.Container
     })
     local ListboxOuter = Library:Create("Frame", {
@@ -8440,7 +8440,7 @@ function Library.PlayerList:Build(Tab)
         Parent = ListboxInner
     })
     Library:AddToRegistry(ScrollFrame, { ScrollBarImageColor3 = "AccentColor" })
-    Library:Create("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Parent = ScrollFrame })
+    local UIListLayout = Library:Create("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Parent = ScrollFrame })
     
     -- 2. TextBox Search
     local SearchHolder = Library:Create("Frame", {
@@ -8469,7 +8469,7 @@ function Library.PlayerList:Build(Tab)
         Font = Library.Font,
         TextSize = 13,
         Text = "",
-        PlaceholderText = "Type here...",
+        PlaceholderText = "Search",
         TextColor3 = Library.FontColor,
         PlaceholderColor3 = Color3.fromRGB(150, 150, 150),
         TextXAlignment = Enum.TextXAlignment.Center,
@@ -8495,11 +8495,11 @@ function Library.PlayerList:Build(Tab)
         return Lbl
     end
     
-    local UserLabel = AddCustomLabel("User: ??")
-    local DisplayLabel = AddCustomLabel("DisplayName: ??")
-    local IdLabel = AddCustomLabel("User Id: ??")
-    local PriorityLabel = AddCustomLabel("Priority")
+    local NameLabel = AddCustomLabel("Name: ??")
+    local DisplayLabel = AddCustomLabel("Display Name: ??")
+    local IdLabel = AddCustomLabel("User ID: ??")
     
+    -- 4. Dropdown
     local PriorityDropdown = Left:AddDropdown("PlayerList_Priority", {
         Values = {"Neutral", "Friendly", "Priority"},
         Default = 1,
@@ -8520,7 +8520,18 @@ function Library.PlayerList:Build(Tab)
                     if getgenv().Linoria.Priorities then getgenv().Linoria.Priorities[self.CurrentTarget.Name] = nil end
                     if getgenv().Linoria.Friendlies then getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = nil end
                 end
-                self:RefreshList()
+                
+                local pData = self.PlayersData[self.CurrentTarget.Name]
+                if pData then
+                    pData.StatusLbl.Text = val
+                    if val == "Priority" then
+                        pData.StatusLbl.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    elseif val == "Friendly" then
+                        pData.StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    else
+                        pData.StatusLbl.TextColor3 = Library.FontColor
+                    end
+                end
             end
         end
     })
@@ -8529,124 +8540,166 @@ function Library.PlayerList:Build(Tab)
         PriorityDropdown.Label.Visible = false
     end
     
-    self.Elements.UserLabel = UserLabel
+    self.Elements.NameLabel = NameLabel
     self.Elements.DisplayLabel = DisplayLabel
     self.Elements.IdLabel = IdLabel
     self.Elements.ScrollFrame = ScrollFrame
+    self.Elements.UIListLayout = UIListLayout
     self.Elements.SearchBox = SearchBox
     self.Elements.PriorityDropdown = PriorityDropdown
     
     SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
         self.FilterText = SearchBox.Text:lower()
-        self:RefreshList()
+        self:FilterList()
     end)
     
-    Players.PlayerAdded:Connect(function() self:RefreshList() end)
-    Players.PlayerRemoving:Connect(function() self:RefreshList() end)
+    local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
     
-    task.spawn(function()
-        while not Library.Unloaded do
-            task.wait(1)
-            self:RefreshList()
-        end
-    end)
+    Players.PlayerAdded:Connect(function(plr) self:AddPlayer(plr, LocalPlayer) end)
+    Players.PlayerRemoving:Connect(function(plr) self:RemovePlayer(plr) end)
     
-    self:RefreshList()
+    for _, plr in ipairs(Players:GetPlayers()) do
+        self:AddPlayer(plr, LocalPlayer)
+    end
 end
 
-function Library.PlayerList:RefreshList()
-    if not self.Elements.ScrollFrame then return end
+function Library.PlayerList:AddPlayer(plr, LocalPlayer)
+    if self.PlayersData[plr.Name] then return end
     
-    for _, child in ipairs(self.Elements.ScrollFrame:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
+    local btn = Library:Create("TextButton", {
+        BackgroundTransparency = 1,
+        BackgroundColor3 = Library.AccentColor,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 18),
+        Text = "",
+        Parent = self.Elements.ScrollFrame,
+        AutoButtonColor = false,
+        LayoutOrder = 0
+    })
+    
+    local nameLbl = Library:CreateLabel({
+        Text = plr.Name,
+        TextSize = 13,
+        Size = UDim2.new(0.6, -10, 1, 0),
+        Position = UDim2.new(0, 5, 0, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = btn
+    })
+    Library:AddToRegistry(nameLbl, { TextColor3 = "FontColor" })
+    
+    local status = "Neutral"
+    local statusColor = Library.FontColor
+    
+    if plr == LocalPlayer then
+        status = "LocalPlayer"
+        statusColor = Color3.fromRGB(30, 80, 200)
+    elseif getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
+        status = "Priority"
+        statusColor = Color3.fromRGB(255, 0, 0)
+    elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
+        status = "Friendly"
+        statusColor = Color3.fromRGB(0, 255, 0)
     end
     
+    local statusLbl = Library:CreateLabel({
+        Text = status,
+        TextColor3 = statusColor,
+        TextSize = 13,
+        Size = UDim2.new(0.4, -5, 1, 0),
+        Position = UDim2.new(0.6, 0, 0, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = btn
+    })
+    if status == "Neutral" then
+        Library:AddToRegistry(statusLbl, { TextColor3 = "FontColor" })
+    end
+    
+    btn.MouseButton1Click:Connect(function()
+        self.CurrentTarget = plr
+        self:UpdateSelection()
+    end)
+    
+    self.PlayersData[plr.Name] = {
+        Button = btn,
+        NameLbl = nameLbl,
+        StatusLbl = statusLbl,
+        Player = plr
+    }
+    
+    self:FilterList()
+end
+
+function Library.PlayerList:RemovePlayer(plr)
+    local pData = self.PlayersData[plr.Name]
+    if pData then
+        pData.Button:Destroy()
+        self.PlayersData[plr.Name] = nil
+    end
+    if self.CurrentTarget == plr then
+        self.CurrentTarget = nil
+        self:UpdateSelection()
+    end
+    self:FilterList()
+end
+
+function Library.PlayerList:FilterList()
     local yOffset = 0
-    local players = Players:GetPlayers()
-    table.sort(players, function(a, b) return a.Name:lower() < b.Name:lower() end)
+    local sortedPlayers = {}
+    for name, _ in pairs(self.PlayersData) do
+        table.insert(sortedPlayers, name)
+    end
+    table.sort(sortedPlayers, function(a, b) return a:lower() < b:lower() end)
     
-    for _, plr in ipairs(players) do
-        if self.FilterText ~= "" and not plr.Name:lower():find(self.FilterText) and not plr.DisplayName:lower():find(self.FilterText) then
-            continue
+    for _, name in ipairs(sortedPlayers) do
+        local pData = self.PlayersData[name]
+        local plr = pData.Player
+        
+        local match = true
+        if self.FilterText ~= "" then
+            if not plr.Name:lower():find(self.FilterText) and not plr.DisplayName:lower():find(self.FilterText) then
+                match = false
+            end
         end
         
-        local isSelected = (self.CurrentTarget == plr)
-        local btn = Library:Create("TextButton", {
-            BackgroundTransparency = isSelected and 0.8 or 1,
-            BackgroundColor3 = Library.AccentColor,
-            BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 0, 18),
-            Text = "",
-            Parent = self.Elements.ScrollFrame,
-            AutoButtonColor = false
-        })
-        if isSelected then
-            Library:AddToRegistry(btn, { BackgroundColor3 = "AccentColor" })
+        if match then
+            pData.Button.Visible = true
+            pData.Button.LayoutOrder = yOffset
+            yOffset = yOffset + 18
+        else
+            pData.Button.Visible = false
         end
-        
-        local nameLbl = Library:CreateLabel({
-            Text = plr.Name,
-            TextSize = 13,
-            Size = UDim2.new(0.6, -10, 1, 0),
-            Position = UDim2.new(0, 5, 0, 0),
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = btn
-        })
-        Library:AddToRegistry(nameLbl, { TextColor3 = "FontColor" })
-        
-        local status = "Neutral"
-        local statusColor = Color3.fromRGB(255, 255, 255)
-        
-        if plr == LocalPlayer then
-            status = "LocalPlayer"
-            statusColor = Color3.fromRGB(30, 80, 200)
-        elseif getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
-            status = "Priority"
-            statusColor = Color3.fromRGB(255, 0, 0)
-        elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
-            status = "Friendly"
-            statusColor = Color3.fromRGB(0, 255, 0)
-        end
-        
-        Library:CreateLabel({
-            Text = status,
-            TextColor3 = statusColor,
-            TextSize = 13,
-            Size = UDim2.new(0.4, -5, 1, 0),
-            Position = UDim2.new(0.6, 0, 0, 0),
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = btn
-        })
-        
-        btn.MouseButton1Click:Connect(function()
-            self.CurrentTarget = plr
-            self:UpdateSelection()
-            self:RefreshList()
-        end)
-        
-        yOffset = yOffset + 18
     end
     
-    self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+    if self.Elements.ScrollFrame then
+        self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+    end
 end
 
 function Library.PlayerList:UpdateSelection()
     local plr = self.CurrentTarget
+    
+    for name, pData in pairs(self.PlayersData) do
+        if pData.Player == plr then
+            pData.Button.BackgroundTransparency = 0.8
+            Library:AddToRegistry(pData.Button, { BackgroundColor3 = "AccentColor" })
+        else
+            pData.Button.BackgroundTransparency = 1
+        end
+    end
+
     if plr then
-        self.Elements.UserLabel.Text = "User: " .. plr.Name
-        self.Elements.DisplayLabel.Text = "DisplayName: " .. plr.DisplayName
-        self.Elements.IdLabel.Text = "User Id: " .. tostring(plr.UserId)
+        self.Elements.NameLabel.Text = "Name: " .. plr.Name
+        self.Elements.DisplayLabel.Text = "Display Name: " .. plr.DisplayName
+        self.Elements.IdLabel.Text = "User ID: " .. tostring(plr.UserId)
         
         local status = "Neutral"
         if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then status = "Priority"
         elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then status = "Friendly" end
         self.Elements.PriorityDropdown:SetValue(status)
     else
-        self.Elements.UserLabel.Text = "User: ??"
-        self.Elements.DisplayLabel.Text = "DisplayName: ??"
-        self.Elements.IdLabel.Text = "User Id: ??"
+        self.Elements.NameLabel.Text = "Name: ??"
+        self.Elements.DisplayLabel.Text = "Display Name: ??"
+        self.Elements.IdLabel.Text = "User ID: ??"
         self.Elements.PriorityDropdown:SetValue("Neutral")
     end
 end
