@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github
+-- wwww
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8434,7 +8434,6 @@ function Library.PlayerList:Build(Tab)
         BorderSizePixel = 0,
         Size = UDim2.new(1, -2, 1, -2),
         Position = UDim2.new(0, 1, 0, 1),
-        CanvasSize = UDim2.new(0, 0, 0, 0),
         ScrollBarThickness = 2,
         ScrollBarImageColor3 = Library.AccentColor,
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
