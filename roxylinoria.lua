@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github nigger
+-- gg 3/25/26 v223 -- hurry the fuck up w
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8389,8 +8389,12 @@ Library.PlayerList = {
     CurrentTarget = nil,
     Elements = {},
     FilterText = "",
-    PlayersData = {}
+    PlayersData = {},
+    Priorities = {},
+    Friendlies = {}
 }
+Library.Priorities = Library.PlayerList.Priorities
+Library.Friendlies = Library.PlayerList.Friendlies
 
 function Library.PlayerList:Build(Tab)
     local self = Library.PlayerList
@@ -8409,28 +8413,12 @@ function Library.PlayerList:Build(Tab)
 
     local Left = Tab:AddLeftGroupbox("Playerlist")
     
-    -- 1. Search Box
-    local SearchInput = Left:AddInput("PlayerList_Search", {
-        Default = "",
-        Text = "Search",
-        Placeholder = "Search players...",
-        Callback = function(val)
-            self.FilterText = val:lower()
-            self:FilterList()
-        end
-    })
-    
-    -- 2. Labels
-    local NameLabel = Left:AddLabel("Name: ??")
-    local DisplayLabel = Left:AddLabel("Display Name: ??")
-    local IdLabel = Left:AddLabel("User ID: ??")
-    
-    -- 3. Premium Scrolling List (uilib style)
+    -- 1. Premium Scrolling List (uilib style) - AT THE TOP
     local ListboxHolder = Library:Create("Frame", {
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 240),
         Parent = Left.Container,
-        LayoutOrder = 10
+        LayoutOrder = -1 -- Force to top
     })
     
     local ListboxOuter = Library:Create("Frame", {
@@ -8457,7 +8445,7 @@ function Library.PlayerList:Build(Tab)
     })
     Library:AddToRegistry(ListboxBackground, { BackgroundColor3 = "AccentColor" })
     
-    local BG_Gradient = Library:Create("UIGradient", {
+    Library:Create("UIGradient", {
         Rotation = 90,
         Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
@@ -8474,7 +8462,7 @@ function Library.PlayerList:Build(Tab)
         Parent = ListboxBackground
     })
     
-    local Contrast_Gradient = Library:Create("UIGradient", {
+    Library:Create("UIGradient", {
         Rotation = 90,
         Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(41, 41, 55)),
@@ -8509,6 +8497,22 @@ function Library.PlayerList:Build(Tab)
         Parent = ScrollFrame 
     })
     
+    -- 2. Search Box
+    local SearchInput = Left:AddInput("PlayerList_Search", {
+        Default = "",
+        Text = "Search",
+        Placeholder = "Search players...",
+        Callback = function(val)
+            self.FilterText = val:lower()
+            self:FilterList()
+        end
+    })
+    
+    -- 3. Labels
+    local NameLabel = Left:AddLabel("Name: ??")
+    local DisplayLabel = Left:AddLabel("Display Name: ??")
+    local IdLabel = Left:AddLabel("User ID: ??")
+    
     -- 4. Priority Dropdown
     local PriorityDropdown = Left:AddDropdown("PlayerList_Priority", {
         Values = {"Neutral", "Friendly", "Priority"},
@@ -8518,18 +8522,15 @@ function Library.PlayerList:Build(Tab)
         Tooltip = "Set the priority for this player",
         Callback = function(val)
             if self.CurrentTarget then
-                getgenv().Linoria.Priorities = getgenv().Linoria.Priorities or {}
-                getgenv().Linoria.Friendlies = getgenv().Linoria.Friendlies or {}
-                
                 if val == "Friendly" then
-                    getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = true
-                    getgenv().Linoria.Priorities[self.CurrentTarget.Name] = nil
+                    Library.Friendlies[self.CurrentTarget.Name] = true
+                    Library.Priorities[self.CurrentTarget.Name] = nil
                 elseif val == "Priority" then
-                    getgenv().Linoria.Priorities[self.CurrentTarget.Name] = true
-                    getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = nil
+                    Library.Priorities[self.CurrentTarget.Name] = true
+                    Library.Friendlies[self.CurrentTarget.Name] = nil
                 else
-                    getgenv().Linoria.Priorities[self.CurrentTarget.Name] = nil
-                    getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = nil
+                    Library.Priorities[self.CurrentTarget.Name] = nil
+                    Library.Friendlies[self.CurrentTarget.Name] = nil
                 end
                 
                 local pData = self.PlayersData[self.CurrentTarget.Name]
@@ -8544,12 +8545,14 @@ function Library.PlayerList:Build(Tab)
     })
     
     -- Sync elements
-    self.Elements.NameLabel = NameLabel
-    self.Elements.DisplayLabel = DisplayLabel
-    self.Elements.IdLabel = IdLabel
-    self.Elements.ScrollFrame = ScrollFrame
-    self.Elements.UIListLayout = UIListLayout
-    self.Elements.PriorityDropdown = PriorityDropdown
+    self.Elements = {
+        NameLabel = NameLabel,
+        DisplayLabel = DisplayLabel,
+        IdLabel = IdLabel,
+        ScrollFrame = ScrollFrame,
+        UIListLayout = UIListLayout,
+        PriorityDropdown = PriorityDropdown
+    }
     
     -- Robust Initial Load
     local function initPlayers()
@@ -8619,7 +8622,7 @@ function Library.PlayerList:AddPlayer(plr)
         TextSize = 12,
     })
 
-    local Separator = Library:Create("Frame", {
+    Library:Create("Frame", {
         Parent = priority_text,
         Name = "Separator",
         Position = UDim2.new(0, -10, 0, 2),
@@ -8660,6 +8663,18 @@ function Library.PlayerList:AddPlayer(plr)
     
     TextButton.MouseButton1Click:Connect(select)
     
+    TextButton.MouseEnter:Connect(function()
+        if self.CurrentTarget ~= plr then
+            player_name.TextColor3 = Library.AccentColor:Lerp(Color3.new(1, 1, 1), 0.5)
+        end
+    end)
+    
+    TextButton.MouseLeave:Connect(function()
+        if self.CurrentTarget ~= plr then
+            player_name.TextColor3 = Library.FontColor
+        end
+    end)
+    
     self.PlayersData[plr.Name] = {
         Button = TextButton,
         Line = line,
@@ -8670,10 +8685,10 @@ function Library.PlayerList:AddPlayer(plr)
     
     -- Sync initial priorities if they already exist
     if not isLocal then
-        if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
+        if Library.Priorities and Library.Priorities[plr.Name] then
             priority_text.Text = "Priority"
             priority_text.TextColor3 = Color3.fromRGB(255, 255, 0)
-        elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
+        elseif Library.Friendlies and Library.Friendlies[plr.Name] then
             priority_text.Text = "Friendly"
             priority_text.TextColor3 = Color3.fromRGB(0, 255, 255)
         end
@@ -8751,8 +8766,8 @@ function Library.PlayerList:UpdateSelection()
         end
         
         local status = "Neutral"
-        if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then status = "Priority"
-        elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then status = "Friendly" end
+        if Library.Priorities and Library.Priorities[plr.Name] then status = "Priority"
+        elseif Library.Friendlies and Library.Friendlies[plr.Name] then status = "Friendly" end
         
         if self.Elements.PriorityDropdown and self.Elements.PriorityDropdown.SetValue then
             self.Elements.PriorityDropdown:SetValue(status)
