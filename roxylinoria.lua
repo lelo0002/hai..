@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github
+-- gg 3/25/26 v223 -- fuck you
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8423,16 +8423,16 @@ function Library.PlayerList:Build(Tab)
     })
     
     local ListboxOuter = Library:Create("Frame", {
-        BackgroundColor3 = Color3.fromRGB(10, 10, 10),
-        BorderColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
         Size = UDim2.fromScale(1, 1),
         ZIndex = 5,
         Parent = ListboxHolder
     })
     
     local ListboxInline = Library:Create("Frame", {
-        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-        BorderColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
         Position = UDim2.new(0, 1, 0, 1),
         Size = UDim2.new(1, -2, 1, -2),
         ZIndex = 6,
@@ -8440,40 +8440,20 @@ function Library.PlayerList:Build(Tab)
     })
     
     local ListboxBackground = Library:Create("Frame", {
-        BackgroundColor3 = Library.AccentColor,
-        BorderColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
         Position = UDim2.new(0, 1, 0, 1),
         Size = UDim2.new(1, -2, 1, -2),
         ZIndex = 7,
         Parent = ListboxInline
     })
-    Library:AddToRegistry(ListboxBackground, { BackgroundColor3 = "AccentColor" })
-    
-    Library:Create("UIGradient", {
-        Rotation = 90,
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 167, 167))
-        }),
-        Parent = ListboxBackground
-    })
     
     local ListboxContrast = Library:Create("Frame", {
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BorderColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 1,
         BorderSizePixel = 0,
         Size = UDim2.fromScale(1, 1),
         ZIndex = 8,
         Parent = ListboxBackground
-    })
-    
-    Library:Create("UIGradient", {
-        Rotation = 90,
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(41, 41, 55)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 47))
-        }),
-        Parent = ListboxContrast
     })
     
     local ScrollFrame = Library:Create("ScrollingFrame", {
@@ -8542,8 +8522,8 @@ function Library.PlayerList:Build(Tab)
                 local pData = self.PlayersData[self.CurrentTarget.Name]
                 if pData then
                     pData.StatusLbl.Text = val
-                    if val == "Priority" then pData.StatusLbl.TextColor3 = Color3.fromRGB(255, 255, 0)
-                    elseif val == "Friendly" then pData.StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 255)
+                    if val == "Priority" then pData.StatusLbl.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    elseif val == "Friendly" then pData.StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 0)
                     else pData.StatusLbl.TextColor3 = Library.FontColor end
                 end
             end
@@ -8580,20 +8560,20 @@ function Library.PlayerList:AddPlayer(plr)
     local TextButton = Library:Create("TextButton", {
         Parent = self.Elements.ScrollFrame,
         Name = plr.Name,
-        Font = Library.Font,
+        Font = Enum.Font.BuilderSansMedium,
         TextColor3 = Library.FontColor,
         Text = "",
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 16), -- Fixed height to ensure visibility
+        Size = UDim2.new(1, 0, 0, 18), -- Slightly increased height
         BorderSizePixel = 0,
-        TextSize = 12,
+        TextSize = 13,
         ZIndex = 10,
         LayoutOrder = 0
     })
 
     local player_name = Library:Create("TextLabel", {
         Parent = TextButton,
-        Font = Library.Font,
+        Font = Enum.Font.BuilderSansMedium,
         TextColor3 = Library.FontColor,
         Text = plr.Name,
         BorderSizePixel = 0,
@@ -8601,7 +8581,7 @@ function Library.PlayerList:AddPlayer(plr)
         Size = UDim2.new(0.6, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        TextSize = 12,
+        TextSize = 13,
         ZIndex = 11,
         LayoutOrder = -100, 
     })
@@ -8613,7 +8593,7 @@ function Library.PlayerList:AddPlayer(plr)
     local pcolor = Library.FontColor
     if isLocal then
         pstatus = "LocalPlayer"
-        pcolor = Color3.fromRGB(0, 0, 255)
+        pcolor = Color3.fromRGB(0, 100, 255)
     end
     
     local priority_text = Library:Create("TextLabel", {
@@ -8697,10 +8677,10 @@ function Library.PlayerList:AddPlayer(plr)
     if not isLocal then
         if Library.Priorities and Library.Priorities[plr.Name] then
             priority_text.Text = "Priority"
-            priority_text.TextColor3 = Color3.fromRGB(255, 255, 0)
+            priority_text.TextColor3 = Color3.fromRGB(255, 0, 0)
         elseif Library.Friendlies and Library.Friendlies[plr.Name] then
             priority_text.Text = "Friendly"
-            priority_text.TextColor3 = Color3.fromRGB(0, 255, 255)
+            priority_text.TextColor3 = Color3.fromRGB(0, 255, 0)
         end
     end
 
@@ -8724,10 +8704,17 @@ end
 function Library.PlayerList:FilterList()
     local yOffset = 0
     local sortedPlayers = {}
+    local lp = game:GetService("Players").LocalPlayer
+    
     for name, _ in pairs(self.PlayersData) do
         table.insert(sortedPlayers, name)
     end
-    table.sort(sortedPlayers, function(a, b) return a:lower() < b:lower() end)
+    
+    table.sort(sortedPlayers, function(a, b)
+        if lp and a == lp.Name then return true end
+        if lp and b == lp.Name then return false end
+        return a:lower() < b:lower()
+    end)
     
     for _, name in ipairs(sortedPlayers) do
         local pData = self.PlayersData[name]
