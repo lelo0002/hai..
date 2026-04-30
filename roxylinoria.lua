@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- fuck you
+-- just snorted a football feeling good
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -3757,6 +3757,8 @@ do
             ZIndex = 5;
             Parent = Container;
         })
+
+        Textbox.Label = InputLabel
 
         Groupbox:AddBlank(1)
 
@@ -8494,6 +8496,10 @@ function Library.PlayerList:Build(Tab)
         end
     })
     
+    if SearchInput.Label then
+        SearchInput.Label.TextXAlignment = Enum.TextXAlignment.Center
+    end
+    
     -- 3. Labels
     local NameLabel = Left:AddLabel("Name: ??")
     local DisplayLabel = Left:AddLabel("Display Name: ??")
@@ -8564,11 +8570,27 @@ function Library.PlayerList:AddPlayer(plr)
         TextColor3 = Library.FontColor,
         Text = "",
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 18), -- Slightly increased height
+        Size = UDim2.new(1, 0, 0, 20), -- Increased height for avatar
         BorderSizePixel = 0,
         TextSize = 13,
         ZIndex = 10,
         LayoutOrder = 0
+    })
+
+    local avatarimg = Library:Create("ImageLabel", {
+        Parent = TextButton,
+        Name = "Avatar",
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Size = UDim2.new(0, 16, 0, 16),
+        Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=48&h=48",
+        ZIndex = 11,
+        LayoutOrder = -101,
+    })
+
+    Library:Create("UICorner", {
+        CornerRadius = UDim.new(1, 0),
+        Parent = avatarimg
     })
 
     local player_name = Library:Create("TextLabel", {
@@ -8578,7 +8600,7 @@ function Library.PlayerList:AddPlayer(plr)
         Text = plr.Name,
         BorderSizePixel = 0,
         BackgroundTransparency = 1,
-        Size = UDim2.new(0.6, 0, 1, 0),
+        Size = UDim2.new(0.6, -20, 1, 0), -- Adjusted for avatar
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
         TextSize = 13,
