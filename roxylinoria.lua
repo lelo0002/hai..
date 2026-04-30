@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up w
+-- gg 3/25/26 v223 -- hurry the fuck up github
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8578,9 +8578,8 @@ function Library.PlayerList:AddPlayer(plr)
         TextColor3 = Library.FontColor,
         Text = "",
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 16), -- Fixed height to ensure visibility
         BorderSizePixel = 0,
-        AutomaticSize = Enum.AutomaticSize.Y,
         TextSize = 12,
         LayoutOrder = 0
     })
@@ -8592,9 +8591,9 @@ function Library.PlayerList:AddPlayer(plr)
         Text = plr.Name,
         BorderSizePixel = 0,
         BackgroundTransparency = 1,
+        Size = UDim2.new(0.6, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        AutomaticSize = Enum.AutomaticSize.Y,
         TextSize = 12,
         LayoutOrder = -100, 
     })
@@ -8616,9 +8615,9 @@ function Library.PlayerList:AddPlayer(plr)
         TextColor3 = pcolor,
         Text = pstatus,
         BackgroundTransparency = 1,
+        Size = UDim2.new(0.4, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         BorderSizePixel = 0,
-        AutomaticSize = Enum.AutomaticSize.Y,
         TextSize = 12,
     })
 
