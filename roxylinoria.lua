@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github1
+-- w
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8440,7 +8440,20 @@ function Library.PlayerList:Build(Tab)
         Parent = ListboxInner
     })
     Library:AddToRegistry(ScrollFrame, { ScrollBarImageColor3 = "AccentColor" })
-    local UIListLayout = Library:Create("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Parent = ScrollFrame })
+    
+    Library:Create("UIPadding", {
+        Parent = ScrollFrame,
+        PaddingTop = UDim.new(0, 4),
+        PaddingBottom = UDim.new(0, 4),
+        PaddingRight = UDim.new(0, 4),
+        PaddingLeft = UDim.new(0, 4)
+    })
+    
+    local UIListLayout = Library:Create("UIListLayout", { 
+        Padding = UDim.new(0, 0),
+        SortOrder = Enum.SortOrder.LayoutOrder, 
+        Parent = ScrollFrame 
+    })
     
     -- 2. TextBox Search
     local SearchHolder = Library:Create("Frame", {
@@ -8528,6 +8541,8 @@ function Library.PlayerList:Build(Tab)
                         pData.StatusLbl.TextColor3 = Color3.fromRGB(255, 0, 0)
                     elseif val == "Friendly" then
                         pData.StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    elseif val == "LocalPlayer" then
+                        pData.StatusLbl.TextColor3 = Color3.fromRGB(30, 80, 200)
                     else
                         pData.StatusLbl.TextColor3 = Library.FontColor
                     end
@@ -8568,21 +8583,39 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
     
     local btn = Library:Create("TextButton", {
         BackgroundTransparency = 1,
-        BackgroundColor3 = Library.AccentColor,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 18),
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
         Text = "",
         Parent = self.Elements.ScrollFrame,
         AutoButtonColor = false,
         LayoutOrder = 0
     })
     
+    Library:Create("UIListLayout", {
+        Parent = btn,
+        FillDirection = Enum.FillDirection.Horizontal,
+        HorizontalFlex = Enum.UIFlexAlignment.Fill,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        VerticalFlex = Enum.UIFlexAlignment.Fill
+    })
+    
+    Library:Create("UIPadding", {
+        Parent = btn,
+        PaddingLeft = UDim.new(0, 2),
+        PaddingRight = UDim.new(0, 2),
+        PaddingTop = UDim.new(0, 2),
+        PaddingBottom = UDim.new(0, 2)
+    })
+    
     local nameLbl = Library:CreateLabel({
         Text = plr.Name,
         TextSize = 13,
-        Size = UDim2.new(0.6, -10, 1, 0),
-        Position = UDim2.new(0, 5, 0, 0),
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
         TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        LayoutOrder = -100,
         Parent = btn
     })
     Library:AddToRegistry(nameLbl, { TextColor3 = "FontColor" })
@@ -8605,14 +8638,23 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
         Text = status,
         TextColor3 = statusColor,
         TextSize = 13,
-        Size = UDim2.new(0.4, -5, 1, 0),
-        Position = UDim2.new(0.6, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = btn
     })
     if status == "Neutral" then
         Library:AddToRegistry(statusLbl, { TextColor3 = "FontColor" })
     end
+    
+    local line = Library:Create("Frame", {
+        Parent = self.Elements.ScrollFrame,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 1),
+        BackgroundColor3 = Library.OutlineColor,
+        LayoutOrder = 1
+    })
+    Library:AddToRegistry(line, { BackgroundColor3 = "OutlineColor" })
     
     btn.MouseButton1Click:Connect(function()
         self.CurrentTarget = plr
@@ -8621,6 +8663,7 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
     
     self.PlayersData[plr.Name] = {
         Button = btn,
+        Line = line,
         NameLbl = nameLbl,
         StatusLbl = statusLbl,
         Player = plr
@@ -8633,6 +8676,7 @@ function Library.PlayerList:RemovePlayer(plr)
     local pData = self.PlayersData[plr.Name]
     if pData then
         pData.Button:Destroy()
+        pData.Line:Destroy()
         self.PlayersData[plr.Name] = nil
     end
     if self.CurrentTarget == plr then
@@ -8663,15 +8707,18 @@ function Library.PlayerList:FilterList()
         
         if match then
             pData.Button.Visible = true
+            pData.Line.Visible = true
             pData.Button.LayoutOrder = yOffset
-            yOffset = yOffset + 18
+            pData.Line.LayoutOrder = yOffset + 1
+            yOffset = yOffset + 2
         else
             pData.Button.Visible = false
+            pData.Line.Visible = false
         end
     end
     
     if self.Elements.ScrollFrame then
-        self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+        self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, self.Elements.UIListLayout.AbsoluteContentSize.Y)
     end
 end
 
@@ -8680,10 +8727,9 @@ function Library.PlayerList:UpdateSelection()
     
     for name, pData in pairs(self.PlayersData) do
         if pData.Player == plr then
-            pData.Button.BackgroundTransparency = 0.8
-            Library:AddToRegistry(pData.Button, { BackgroundColor3 = "AccentColor" })
+            pData.NameLbl.TextColor3 = Library.AccentColor
         else
-            pData.Button.BackgroundTransparency = 1
+            pData.NameLbl.TextColor3 = Library.FontColor
         end
     end
 
