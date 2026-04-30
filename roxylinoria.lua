@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github23232323
+-- fnfifief90uIF(W)EA
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8387,131 +8387,255 @@ end))
 --// Player List Addon \\--
 Library.PlayerList = {
     CurrentTarget = nil,
-    Spectating = false,
-    Elements = {}
+    Elements = {},
+    FilterText = "",
 }
 
-function Library.PlayerList:UpdateInfo()
-    if not self.Elements.Info then return end
-
-    local targetName = self.CurrentTarget
-    if not targetName or targetName == "" then
-        self.Elements.Info:SetText("No player selected.")
-        return
-    end
-
-    local player = Players:FindFirstChild(targetName)
-    if not player then
-        self.Elements.Info:SetText("Player left the game.")
-        return
-    end
-
-    local teamName = player.Team and player.Team.Name or "None"
-    local accountAge = player.AccountAge
-    local isFriend = LocalPlayer:IsFriendsWith(player.UserId)
-    local health = "N/A"
-    local maxHealth = "N/A"
+function Library.PlayerList:Build(Tab)
+    local Left = Tab:AddLeftGroupbox("Playerlist")
     
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        local hum = player.Character.Humanoid
-        health = tostring(math.floor(hum.Health))
-        maxHealth = tostring(math.floor(hum.MaxHealth))
+    -- 1. Listbox Frame
+    local ListboxHolder = Library:Create("Frame", {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, -4, 0, 230),
+        Parent = Left.Container
+    })
+    local ListboxOuter = Library:Create("Frame", {
+        BackgroundColor3 = Library.BackgroundColor,
+        BorderColor3 = Library.OutlineColor,
+        Size = UDim2.fromScale(1, 1),
+        Parent = ListboxHolder
+    })
+    Library:AddToRegistry(ListboxOuter, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
+    local ListboxInner = Library:Create("Frame", {
+        BackgroundColor3 = Library.MainColor,
+        BorderColor3 = Library.OutlineColor,
+        BorderMode = Enum.BorderMode.Inset,
+        Size = UDim2.new(1, 0, 1, 0),
+        Parent = ListboxOuter
+    })
+    Library:AddToRegistry(ListboxInner, { BackgroundColor3 = "MainColor", BorderColor3 = "OutlineColor" })
+    
+    local ScrollFrame = Library:Create("ScrollingFrame", {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, -2, 1, -2),
+        Position = UDim2.new(0, 1, 0, 1),
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        ScrollBarThickness = 2,
+        ScrollBarImageColor3 = Library.AccentColor,
+        Parent = ListboxInner
+    })
+    Library:AddToRegistry(ScrollFrame, { ScrollBarImageColor3 = "AccentColor" })
+    Library:Create("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Parent = ScrollFrame })
+    
+    -- 2. TextBox Search
+    local SearchHolder = Library:Create("Frame", {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, -4, 0, 20),
+        Parent = Left.Container
+    })
+    local SearchOuter = Library:Create("Frame", {
+        BackgroundColor3 = Library.BackgroundColor,
+        BorderColor3 = Library.OutlineColor,
+        Size = UDim2.fromScale(1, 1),
+        Parent = SearchHolder
+    })
+    Library:AddToRegistry(SearchOuter, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
+    local SearchInner = Library:Create("Frame", {
+        BackgroundColor3 = Library.MainColor,
+        BorderColor3 = Library.OutlineColor,
+        BorderMode = Enum.BorderMode.Inset,
+        Size = UDim2.new(1, 0, 1, 0),
+        Parent = SearchOuter
+    })
+    Library:AddToRegistry(SearchInner, { BackgroundColor3 = "MainColor", BorderColor3 = "OutlineColor" })
+    local SearchBox = Library:Create("TextBox", {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 1, 0),
+        Font = Library.Font,
+        TextSize = 13,
+        Text = "",
+        PlaceholderText = "Type here...",
+        TextColor3 = Library.FontColor,
+        PlaceholderColor3 = Color3.fromRGB(150, 150, 150),
+        TextXAlignment = Enum.TextXAlignment.Center,
+        Parent = SearchInner
+    })
+    Library:AddToRegistry(SearchBox, { TextColor3 = "FontColor" })
+    
+    -- 3. Labels
+    local function AddCustomLabel(text)
+        local Holder = Library:Create("Frame", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, -4, 0, 16),
+            Parent = Left.Container
+        })
+        local Lbl = Library:CreateLabel({
+            Text = text,
+            TextSize = 13,
+            Size = UDim2.fromScale(1, 1),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = Holder
+        })
+        Library:AddToRegistry(Lbl, { TextColor3 = "FontColor" })
+        return Lbl
     end
-
-    local infoText = string.format(
-        "Username: %s\nDisplay Name: %s\nUser ID: %s\n\nTeam: %s\nAccount Age: %s Days\nFriends: %s\nHealth: %s / %s",
-        player.Name,
-        player.DisplayName,
-        tostring(player.UserId),
-        teamName,
-        tostring(accountAge),
-        tostring(isFriend),
-        health,
-        maxHealth
-    )
-
-    self.Elements.Info:SetText(infoText)
-end
-
-function Library.PlayerList:Action(act)
-    local targetName = self.CurrentTarget
-    local player = targetName and Players:FindFirstChild(targetName)
-    if not player then
-        if Library.Notify then Library:Notify("Invalid or missing player!") end
-        return
-    end
-
-    if act == "Teleport" then
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-            if Library.Notify then Library:Notify("Teleported to " .. player.Name) end
-        else
-            if Library.Notify then Library:Notify("Cannot teleport to " .. player.Name) end
-        end
-    elseif act == "Spectate" then
-        local camera = workspace.CurrentCamera
-        if self.Spectating and self.Spectating == player then
-            -- Unspectate
-            camera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") or LocalPlayer.Character
-            self.Spectating = nil
-            if Library.Notify then Library:Notify("Stopped spectating.") end
-        else
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                camera.CameraSubject = player.Character.Humanoid
-                self.Spectating = player
-                if Library.Notify then Library:Notify("Spectating " .. player.Name) end
-            else
-                if Library.Notify then Library:Notify("Cannot spectate " .. player.Name) end
+    
+    local UserLabel = AddCustomLabel("Name: ??")
+    local DisplayLabel = AddCustomLabel("Display Name: ??")
+    local IdLabel = AddCustomLabel("User Id: ??")
+    local PriorityLabel = AddCustomLabel("Priority")
+    
+    local PriorityDropdown = Left:AddDropdown("PlayerList_Priority", {
+        Values = {"Friendly", "Neutral", "Enemy"},
+        Default = 2,
+        Multi = false,
+        Text = "", 
+        Tooltip = "Set the priority for this player",
+        Callback = function(val)
+            if self.CurrentTarget then
+                if val == "Friendly" then
+                    getgenv().Linoria.Friendlies = getgenv().Linoria.Friendlies or {}
+                    getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = true
+                    if getgenv().Linoria.Priorities then getgenv().Linoria.Priorities[self.CurrentTarget.Name] = nil end
+                elseif val == "Enemy" then
+                    getgenv().Linoria.Priorities = getgenv().Linoria.Priorities or {}
+                    getgenv().Linoria.Priorities[self.CurrentTarget.Name] = true
+                    if getgenv().Linoria.Friendlies then getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = nil end
+                else
+                    if getgenv().Linoria.Priorities then getgenv().Linoria.Priorities[self.CurrentTarget.Name] = nil end
+                    if getgenv().Linoria.Friendlies then getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = nil end
+                end
+                self:RefreshList()
             end
         end
-    elseif act == "CopyUser" then
-        if setclipboard then
-            setclipboard(player.Name)
-            if Library.Notify then Library:Notify("Copied Username!") end
-        end
-    elseif act == "CopyID" then
-        if setclipboard then
-            setclipboard(tostring(player.UserId))
-            if Library.Notify then Library:Notify("Copied User ID!") end
-        end
-    end
-end
-
-function Library.PlayerList:Build(Tab)
-    local Left = Tab:AddLeftGroupbox("Player Selection")
-    local Right = Tab:AddRightGroupbox("Player Information")
-
-    Left:AddDropdown("PlayerList_Target", {
-        SpecialType = "Player",
-        Text = "Target Player",
-        Tooltip = "Select a player from the server",
-        Callback = function(v)
-            self.CurrentTarget = v
-            self:UpdateInfo()
-        end
     })
-
-    Left:AddButton("Refresh Stats", function()
-        self:UpdateInfo()
+    -- Hide the dropdown label entirely so it aligns flawlessly with "Priority" directly above it.
+    if PriorityDropdown.Label then
+        PriorityDropdown.Label.Visible = false
+    end
+    
+    self.Elements.UserLabel = UserLabel
+    self.Elements.DisplayLabel = DisplayLabel
+    self.Elements.IdLabel = IdLabel
+    self.Elements.ScrollFrame = ScrollFrame
+    self.Elements.SearchBox = SearchBox
+    self.Elements.PriorityDropdown = PriorityDropdown
+    
+    SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        self.FilterText = SearchBox.Text:lower()
+        self:RefreshList()
     end)
     
-    self.Elements.Info = Right:AddLabel("No player selected.")
-    Right:AddDivider()
+    Players.PlayerAdded:Connect(function() self:RefreshList() end)
+    Players.PlayerRemoving:Connect(function() self:RefreshList() end)
     
-    Right:AddButton("Teleport", function() self:Action("Teleport") end)
-    Right:AddButton("Spectate", function() self:Action("Spectate") end)
-    
-    local actions = Right:AddButton("Copy Username", function() self:Action("CopyUser") end)
-    actions:AddButton("Copy User ID", function() self:Action("CopyID") end)
-
     task.spawn(function()
         while not Library.Unloaded do
             task.wait(1)
-            if self.CurrentTarget then
-                self:UpdateInfo()
-            end
+            self:RefreshList()
         end
     end)
+    
+    self:RefreshList()
+end
+
+function Library.PlayerList:RefreshList()
+    if not self.Elements.ScrollFrame then return end
+    
+    for _, child in ipairs(self.Elements.ScrollFrame:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    local yOffset = 0
+    local players = Players:GetPlayers()
+    table.sort(players, function(a, b) return a.Name:lower() < b.Name:lower() end)
+    
+    for _, plr in ipairs(players) do
+        if self.FilterText ~= "" and not plr.Name:lower():find(self.FilterText) and not plr.DisplayName:lower():find(self.FilterText) then
+            continue
+        end
+        
+        local isSelected = (self.CurrentTarget == plr)
+        local btn = Library:Create("TextButton", {
+            BackgroundTransparency = isSelected and 0.8 or 1,
+            BackgroundColor3 = Library.AccentColor,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 18),
+            Text = "",
+            Parent = self.Elements.ScrollFrame,
+            AutoButtonColor = false
+        })
+        if isSelected then
+            Library:AddToRegistry(btn, { BackgroundColor3 = "AccentColor" })
+        end
+        
+        local nameLbl = Library:CreateLabel({
+            Text = plr.Name,
+            TextSize = 13,
+            Size = UDim2.new(0.6, -10, 1, 0),
+            Position = UDim2.new(0, 5, 0, 0),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = btn
+        })
+        Library:AddToRegistry(nameLbl, { TextColor3 = "FontColor" })
+        
+        local status = "Neutral"
+        local statusColor = Color3.fromRGB(180, 180, 180)
+        
+        if plr == LocalPlayer then
+            status = "LocalPlayer"
+            statusColor = Color3.fromRGB(0, 0, 255)
+        elseif getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
+            status = "Enemy"
+            statusColor = Color3.fromRGB(255, 0, 0)
+        elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
+            status = "Friendly"
+            statusColor = Color3.fromRGB(0, 255, 0)
+        end
+        
+        Library:CreateLabel({
+            Text = status,
+            TextColor3 = statusColor,
+            TextSize = 13,
+            Size = UDim2.new(0.4, -5, 1, 0),
+            Position = UDim2.new(0.6, 0, 0, 0),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = btn
+        })
+        
+        btn.MouseButton1Click:Connect(function()
+            self.CurrentTarget = plr
+            self:UpdateSelection()
+            self:RefreshList()
+        end)
+        
+        yOffset = yOffset + 18
+    end
+    
+    self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+function Library.PlayerList:UpdateSelection()
+    local plr = self.CurrentTarget
+    if plr then
+        self.Elements.UserLabel.Text = "Name: " .. plr.Name
+        self.Elements.DisplayLabel.Text = "Display Name: " .. plr.DisplayName
+        self.Elements.IdLabel.Text = "User Id: " .. tostring(plr.UserId)
+        
+        local status = "Neutral"
+        if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then status = "Enemy"
+        elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then status = "Friendly" end
+        self.Elements.PriorityDropdown:SetValue(status)
+    else
+        self.Elements.UserLabel.Text = "Name: ??"
+        self.Elements.DisplayLabel.Text = "Display Name: ??"
+        self.Elements.IdLabel.Text = "User Id: ??"
+        self.Elements.PriorityDropdown:SetValue("Neutral")
+    end
 end
 
 ----
