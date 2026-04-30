@@ -8418,6 +8418,7 @@ function Library.PlayerList:Build(Tab)
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 240),
         Parent = Left.Container,
+        ZIndex = 5,
         LayoutOrder = -1 -- Force to top
     })
     
@@ -8425,6 +8426,7 @@ function Library.PlayerList:Build(Tab)
         BackgroundColor3 = Color3.fromRGB(10, 10, 10),
         BorderColor3 = Color3.new(0, 0, 0),
         Size = UDim2.fromScale(1, 1),
+        ZIndex = 5,
         Parent = ListboxHolder
     })
     
@@ -8433,6 +8435,7 @@ function Library.PlayerList:Build(Tab)
         BorderColor3 = Color3.new(0, 0, 0),
         Position = UDim2.new(0, 1, 0, 1),
         Size = UDim2.new(1, -2, 1, -2),
+        ZIndex = 6,
         Parent = ListboxOuter
     })
     
@@ -8441,6 +8444,7 @@ function Library.PlayerList:Build(Tab)
         BorderColor3 = Color3.new(0, 0, 0),
         Position = UDim2.new(0, 1, 0, 1),
         Size = UDim2.new(1, -2, 1, -2),
+        ZIndex = 7,
         Parent = ListboxInline
     })
     Library:AddToRegistry(ListboxBackground, { BackgroundColor3 = "AccentColor" })
@@ -8459,6 +8463,7 @@ function Library.PlayerList:Build(Tab)
         BorderColor3 = Color3.new(0, 0, 0),
         BorderSizePixel = 0,
         Size = UDim2.fromScale(1, 1),
+        ZIndex = 8,
         Parent = ListboxBackground
     })
     
@@ -8479,6 +8484,7 @@ function Library.PlayerList:Build(Tab)
         ScrollBarImageColor3 = Library.AccentColor,
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         CanvasSize = UDim2.new(0, 0, 0, 0),
+        ZIndex = 9,
         Parent = ListboxContrast
     })
     Library:AddToRegistry(ScrollFrame, { ScrollBarImageColor3 = "AccentColor" })
@@ -8581,6 +8587,7 @@ function Library.PlayerList:AddPlayer(plr)
         Size = UDim2.new(1, 0, 0, 16), -- Fixed height to ensure visibility
         BorderSizePixel = 0,
         TextSize = 12,
+        ZIndex = 10,
         LayoutOrder = 0
     })
 
@@ -8595,6 +8602,7 @@ function Library.PlayerList:AddPlayer(plr)
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
         TextSize = 12,
+        ZIndex = 11,
         LayoutOrder = -100, 
     })
     
@@ -8619,6 +8627,7 @@ function Library.PlayerList:AddPlayer(plr)
         TextXAlignment = Enum.TextXAlignment.Left,
         BorderSizePixel = 0,
         TextSize = 12,
+        ZIndex = 11,
     })
 
     Library:Create("Frame", {
@@ -8627,7 +8636,8 @@ function Library.PlayerList:AddPlayer(plr)
         Position = UDim2.new(0, -10, 0, 2),
         Size = UDim2.new(0, 1, 0, 12),
         BorderSizePixel = 0,
-        BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        ZIndex = 11,
     })
     
     Library:Create("UIListLayout", {
@@ -8650,6 +8660,7 @@ function Library.PlayerList:AddPlayer(plr)
         Size = UDim2.new(1, 0, 0, 1),
         BorderSizePixel = 0,
         BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+        ZIndex = 10,
         LayoutOrder = 1
     })
     
