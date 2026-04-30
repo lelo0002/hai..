@@ -1,4 +1,4 @@
--- w
+-- gg 3/25/26 v223 -- hurry the fuck up github
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8437,6 +8437,8 @@ function Library.PlayerList:Build(Tab)
         CanvasSize = UDim2.new(0, 0, 0, 0),
         ScrollBarThickness = 2,
         ScrollBarImageColor3 = Library.AccentColor,
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
         Parent = ListboxInner
     })
     Library:AddToRegistry(ScrollFrame, { ScrollBarImageColor3 = "AccentColor" })
@@ -8579,13 +8581,12 @@ function Library.PlayerList:Build(Tab)
 end
 
 function Library.PlayerList:AddPlayer(plr, LocalPlayer)
-    if self.PlayersData[plr.Name] then return end
+    if not plr or self.PlayersData[plr.Name] then return end
     
     local btn = Library:Create("TextButton", {
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 0),
-        AutomaticSize = Enum.AutomaticSize.Y,
+        Size = UDim2.new(1, 0, 0, 18), -- Fixed height for reliability
         Text = "",
         Parent = self.Elements.ScrollFrame,
         AutoButtonColor = false,
@@ -8597,28 +8598,25 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
         FillDirection = Enum.FillDirection.Horizontal,
         HorizontalFlex = Enum.UIFlexAlignment.Fill,
         SortOrder = Enum.SortOrder.LayoutOrder,
-        VerticalFlex = Enum.UIFlexAlignment.Fill
+        VerticalFlex = Enum.UIFlexAlignment.Fill,
+        Padding = UDim.new(0, 10) -- Space between name and status
     })
     
     Library:Create("UIPadding", {
         Parent = btn,
-        PaddingLeft = UDim.new(0, 2),
-        PaddingRight = UDim.new(0, 2),
-        PaddingTop = UDim.new(0, 2),
-        PaddingBottom = UDim.new(0, 2)
+        PaddingLeft = UDim.new(0, 5),
+        PaddingRight = UDim.new(0, 5)
     })
     
     local nameLbl = Library:CreateLabel({
         Text = plr.Name,
         TextSize = 13,
-        Size = UDim2.new(1, 0, 0, 0),
-        AutomaticSize = Enum.AutomaticSize.Y,
+        Size = UDim2.new(1, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
         LayoutOrder = -100,
         Parent = btn
     })
-    Library:AddToRegistry(nameLbl, { TextColor3 = "FontColor" })
     
     local status = "Neutral"
     local statusColor = Library.FontColor
@@ -8638,14 +8636,10 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
         Text = status,
         TextColor3 = statusColor,
         TextSize = 13,
-        Size = UDim2.new(1, 0, 0, 0),
-        AutomaticSize = Enum.AutomaticSize.Y,
-        TextXAlignment = Enum.TextXAlignment.Left,
+        Size = UDim2.new(1, 0, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Right, -- Align status to the right
         Parent = btn
     })
-    if status == "Neutral" then
-        Library:AddToRegistry(statusLbl, { TextColor3 = "FontColor" })
-    end
     
     local line = Library:Create("Frame", {
         Parent = self.Elements.ScrollFrame,
@@ -8718,7 +8712,7 @@ function Library.PlayerList:FilterList()
     end
     
     if self.Elements.ScrollFrame then
-        self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, self.Elements.UIListLayout.AbsoluteContentSize.Y)
+        -- AutomaticCanvasSize handles it
     end
 end
 
