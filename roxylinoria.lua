@@ -1,4 +1,4 @@
--- fnfifief90uIF(W)EA
+-- gg 3/25/26 v223 -- hurry the fuck up github
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8392,12 +8392,25 @@ Library.PlayerList = {
 }
 
 function Library.PlayerList:Build(Tab)
+    -- Make the tab full width by overriding Resize
+    local oldResize = Tab.Resize
+    function Tab:Resize(...)
+        oldResize(self, ...)
+        if self.LeftSideFrame then
+            self.LeftSideFrame.Size = UDim2.new(1, -14, self.LeftSideFrame.Size.Y.Scale, self.LeftSideFrame.Size.Y.Offset)
+        end
+        if self.RightSideFrame then
+            self.RightSideFrame.Visible = false
+        end
+    end
+    Tab:Resize()
+
     local Left = Tab:AddLeftGroupbox("Playerlist")
     
     -- 1. Listbox Frame
     local ListboxHolder = Library:Create("Frame", {
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, -4, 0, 230),
+        Size = UDim2.new(1, -4, 0, 320),
         Parent = Left.Container
     })
     local ListboxOuter = Library:Create("Frame", {
@@ -8482,14 +8495,14 @@ function Library.PlayerList:Build(Tab)
         return Lbl
     end
     
-    local UserLabel = AddCustomLabel("Name: ??")
-    local DisplayLabel = AddCustomLabel("Display Name: ??")
+    local UserLabel = AddCustomLabel("User: ??")
+    local DisplayLabel = AddCustomLabel("DisplayName: ??")
     local IdLabel = AddCustomLabel("User Id: ??")
     local PriorityLabel = AddCustomLabel("Priority")
     
     local PriorityDropdown = Left:AddDropdown("PlayerList_Priority", {
-        Values = {"Friendly", "Neutral", "Enemy"},
-        Default = 2,
+        Values = {"Neutral", "Friendly", "Priority"},
+        Default = 1,
         Multi = false,
         Text = "", 
         Tooltip = "Set the priority for this player",
@@ -8499,7 +8512,7 @@ function Library.PlayerList:Build(Tab)
                     getgenv().Linoria.Friendlies = getgenv().Linoria.Friendlies or {}
                     getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = true
                     if getgenv().Linoria.Priorities then getgenv().Linoria.Priorities[self.CurrentTarget.Name] = nil end
-                elseif val == "Enemy" then
+                elseif val == "Priority" then
                     getgenv().Linoria.Priorities = getgenv().Linoria.Priorities or {}
                     getgenv().Linoria.Priorities[self.CurrentTarget.Name] = true
                     if getgenv().Linoria.Friendlies then getgenv().Linoria.Friendlies[self.CurrentTarget.Name] = nil end
@@ -8511,7 +8524,7 @@ function Library.PlayerList:Build(Tab)
             end
         end
     })
-    -- Hide the dropdown label entirely so it aligns flawlessly with "Priority" directly above it.
+    
     if PriorityDropdown.Label then
         PriorityDropdown.Label.Visible = false
     end
@@ -8584,13 +8597,13 @@ function Library.PlayerList:RefreshList()
         Library:AddToRegistry(nameLbl, { TextColor3 = "FontColor" })
         
         local status = "Neutral"
-        local statusColor = Color3.fromRGB(180, 180, 180)
+        local statusColor = Color3.fromRGB(255, 255, 255)
         
         if plr == LocalPlayer then
             status = "LocalPlayer"
-            statusColor = Color3.fromRGB(0, 0, 255)
+            statusColor = Color3.fromRGB(30, 80, 200)
         elseif getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
-            status = "Enemy"
+            status = "Priority"
             statusColor = Color3.fromRGB(255, 0, 0)
         elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
             status = "Friendly"
@@ -8622,17 +8635,17 @@ end
 function Library.PlayerList:UpdateSelection()
     local plr = self.CurrentTarget
     if plr then
-        self.Elements.UserLabel.Text = "Name: " .. plr.Name
-        self.Elements.DisplayLabel.Text = "Display Name: " .. plr.DisplayName
+        self.Elements.UserLabel.Text = "User: " .. plr.Name
+        self.Elements.DisplayLabel.Text = "DisplayName: " .. plr.DisplayName
         self.Elements.IdLabel.Text = "User Id: " .. tostring(plr.UserId)
         
         local status = "Neutral"
-        if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then status = "Enemy"
+        if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then status = "Priority"
         elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then status = "Friendly" end
         self.Elements.PriorityDropdown:SetValue(status)
     else
-        self.Elements.UserLabel.Text = "Name: ??"
-        self.Elements.DisplayLabel.Text = "Display Name: ??"
+        self.Elements.UserLabel.Text = "User: ??"
+        self.Elements.DisplayLabel.Text = "DisplayName: ??"
         self.Elements.IdLabel.Text = "User Id: ??"
         self.Elements.PriorityDropdown:SetValue("Neutral")
     end
