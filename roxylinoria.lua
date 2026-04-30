@@ -1,4 +1,4 @@
--- f8uck githubv and gfuck youwa
+-- fuckckckckc
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8393,6 +8393,7 @@ Library.PlayerList = {
 }
 
 function Library.PlayerList:Build(Tab)
+    local self = Library.PlayerList
     local oldResize = Tab.Resize
     function Tab:Resize(...)
         oldResize(self, ...)
@@ -8407,7 +8408,7 @@ function Library.PlayerList:Build(Tab)
 
     local Left = Tab:AddLeftGroupbox("Playerlist")
     
-    -- 1. Search Box (Using native AddInput for professional look)
+    -- 1. Search Box
     local SearchInput = Left:AddInput("PlayerList_Search", {
         Default = "",
         Text = "Search",
@@ -8418,7 +8419,7 @@ function Library.PlayerList:Build(Tab)
         end
     })
     
-    -- 2. Labels (Using native AddLabel)
+    -- 2. Labels
     local NameLabel = Left:AddLabel("Name: ??")
     local DisplayLabel = Left:AddLabel("Display Name: ??")
     local IdLabel = Left:AddLabel("User ID: ??")
@@ -8428,7 +8429,7 @@ function Library.PlayerList:Build(Tab)
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 200),
         Parent = Left.Container,
-        LayoutOrder = 10 -- Ensure it's between labels and dropdown
+        LayoutOrder = 10
     })
     
     local ListboxOuter = Library:Create("Frame", {
@@ -8461,7 +8462,7 @@ function Library.PlayerList:Build(Tab)
     })
     Library:AddToRegistry(ScrollFrame, { ScrollBarImageColor3 = "AccentColor" })
     
-    Library:Create("UIListLayout", { 
+    local UIListLayout = Library:Create("UIListLayout", { 
         Padding = UDim.new(0, 0),
         SortOrder = Enum.SortOrder.LayoutOrder, 
         Parent = ScrollFrame 
@@ -8506,27 +8507,30 @@ function Library.PlayerList:Build(Tab)
     self.Elements.DisplayLabel = DisplayLabel
     self.Elements.IdLabel = IdLabel
     self.Elements.ScrollFrame = ScrollFrame
-    self.Elements.UIListLayout = ScrollFrame:FindFirstChildOfClass("UIListLayout")
+    self.Elements.UIListLayout = UIListLayout
     self.Elements.PriorityDropdown = PriorityDropdown
     
-    -- Initialization
-    local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
-    
-    Players.PlayerAdded:Connect(function(plr) self:AddPlayer(plr, LocalPlayer) end)
-    Players.PlayerRemoving:Connect(function(plr) self:RemovePlayer(plr) end)
-    
-    for _, plr in ipairs(Players:GetPlayers()) do
-        task.spawn(function() self:AddPlayer(plr, LocalPlayer) end)
+    -- Robust Initial Load
+    local function initPlayers()
+        for _, plr in ipairs(game:GetService("Players"):GetPlayers()) do
+            task.spawn(function() self:AddPlayer(plr) end)
+        end
     end
+
+    game:GetService("Players").PlayerAdded:Connect(function(plr) self:AddPlayer(plr) end)
+    game:GetService("Players").PlayerRemoving:Connect(function(plr) self:RemovePlayer(plr) end)
+    
+    initPlayers()
 end
 
-function Library.PlayerList:AddPlayer(plr, LocalPlayer)
+function Library.PlayerList:AddPlayer(plr)
+    local self = Library.PlayerList
     if not plr or self.PlayersData[plr.Name] then return end
     
     local btn = Library:Create("TextButton", {
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 18), -- Fixed height for reliability
+        Size = UDim2.new(1, 0, 0, 18),
         Text = "",
         Parent = self.Elements.ScrollFrame,
         AutoButtonColor = false,
@@ -8539,7 +8543,7 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
         HorizontalFlex = Enum.UIFlexAlignment.Fill,
         SortOrder = Enum.SortOrder.LayoutOrder,
         VerticalFlex = Enum.UIFlexAlignment.Fill,
-        Padding = UDim.new(0, 10) -- Space between name and status
+        Padding = UDim.new(0, 10)
     })
     
     Library:Create("UIPadding", {
@@ -8561,6 +8565,7 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
     local status = "Neutral"
     local statusColor = Library.FontColor
     
+    local LocalPlayer = game:GetService("Players").LocalPlayer
     if plr == LocalPlayer then
         status = "LocalPlayer"
         statusColor = Color3.fromRGB(30, 80, 200)
@@ -8577,7 +8582,7 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
         TextColor3 = statusColor,
         TextSize = 13,
         Size = UDim2.new(1, 0, 1, 0),
-        TextXAlignment = Enum.TextXAlignment.Right, -- Align status to the right
+        TextXAlignment = Enum.TextXAlignment.Right,
         Parent = btn
     })
     
@@ -8590,10 +8595,15 @@ function Library.PlayerList:AddPlayer(plr, LocalPlayer)
     })
     Library:AddToRegistry(line, { BackgroundColor3 = "OutlineColor" })
     
-    btn.MouseButton1Click:Connect(function()
+    -- Selection connection
+    local function select()
         self.CurrentTarget = plr
         self:UpdateSelection()
-    end)
+    end
+    
+    btn.MouseButton1Click:Connect(select)
+    nameLbl.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then select() end end)
+    statusLbl.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then select() end end)
     
     self.PlayersData[plr.Name] = {
         Button = btn,
