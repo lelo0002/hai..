@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github
+-- gg 3/25/26 v223 -- hurry the fuck up github nigger
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8394,14 +8394,15 @@ Library.PlayerList = {
 
 function Library.PlayerList:Build(Tab)
     local self = Library.PlayerList
+    
     local oldResize = Tab.Resize
     function Tab:Resize(...)
-        oldResize(self, ...)
-        if self.LeftSideFrame then
-            self.LeftSideFrame.Size = UDim2.new(1, -14, self.LeftSideFrame.Size.Y.Scale, self.LeftSideFrame.Size.Y.Offset)
+        oldResize(Tab, ...)
+        if Tab.LeftSideFrame then
+            Tab.LeftSideFrame.Size = UDim2.new(1, -14, Tab.LeftSideFrame.Size.Y.Scale, Tab.LeftSideFrame.Size.Y.Offset)
         end
-        if self.RightSideFrame then
-            self.RightSideFrame.Visible = false
+        if Tab.RightSideFrame then
+            Tab.RightSideFrame.Visible = false
         end
     end
     Tab:Resize()
@@ -8424,46 +8425,86 @@ function Library.PlayerList:Build(Tab)
     local DisplayLabel = Left:AddLabel("Display Name: ??")
     local IdLabel = Left:AddLabel("User ID: ??")
     
-    -- 3. Scrolling List
+    -- 3. Premium Scrolling List (uilib style)
     local ListboxHolder = Library:Create("Frame", {
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 200),
+        Size = UDim2.new(1, 0, 0, 240),
         Parent = Left.Container,
         LayoutOrder = 10
     })
     
     local ListboxOuter = Library:Create("Frame", {
-        BackgroundColor3 = Library.BackgroundColor,
-        BorderColor3 = Library.OutlineColor,
+        BackgroundColor3 = Color3.fromRGB(10, 10, 10),
+        BorderColor3 = Color3.new(0, 0, 0),
         Size = UDim2.fromScale(1, 1),
         Parent = ListboxHolder
     })
-    Library:AddToRegistry(ListboxOuter, { BackgroundColor3 = "BackgroundColor", BorderColor3 = "OutlineColor" })
     
-    local ListboxInner = Library:Create("Frame", {
-        BackgroundColor3 = Library.MainColor,
-        BorderColor3 = Library.OutlineColor,
-        BorderMode = Enum.BorderMode.Inset,
-        Size = UDim2.new(1, 0, 1, 0),
+    local ListboxInline = Library:Create("Frame", {
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        BorderColor3 = Color3.new(0, 0, 0),
+        Position = UDim2.new(0, 1, 0, 1),
+        Size = UDim2.new(1, -2, 1, -2),
         Parent = ListboxOuter
     })
-    Library:AddToRegistry(ListboxInner, { BackgroundColor3 = "MainColor", BorderColor3 = "OutlineColor" })
+    
+    local ListboxBackground = Library:Create("Frame", {
+        BackgroundColor3 = Library.AccentColor,
+        BorderColor3 = Color3.new(0, 0, 0),
+        Position = UDim2.new(0, 1, 0, 1),
+        Size = UDim2.new(1, -2, 1, -2),
+        Parent = ListboxInline
+    })
+    Library:AddToRegistry(ListboxBackground, { BackgroundColor3 = "AccentColor" })
+    
+    local BG_Gradient = Library:Create("UIGradient", {
+        Rotation = 90,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 167, 167))
+        }),
+        Parent = ListboxBackground
+    })
+    
+    local ListboxContrast = Library:Create("Frame", {
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BorderColor3 = Color3.new(0, 0, 0),
+        BorderSizePixel = 0,
+        Size = UDim2.fromScale(1, 1),
+        Parent = ListboxBackground
+    })
+    
+    local Contrast_Gradient = Library:Create("UIGradient", {
+        Rotation = 90,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(41, 41, 55)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 47))
+        }),
+        Parent = ListboxContrast
+    })
     
     local ScrollFrame = Library:Create("ScrollingFrame", {
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, -2, 1, -2),
-        Position = UDim2.new(0, 1, 0, 1),
+        Size = UDim2.fromScale(1, 1),
         ScrollBarThickness = 2,
         ScrollBarImageColor3 = Library.AccentColor,
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         CanvasSize = UDim2.new(0, 0, 0, 0),
-        Parent = ListboxInner
+        Parent = ListboxContrast
     })
     Library:AddToRegistry(ScrollFrame, { ScrollBarImageColor3 = "AccentColor" })
     
+    Library:Create("UIPadding", {
+        PaddingTop = UDim.new(0, 4),
+        PaddingBottom = UDim.new(0, 4),
+        PaddingRight = UDim.new(0, 4),
+        PaddingLeft = UDim.new(0, 4),
+        Parent = ScrollFrame
+    })
+    
     local UIListLayout = Library:Create("UIListLayout", { 
-        Padding = UDim.new(0, 0),
+        Padding = UDim.new(0, 4),
         SortOrder = Enum.SortOrder.LayoutOrder, 
         Parent = ScrollFrame 
     })
@@ -8494,8 +8535,8 @@ function Library.PlayerList:Build(Tab)
                 local pData = self.PlayersData[self.CurrentTarget.Name]
                 if pData then
                     pData.StatusLbl.Text = val
-                    if val == "Priority" then pData.StatusLbl.TextColor3 = Color3.fromRGB(255, 0, 0)
-                    elseif val == "Friendly" then pData.StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    if val == "Priority" then pData.StatusLbl.TextColor3 = Color3.fromRGB(255, 255, 0)
+                    elseif val == "Friendly" then pData.StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 255)
                     else pData.StatusLbl.TextColor3 = Library.FontColor end
                 end
             end
@@ -8517,8 +8558,8 @@ function Library.PlayerList:Build(Tab)
         end
     end
 
-    game:GetService("Players").PlayerAdded:Connect(function(plr) self:AddPlayer(plr) end)
-    game:GetService("Players").PlayerRemoving:Connect(function(plr) self:RemovePlayer(plr) end)
+    self.PlayerAddedConn = game:GetService("Players").PlayerAdded:Connect(function(plr) self:AddPlayer(plr) end)
+    self.PlayerRemovingConn = game:GetService("Players").PlayerRemoving:Connect(function(plr) self:RemovePlayer(plr) end)
     
     initPlayers()
 end
@@ -8532,14 +8573,12 @@ function Library.PlayerList:AddPlayer(plr)
         Name = plr.Name,
         Font = Library.Font,
         TextColor3 = Library.FontColor,
-        BorderColor3 = Color3.new(0, 0, 0),
         Text = "",
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 0),
         BorderSizePixel = 0,
         AutomaticSize = Enum.AutomaticSize.Y,
-        TextSize = 13,
-        BackgroundColor3 = Color3.new(1, 1, 1),
+        TextSize = 12,
         LayoutOrder = 0
     })
 
@@ -8547,16 +8586,14 @@ function Library.PlayerList:AddPlayer(plr)
         Parent = TextButton,
         Font = Library.Font,
         TextColor3 = Library.FontColor,
-        BorderColor3 = Color3.new(0, 0, 0),
         Text = plr.Name,
         BorderSizePixel = 0,
         BackgroundTransparency = 1,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
         AutomaticSize = Enum.AutomaticSize.Y,
-        TextSize = 13,
+        TextSize = 12,
         LayoutOrder = -100, 
-        BackgroundColor3 = Color3.new(1, 1, 1)
     })
     
     local LocalPlayer = game:GetService("Players").LocalPlayer
@@ -8566,38 +8603,33 @@ function Library.PlayerList:AddPlayer(plr)
     local pcolor = Library.FontColor
     if isLocal then
         pstatus = "LocalPlayer"
-        pcolor = Color3.fromRGB(30, 80, 200)
+        pcolor = Color3.fromRGB(0, 0, 255)
     end
     
     local priority_text = Library:Create("TextLabel", {
         Parent = TextButton,
-        Name = "",
+        Name = "Status",
         Font = Library.Font,
         TextColor3 = pcolor,
-        BorderColor3 = Color3.new(0, 0, 0),
         Text = pstatus,
         BackgroundTransparency = 1,
         TextXAlignment = Enum.TextXAlignment.Left,
         BorderSizePixel = 0,
         AutomaticSize = Enum.AutomaticSize.Y,
-        TextSize = 13,
-        BackgroundColor3 = Color3.new(1, 1, 1)
+        TextSize = 12,
     })
 
-    local Frame = Library:Create("Frame", {
+    local Separator = Library:Create("Frame", {
         Parent = priority_text,
-        Name = "",
-        Position = UDim2.new(0, -10, 0, 0),
-        BorderColor3 = Color3.new(0, 0, 0),
+        Name = "Separator",
+        Position = UDim2.new(0, -10, 0, 2),
         Size = UDim2.new(0, 1, 0, 12),
         BorderSizePixel = 0,
-        BackgroundColor3 = Library.OutlineColor
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     })
-    Library:AddToRegistry(Frame, { BackgroundColor3 = "OutlineColor" })
     
     Library:Create("UIListLayout", {
         Parent = TextButton,
-        Name = "",
         FillDirection = Enum.FillDirection.Horizontal,
         HorizontalFlex = Enum.UIFlexAlignment.Fill,
         SortOrder = Enum.SortOrder.LayoutOrder,
@@ -8606,24 +8638,22 @@ function Library.PlayerList:AddPlayer(plr)
     
     Library:Create("UIPadding", {
         Parent = TextButton,
-        Name = "",
         PaddingRight = UDim.new(0, 2),
         PaddingLeft = UDim.new(0, 2)
     })
 
     local line = Library:Create("Frame", {
         Parent = self.Elements.ScrollFrame,
-        Name = "",
-        BorderColor3 = Color3.new(0, 0, 0),
+        Name = "Line",
         Size = UDim2.new(1, 0, 0, 1),
         BorderSizePixel = 0,
-        BackgroundColor3 = Library.OutlineColor,
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
         LayoutOrder = 1
     })
-    Library:AddToRegistry(line, { BackgroundColor3 = "OutlineColor" })
     
     -- Selection connection
     local function select()
+        if plr == LocalPlayer then return end
         self.CurrentTarget = plr
         self:UpdateSelection()
     end
@@ -8638,18 +8668,18 @@ function Library.PlayerList:AddPlayer(plr)
         Player = plr
     }
     
-    self:FilterList()
-    
     -- Sync initial priorities if they already exist
     if not isLocal then
         if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
             priority_text.Text = "Priority"
-            priority_text.TextColor3 = Color3.fromRGB(255, 0, 0)
+            priority_text.TextColor3 = Color3.fromRGB(255, 255, 0)
         elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
             priority_text.Text = "Friendly"
-            priority_text.TextColor3 = Color3.fromRGB(0, 255, 0)
+            priority_text.TextColor3 = Color3.fromRGB(0, 255, 255)
         end
     end
+
+    self:FilterList()
 end
 
 function Library.PlayerList:RemovePlayer(plr)
@@ -8669,7 +8699,6 @@ end
 function Library.PlayerList:FilterList()
     local yOffset = 0
     local sortedPlayers = {}
-    local count = 0
     for name, _ in pairs(self.PlayersData) do
         table.insert(sortedPlayers, name)
     end
@@ -8692,15 +8721,10 @@ function Library.PlayerList:FilterList()
             pData.Button.LayoutOrder = yOffset
             pData.Line.LayoutOrder = yOffset + 1
             yOffset = yOffset + 2
-            count = count + 1
         else
             pData.Button.Visible = false
             pData.Line.Visible = false
         end
-    end
-    
-    if self.Elements.ScrollFrame then
-        self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, count * 19)
     end
 end
 
