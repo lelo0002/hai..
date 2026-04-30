@@ -1,4 +1,4 @@
--- just snorted a half football feeling good
+-- just snorted half a football at 11 pm what am i doing with my life
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -3837,6 +3837,8 @@ do
             ZIndex = 7;
             Parent = TextBoxContainer;
         })
+
+        Textbox.Box = Box
 
         Library:ApplyTextStroke(Box)
 
@@ -8479,11 +8481,7 @@ function Library.PlayerList:Build(Tab)
         Parent = ScrollFrame
     })
     
-    local UIListLayout = Library:Create("UIListLayout", { 
-        Padding = UDim.new(0, 4),
-        SortOrder = Enum.SortOrder.LayoutOrder, 
-        Parent = ScrollFrame 
-    })
+    -- Removed UIListLayout for manual animated positioning
     
     -- 2. Search Box
     local SearchInput = Left:AddInput("PlayerList_Search", {
@@ -8498,6 +8496,10 @@ function Library.PlayerList:Build(Tab)
     
     if SearchInput.Label then
         SearchInput.Label.TextXAlignment = Enum.TextXAlignment.Center
+    end
+    
+    if SearchInput.Box then
+        SearchInput.Box.TextXAlignment = Enum.TextXAlignment.Center
     end
     
     -- 3. Labels
@@ -8566,44 +8568,28 @@ function Library.PlayerList:AddPlayer(plr)
     local TextButton = Library:Create("TextButton", {
         Parent = self.Elements.ScrollFrame,
         Name = plr.Name,
-        Font = Enum.Font.BuilderSansMedium,
+        Font = Enum.Font.Ubuntu, -- High quality sharp font
         TextColor3 = Library.FontColor,
         Text = "",
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 20), -- Increased height for avatar
+        Size = UDim2.new(1, 0, 0, 16),
         BorderSizePixel = 0,
-        TextSize = 13,
+        TextSize = 14,
         ZIndex = 10,
         LayoutOrder = 0
     })
 
-    local avatarimg = Library:Create("ImageLabel", {
-        Parent = TextButton,
-        Name = "Avatar",
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Size = UDim2.new(0, 16, 0, 16),
-        Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=48&h=48",
-        ZIndex = 11,
-        LayoutOrder = -101,
-    })
-
-    Library:Create("UICorner", {
-        CornerRadius = UDim.new(1, 0),
-        Parent = avatarimg
-    })
-
     local player_name = Library:Create("TextLabel", {
         Parent = TextButton,
-        Font = Enum.Font.BuilderSansMedium,
+        Font = Enum.Font.Ubuntu,
         TextColor3 = Library.FontColor,
         Text = plr.Name,
         BorderSizePixel = 0,
         BackgroundTransparency = 1,
-        Size = UDim2.new(0.6, -20, 1, 0), -- Adjusted for avatar
+        Size = UDim2.new(0.6, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        TextSize = 13,
+        TextSize = 14,
         ZIndex = 11,
         LayoutOrder = -100, 
     })
@@ -8621,14 +8607,14 @@ function Library.PlayerList:AddPlayer(plr)
     local priority_text = Library:Create("TextLabel", {
         Parent = TextButton,
         Name = "Status",
-        Font = Library.Font,
+        Font = Enum.Font.Ubuntu,
         TextColor3 = pcolor,
         Text = pstatus,
         BackgroundTransparency = 1,
         Size = UDim2.new(0.4, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         BorderSizePixel = 0,
-        TextSize = 12,
+        TextSize = 13,
         ZIndex = 11,
     })
 
@@ -8724,7 +8710,7 @@ function Library.PlayerList:RemovePlayer(plr)
 end
 
 function Library.PlayerList:FilterList()
-    local yOffset = 0
+    local self = Library.PlayerList
     local sortedPlayers = {}
     local lp = game:GetService("Players").LocalPlayer
     
@@ -8733,10 +8719,33 @@ function Library.PlayerList:FilterList()
     end
     
     table.sort(sortedPlayers, function(a, b)
+        local aData = self.PlayersData[a]
+        local bData = self.PlayersData[b]
+        
+        -- Tier 1: LocalPlayer
         if lp and a == lp.Name then return true end
         if lp and b == lp.Name then return false end
+        
+        -- Tier 2: Priority
+        local aPri = Library.Priorities[a]
+        local bPri = Library.Priorities[b]
+        if aPri and not bPri then return true end
+        if bPri and not aPri then return false end
+        
+        -- Tier 3: Friendly
+        local aFri = Library.Friendlies[a]
+        local bFri = Library.Friendlies[b]
+        if aFri and not bFri then return true end
+        if bFri and not aFri then return false end
+        
+        -- Tier 4: Alphabetical
         return a:lower() < b:lower()
     end)
+    
+    local yOffset = 0
+    local entryHeight = 20 -- 16 (button) + 1 (line) + 3 (padding)
+    local TweenService = game:GetService("TweenService")
+    local tweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     
     for _, name in ipairs(sortedPlayers) do
         local pData = self.PlayersData[name]
@@ -8752,14 +8761,27 @@ function Library.PlayerList:FilterList()
         if match then
             pData.Button.Visible = true
             pData.Line.Visible = true
-            pData.Button.LayoutOrder = yOffset
-            pData.Line.LayoutOrder = yOffset + 1
-            yOffset = yOffset + 2
+            
+            local targetPos = UDim2.new(0, 0, 0, yOffset)
+            local lineTargetPos = UDim2.new(0, 0, 0, yOffset + 17)
+            
+            -- Set initial position if it's the first time
+            if pData.Button.Position == UDim2.new(0, 0, 0, 0) and yOffset ~= 0 then
+                pData.Button.Position = targetPos
+                pData.Line.Position = lineTargetPos
+            else
+                TweenService:Create(pData.Button, tweenInfo, { Position = targetPos }):Play()
+                TweenService:Create(pData.Line, tweenInfo, { Position = lineTargetPos }):Play()
+            end
+            
+            yOffset = yOffset + entryHeight
         else
             pData.Button.Visible = false
             pData.Line.Visible = false
         end
     end
+    
+    self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
 
 function Library.PlayerList:UpdateSelection()
