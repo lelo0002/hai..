@@ -1,4 +1,4 @@
--- just snorted half a football at 11 pm what am i doing with my life
+-- gg 3/25/26 v223 -- hurry the fuck up github
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8500,6 +8500,7 @@ function Library.PlayerList:Build(Tab)
     
     if SearchInput.Box then
         SearchInput.Box.TextXAlignment = Enum.TextXAlignment.Center
+        SearchInput.Box.Size = UDim2.fromScale(1, 1)
     end
     
     -- 3. Labels
@@ -8534,6 +8535,7 @@ function Library.PlayerList:Build(Tab)
                     elseif val == "Friendly" then pData.StatusLbl.TextColor3 = Color3.fromRGB(0, 255, 0)
                     else pData.StatusLbl.TextColor3 = Library.FontColor end
                 end
+                self:FilterList()
             end
         end
     })
@@ -8544,7 +8546,6 @@ function Library.PlayerList:Build(Tab)
         DisplayLabel = DisplayLabel,
         IdLabel = IdLabel,
         ScrollFrame = ScrollFrame,
-        UIListLayout = UIListLayout,
         PriorityDropdown = PriorityDropdown
     }
     
@@ -8568,20 +8569,20 @@ function Library.PlayerList:AddPlayer(plr)
     local TextButton = Library:Create("TextButton", {
         Parent = self.Elements.ScrollFrame,
         Name = plr.Name,
-        Font = Enum.Font.Ubuntu, -- High quality sharp font
+        Font = Library.Font,
         TextColor3 = Library.FontColor,
         Text = "",
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, 16),
         BorderSizePixel = 0,
-        TextSize = 14,
+        TextSize = 12,
         ZIndex = 10,
         LayoutOrder = 0
     })
 
     local player_name = Library:Create("TextLabel", {
         Parent = TextButton,
-        Font = Enum.Font.Ubuntu,
+        Font = Library.Font,
         TextColor3 = Library.FontColor,
         Text = plr.Name,
         BorderSizePixel = 0,
@@ -8589,7 +8590,7 @@ function Library.PlayerList:AddPlayer(plr)
         Size = UDim2.new(0.6, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        TextSize = 14,
+        TextSize = 12,
         ZIndex = 11,
         LayoutOrder = -100, 
     })
@@ -8607,14 +8608,14 @@ function Library.PlayerList:AddPlayer(plr)
     local priority_text = Library:Create("TextLabel", {
         Parent = TextButton,
         Name = "Status",
-        Font = Enum.Font.Ubuntu,
+        Font = Library.Font,
         TextColor3 = pcolor,
         Text = pstatus,
         BackgroundTransparency = 1,
         Size = UDim2.new(0.4, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         BorderSizePixel = 0,
-        TextSize = 13,
+        TextSize = 12,
         ZIndex = 11,
     })
 
@@ -8678,7 +8679,8 @@ function Library.PlayerList:AddPlayer(plr)
         Line = line,
         NameLbl = player_name,
         StatusLbl = priority_text,
-        Player = plr
+        Player = plr,
+        Initialized = false
     }
     
     -- Sync initial priorities if they already exist
@@ -8759,25 +8761,28 @@ function Library.PlayerList:FilterList()
         end
         
         if match then
-            pData.Button.Visible = true
-            pData.Line.Visible = true
-            
             local targetPos = UDim2.new(0, 0, 0, yOffset)
             local lineTargetPos = UDim2.new(0, 0, 0, yOffset + 17)
             
-            -- Set initial position if it's the first time
-            if pData.Button.Position == UDim2.new(0, 0, 0, 0) and yOffset ~= 0 then
+            if not pData.Initialized then
                 pData.Button.Position = targetPos
                 pData.Line.Position = lineTargetPos
+                pData.Initialized = true
             else
                 TweenService:Create(pData.Button, tweenInfo, { Position = targetPos }):Play()
                 TweenService:Create(pData.Line, tweenInfo, { Position = lineTargetPos }):Play()
             end
+
+            pData.Button.Visible = true
+            pData.Line.Visible = true
             
             yOffset = yOffset + entryHeight
         else
             pData.Button.Visible = false
             pData.Line.Visible = false
+            -- Keep position updated even while hidden to prevent glitchy fly-ins
+            pData.Button.Position = UDim2.new(0, 0, 0, yOffset)
+            pData.Line.Position = UDim2.new(0, 0, 0, yOffset + 17)
         end
     end
     
