@@ -1,4 +1,4 @@
--- fuckckckckc
+-- gg 3/25/26 v223 -- hurry the fuck up github
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8527,69 +8527,96 @@ function Library.PlayerList:AddPlayer(plr)
     local self = Library.PlayerList
     if not plr or self.PlayersData[plr.Name] then return end
     
-    local btn = Library:Create("TextButton", {
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 18),
-        Text = "",
+    local TextButton = Library:Create("TextButton", {
         Parent = self.Elements.ScrollFrame,
-        AutoButtonColor = false,
+        Name = plr.Name,
+        Font = Library.Font,
+        TextColor3 = Library.FontColor,
+        BorderColor3 = Color3.new(0, 0, 0),
+        Text = "",
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 0),
+        BorderSizePixel = 0,
+        AutomaticSize = Enum.AutomaticSize.Y,
+        TextSize = 13,
+        BackgroundColor3 = Color3.new(1, 1, 1),
         LayoutOrder = 0
     })
+
+    local player_name = Library:Create("TextLabel", {
+        Parent = TextButton,
+        Font = Library.Font,
+        TextColor3 = Library.FontColor,
+        BorderColor3 = Color3.new(0, 0, 0),
+        Text = plr.Name,
+        BorderSizePixel = 0,
+        BackgroundTransparency = 1,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        AutomaticSize = Enum.AutomaticSize.Y,
+        TextSize = 13,
+        LayoutOrder = -100, 
+        BackgroundColor3 = Color3.new(1, 1, 1)
+    })
+    
+    local LocalPlayer = game:GetService("Players").LocalPlayer
+    local isLocal = plr == LocalPlayer
+    
+    local pstatus = "Neutral"
+    local pcolor = Library.FontColor
+    if isLocal then
+        pstatus = "LocalPlayer"
+        pcolor = Color3.fromRGB(30, 80, 200)
+    end
+    
+    local priority_text = Library:Create("TextLabel", {
+        Parent = TextButton,
+        Name = "",
+        Font = Library.Font,
+        TextColor3 = pcolor,
+        BorderColor3 = Color3.new(0, 0, 0),
+        Text = pstatus,
+        BackgroundTransparency = 1,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        BorderSizePixel = 0,
+        AutomaticSize = Enum.AutomaticSize.Y,
+        TextSize = 13,
+        BackgroundColor3 = Color3.new(1, 1, 1)
+    })
+
+    local Frame = Library:Create("Frame", {
+        Parent = priority_text,
+        Name = "",
+        Position = UDim2.new(0, -10, 0, 0),
+        BorderColor3 = Color3.new(0, 0, 0),
+        Size = UDim2.new(0, 1, 0, 12),
+        BorderSizePixel = 0,
+        BackgroundColor3 = Library.OutlineColor
+    })
+    Library:AddToRegistry(Frame, { BackgroundColor3 = "OutlineColor" })
     
     Library:Create("UIListLayout", {
-        Parent = btn,
+        Parent = TextButton,
+        Name = "",
         FillDirection = Enum.FillDirection.Horizontal,
         HorizontalFlex = Enum.UIFlexAlignment.Fill,
         SortOrder = Enum.SortOrder.LayoutOrder,
-        VerticalFlex = Enum.UIFlexAlignment.Fill,
-        Padding = UDim.new(0, 10)
+        VerticalFlex = Enum.UIFlexAlignment.Fill
     })
     
     Library:Create("UIPadding", {
-        Parent = btn,
-        PaddingLeft = UDim.new(0, 5),
-        PaddingRight = UDim.new(0, 5)
+        Parent = TextButton,
+        Name = "",
+        PaddingRight = UDim.new(0, 2),
+        PaddingLeft = UDim.new(0, 2)
     })
-    
-    local nameLbl = Library:CreateLabel({
-        Text = plr.Name,
-        TextSize = 13,
-        Size = UDim2.new(1, 0, 1, 0),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextTruncate = Enum.TextTruncate.AtEnd,
-        LayoutOrder = -100,
-        Parent = btn
-    })
-    
-    local status = "Neutral"
-    local statusColor = Library.FontColor
-    
-    local LocalPlayer = game:GetService("Players").LocalPlayer
-    if plr == LocalPlayer then
-        status = "LocalPlayer"
-        statusColor = Color3.fromRGB(30, 80, 200)
-    elseif getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
-        status = "Priority"
-        statusColor = Color3.fromRGB(255, 0, 0)
-    elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
-        status = "Friendly"
-        statusColor = Color3.fromRGB(0, 255, 0)
-    end
-    
-    local statusLbl = Library:CreateLabel({
-        Text = status,
-        TextColor3 = statusColor,
-        TextSize = 13,
-        Size = UDim2.new(1, 0, 1, 0),
-        TextXAlignment = Enum.TextXAlignment.Right,
-        Parent = btn
-    })
-    
+
     local line = Library:Create("Frame", {
         Parent = self.Elements.ScrollFrame,
-        BorderSizePixel = 0,
+        Name = "",
+        BorderColor3 = Color3.new(0, 0, 0),
         Size = UDim2.new(1, 0, 0, 1),
+        BorderSizePixel = 0,
         BackgroundColor3 = Library.OutlineColor,
         LayoutOrder = 1
     })
@@ -8601,19 +8628,28 @@ function Library.PlayerList:AddPlayer(plr)
         self:UpdateSelection()
     end
     
-    btn.MouseButton1Click:Connect(select)
-    nameLbl.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then select() end end)
-    statusLbl.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then select() end end)
+    TextButton.MouseButton1Click:Connect(select)
     
     self.PlayersData[plr.Name] = {
-        Button = btn,
+        Button = TextButton,
         Line = line,
-        NameLbl = nameLbl,
-        StatusLbl = statusLbl,
+        NameLbl = player_name,
+        StatusLbl = priority_text,
         Player = plr
     }
     
     self:FilterList()
+    
+    -- Sync initial priorities if they already exist
+    if not isLocal then
+        if getgenv().Linoria.Priorities and getgenv().Linoria.Priorities[plr.Name] then
+            priority_text.Text = "Priority"
+            priority_text.TextColor3 = Color3.fromRGB(255, 0, 0)
+        elseif getgenv().Linoria.Friendlies and getgenv().Linoria.Friendlies[plr.Name] then
+            priority_text.Text = "Friendly"
+            priority_text.TextColor3 = Color3.fromRGB(0, 255, 0)
+        end
+    end
 end
 
 function Library.PlayerList:RemovePlayer(plr)
@@ -8633,6 +8669,7 @@ end
 function Library.PlayerList:FilterList()
     local yOffset = 0
     local sortedPlayers = {}
+    local count = 0
     for name, _ in pairs(self.PlayersData) do
         table.insert(sortedPlayers, name)
     end
@@ -8655,6 +8692,7 @@ function Library.PlayerList:FilterList()
             pData.Button.LayoutOrder = yOffset
             pData.Line.LayoutOrder = yOffset + 1
             yOffset = yOffset + 2
+            count = count + 1
         else
             pData.Button.Visible = false
             pData.Line.Visible = false
@@ -8662,7 +8700,7 @@ function Library.PlayerList:FilterList()
     end
     
     if self.Elements.ScrollFrame then
-        -- AutomaticCanvasSize handles it
+        self.Elements.ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, count * 19)
     end
 end
 
