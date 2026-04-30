@@ -1,4 +1,4 @@
--- fuck github, fuck you and fuck everyone
+-- gg 3/25/26 v223 -- hurry the fuck up github23232323
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8383,6 +8383,136 @@ Library:GiveSignal(RunService.RenderStepped:Connect(function(Delta)
         Library.CurrentRainbowColor = Color3.fromHSV(Hue, 0.8, 1)
     end
 end))
+
+--// Player List Addon \\--
+Library.PlayerList = {
+    CurrentTarget = nil,
+    Spectating = false,
+    Elements = {}
+}
+
+function Library.PlayerList:UpdateInfo()
+    if not self.Elements.Info then return end
+
+    local targetName = self.CurrentTarget
+    if not targetName or targetName == "" then
+        self.Elements.Info:SetText("No player selected.")
+        return
+    end
+
+    local player = Players:FindFirstChild(targetName)
+    if not player then
+        self.Elements.Info:SetText("Player left the game.")
+        return
+    end
+
+    local teamName = player.Team and player.Team.Name or "None"
+    local accountAge = player.AccountAge
+    local isFriend = LocalPlayer:IsFriendsWith(player.UserId)
+    local health = "N/A"
+    local maxHealth = "N/A"
+    
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        local hum = player.Character.Humanoid
+        health = tostring(math.floor(hum.Health))
+        maxHealth = tostring(math.floor(hum.MaxHealth))
+    end
+
+    local infoText = string.format(
+        "Username: %s\nDisplay Name: %s\nUser ID: %s\n\nTeam: %s\nAccount Age: %s Days\nFriends: %s\nHealth: %s / %s",
+        player.Name,
+        player.DisplayName,
+        tostring(player.UserId),
+        teamName,
+        tostring(accountAge),
+        tostring(isFriend),
+        health,
+        maxHealth
+    )
+
+    self.Elements.Info:SetText(infoText)
+end
+
+function Library.PlayerList:Action(act)
+    local targetName = self.CurrentTarget
+    local player = targetName and Players:FindFirstChild(targetName)
+    if not player then
+        if Library.Notify then Library:Notify("Invalid or missing player!") end
+        return
+    end
+
+    if act == "Teleport" then
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+            if Library.Notify then Library:Notify("Teleported to " .. player.Name) end
+        else
+            if Library.Notify then Library:Notify("Cannot teleport to " .. player.Name) end
+        end
+    elseif act == "Spectate" then
+        local camera = workspace.CurrentCamera
+        if self.Spectating and self.Spectating == player then
+            -- Unspectate
+            camera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") or LocalPlayer.Character
+            self.Spectating = nil
+            if Library.Notify then Library:Notify("Stopped spectating.") end
+        else
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                camera.CameraSubject = player.Character.Humanoid
+                self.Spectating = player
+                if Library.Notify then Library:Notify("Spectating " .. player.Name) end
+            else
+                if Library.Notify then Library:Notify("Cannot spectate " .. player.Name) end
+            end
+        end
+    elseif act == "CopyUser" then
+        if setclipboard then
+            setclipboard(player.Name)
+            if Library.Notify then Library:Notify("Copied Username!") end
+        end
+    elseif act == "CopyID" then
+        if setclipboard then
+            setclipboard(tostring(player.UserId))
+            if Library.Notify then Library:Notify("Copied User ID!") end
+        end
+    end
+end
+
+function Library.PlayerList:Build(Tab)
+    local Left = Tab:AddLeftGroupbox("Player Selection")
+    local Right = Tab:AddRightGroupbox("Player Information")
+
+    Left:AddDropdown("PlayerList_Target", {
+        SpecialType = "Player",
+        Text = "Target Player",
+        Tooltip = "Select a player from the server",
+        Callback = function(v)
+            self.CurrentTarget = v
+            self:UpdateInfo()
+        end
+    })
+
+    Left:AddButton("Refresh Stats", function()
+        self:UpdateInfo()
+    end)
+    
+    self.Elements.Info = Right:AddLabel("No player selected.")
+    Right:AddDivider()
+    
+    Right:AddButton("Teleport", function() self:Action("Teleport") end)
+    Right:AddButton("Spectate", function() self:Action("Spectate") end)
+    
+    local actions = Right:AddButton("Copy Username", function() self:Action("CopyUser") end)
+    actions:AddButton("Copy User ID", function() self:Action("CopyID") end)
+
+    task.spawn(function()
+        while not Library.Unloaded do
+            task.wait(1)
+            if self.CurrentTarget then
+                self:UpdateInfo()
+            end
+        end
+    end)
+end
 
 ----
 getgenv().Linoria = Library
