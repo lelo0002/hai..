@@ -1,4 +1,4 @@
--- this shit better work...
+-- gonna kms if this ts doesnt work this time.
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8413,14 +8413,18 @@ function Library.PlayerList:Build(Tab)
     
     local oldResize = Tab.Resize
     function Tab:Resize(...)
-        oldResize(Tab, ...)
-        if Tab.LeftSideFrame then
-            Tab.LeftSideFrame.Size = UDim2.new(1, -14, 1, -14)
-            if Library.PlayerList.Elements and Library.PlayerList.Elements.ListboxHolder then
-                local remainingHeight = Tab.LeftSideFrame.AbsoluteSize.Y - 185
-                Library.PlayerList.Elements.ListboxHolder.Size = UDim2.new(1, 0, 0, math.max(150, remainingHeight))
-            end
+        if oldResize then oldResize(Tab, ...) end
+
+        if not Tab.LeftSideFrame then return end
+        
+        Tab.LeftSideFrame.Size = UDim2.new(1, -14, 1, -14)
+        
+        local Elements = Library.PlayerList.Elements
+        if Elements and Elements.ListboxHolder then
+            local remainingHeight = Tab.LeftSideFrame.AbsoluteSize.Y - 185
+            Elements.ListboxHolder.Size = UDim2.new(1, 0, 0, math.max(150, remainingHeight))
         end
+
         if Tab.RightSideFrame then
             Tab.RightSideFrame.Visible = false
         end
