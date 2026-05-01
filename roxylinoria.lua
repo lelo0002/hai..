@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github1
+-- gg 3/25/26 v223
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
