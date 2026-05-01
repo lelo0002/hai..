@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github1
+
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -231,6 +231,7 @@ local Library = {
     RegistryMap = {};
     HudRegistry = {};
 
+    -- colors and font --
     FontColor = Color3.fromRGB(255, 255, 255);
     MainColor = Color3.fromRGB(22,22,22);
     BackgroundColor = Color3.fromRGB(19,19,19);
@@ -248,13 +249,16 @@ local Library = {
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.BuilderSans,
 
+    -- frames --
     OpenedFrames = {};
     DependencyBoxes = {};
     DependencyGroupboxes = {};
 
+    -- signals --
     UnloadSignals = {};
     Signals = {};
 
+    -- gui --
     ActiveTab = nil;
     TotalTabs = 0;
 
@@ -7375,6 +7379,14 @@ function Library:CreateWindow(...)
             Parent = TabButton;
         })
 
+        TabButton:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+            if Library.ActiveTab == Tab.Name then
+                local TargetX = TabButton.AbsolutePosition.X - Window.TabButtonContainer.AbsolutePosition.X
+                Window.TabGlider.Position = UDim2.new(0, TargetX, 0, 0)
+                Window.TabGlider.Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
+            end
+        end)
+
         local Blocker = Library:Create("Frame", {
             BackgroundColor3 = Library.MainColor;
             BorderSizePixel = 0;
@@ -7657,26 +7669,26 @@ end
 
             Window.TabGlider.Visible = true
             
-            local function UpdateGlider()
-                local TargetX = TabButton.AbsolutePosition.X - Window.TabButtonContainer.AbsolutePosition.X
-                TweenService:Create(Window.TabGlider, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                    Position = UDim2.new(0, TargetX, 0, 0),
-                    Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
-                }):Play()
-            end
-
             if TabButton.AbsolutePosition.X == 0 then
                 task.spawn(function()
                     repeat task.wait() until TabButton.AbsolutePosition.X ~= 0
-                    UpdateGlider()
+                    Tab:UpdateGlider()
                 end)
             else
-                UpdateGlider()
+                Tab:UpdateGlider()
             end
 
             Tab:Resize()
         end
         Tab.Show = Tab.ShowTab
+
+        function Tab:UpdateGlider()
+            local TargetX = TabButton.AbsolutePosition.X - Window.TabButtonContainer.AbsolutePosition.X
+            TweenService:Create(Window.TabGlider, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0, TargetX, 0, 0),
+                Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
+            }):Play()
+        end
 
         function Tab:HideTab()
             Blocker.BackgroundTransparency = 1
@@ -8403,7 +8415,11 @@ function Library.PlayerList:Build(Tab)
     function Tab:Resize(...)
         oldResize(Tab, ...)
         if Tab.LeftSideFrame then
-            Tab.LeftSideFrame.Size = UDim2.new(1, -14, Tab.LeftSideFrame.Size.Y.Scale, Tab.LeftSideFrame.Size.Y.Offset)
+            Tab.LeftSideFrame.Size = UDim2.new(1, -14, 1, -14)
+            if self.Elements.ListboxHolder then
+                local remainingHeight = Tab.LeftSideFrame.AbsoluteSize.Y - 185
+                self.Elements.ListboxHolder.Size = UDim2.new(1, 0, 0, math.max(150, remainingHeight))
+            end
         end
         if Tab.RightSideFrame then
             Tab.RightSideFrame.Visible = false
@@ -8421,6 +8437,7 @@ function Library.PlayerList:Build(Tab)
         ZIndex = 5,
         LayoutOrder = -1 -- Force to top
     })
+    self.Elements.ListboxHolder = ListboxHolder
     
     local ListboxOuter = Library:Create("Frame", {
         BackgroundTransparency = 1,
@@ -8492,17 +8509,23 @@ function Library.PlayerList:Build(Tab)
     
     if SearchInput.Label then
         SearchInput.Label.TextXAlignment = Enum.TextXAlignment.Center
+        SearchInput.Label.Font = Library.Font
     end
     
     if SearchInput.Box then
         SearchInput.Box.TextXAlignment = Enum.TextXAlignment.Center
         SearchInput.Box.Size = UDim2.fromScale(1, 1)
+        SearchInput.Box.Font = Library.Font
     end
     
     -- 3. Labels
     local NameLabel = Left:AddLabel("Name: ??")
     local DisplayLabel = Left:AddLabel("Display Name: ??")
     local IdLabel = Left:AddLabel("User ID: ??")
+    
+    NameLabel.TextLabel.Font = Library.Font
+    DisplayLabel.TextLabel.Font = Library.Font
+    IdLabel.TextLabel.Font = Library.Font
     
     -- 4. Priority Dropdown
     local PriorityDropdown = Left:AddDropdown("PlayerList_Priority", {
@@ -8576,7 +8599,7 @@ function Library.PlayerList:AddPlayer(plr)
         LayoutOrder = 0
     })
 
-    local player_name = Library:Create("TextLabel", {
+    local player_name = Library:CreateLabel({
         Parent = TextButton,
         Font = Library.Font,
         TextColor3 = Library.FontColor,
@@ -8601,7 +8624,7 @@ function Library.PlayerList:AddPlayer(plr)
         pcolor = Color3.fromRGB(0, 100, 255)
     end
     
-    local priority_text = Library:Create("TextLabel", {
+    local priority_text = Library:CreateLabel({
         Parent = TextButton,
         Name = "Status",
         Font = Library.Font,
@@ -8795,6 +8818,7 @@ function Library.PlayerList:UpdateSelection()
             pData.NameLbl.TextColor3 = Library.FontColor
         end
     end
+
     if plr then
         if self.Elements.NameLabel and self.Elements.NameLabel.SetText then
             self.Elements.NameLabel:SetText("Name: " .. plr.Name)
@@ -8805,6 +8829,7 @@ function Library.PlayerList:UpdateSelection()
         if self.Elements.IdLabel and self.Elements.IdLabel.SetText then
             self.Elements.IdLabel:SetText("User ID: " .. tostring(plr.UserId))
         end
+        
         local status = "Neutral"
         if Library.Priorities and Library.Priorities[plr.Name] then status = "Priority"
         elseif Library.Friendlies and Library.Friendlies[plr.Name] then status = "Friendly" end
