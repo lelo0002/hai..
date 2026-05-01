@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github1
+-- gg
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -538,6 +538,25 @@ function Library:ApplyTextStroke(Inst)
         LineJoinMode = Enum.LineJoinMode.Miter;
         Parent = Inst;
     })
+end
+
+Library.GlowElements = {}
+Library.GlowAmount = 1
+
+function Library:SetGlowAmount(amount)
+    Library.GlowAmount = amount
+    for _, data in ipairs(Library.GlowElements) do
+        local obj = data.Obj
+        local base = data.Base
+        if obj and obj.Parent then
+            obj.ImageTransparency = math.clamp(1 - ((1 - base) * amount), 0, 1)
+        end
+    end
+end
+
+function Library:AddGlow(obj, baseTransparency)
+    table.insert(Library.GlowElements, { Obj = obj, Base = baseTransparency })
+    obj.ImageTransparency = math.clamp(1 - ((1 - baseTransparency) * Library.GlowAmount), 0, 1)
 end
 
 function Library:CreateLabel(Properties, IsHud)
@@ -6653,6 +6672,8 @@ function Library:CreateWindow(...)
     })
     Library:AddToRegistry(Glow1, { ImageColor3 = "AccentColor" })
     Library:AddToRegistry(Glow2, { ImageColor3 = "AccentColor" })
+    Library:AddGlow(Glow1, 0.65)
+    Library:AddGlow(Glow2, 0.85)
 
     local Inner = Library:Create("Frame", {
         BackgroundColor3 = Library.MainColor;
@@ -6793,6 +6814,7 @@ function Library:CreateWindow(...)
         Parent = TabContainer,
     })
     Library:AddToRegistry(TabContainerGlow, { ImageColor3 = "AccentColor" })
+    Library:AddGlow(TabContainerGlow, 0.75)
     
     local InnerVideoBackground = Library:Create("VideoFrame", {
         BackgroundColor3 = Library.MainColor;
@@ -8607,7 +8629,7 @@ function Library.PlayerList:AddPlayer(plr)
     local player_name = Library:CreateLabel({
         Parent = TextButton,
         Font = Library.Font,
-        TextColor3 = Library.FontColor,
+        TextColor3 = (plr == game:GetService("Players").LocalPlayer) and Color3.fromRGB(0, 100, 255) or Library.FontColor,
         Text = plr.Name,
         BorderSizePixel = 0,
         BackgroundTransparency = 1,
@@ -8819,6 +8841,8 @@ function Library.PlayerList:UpdateSelection()
     for name, pData in pairs(Library.PlayerList.PlayersData) do
         if pData.Player == plr then
             pData.NameLbl.TextColor3 = Library.AccentColor
+        elseif pData.Player == game:GetService("Players").LocalPlayer then
+            pData.NameLbl.TextColor3 = Color3.fromRGB(0, 100, 255)
         else
             pData.NameLbl.TextColor3 = Library.FontColor
         end
