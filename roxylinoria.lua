@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github1
+-- wtf
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -231,7 +231,6 @@ local Library = {
     RegistryMap = {};
     HudRegistry = {};
 
-    -- colors and font --
     FontColor = Color3.fromRGB(255, 255, 255);
     MainColor = Color3.fromRGB(22,22,22);
     BackgroundColor = Color3.fromRGB(19,19,19);
@@ -249,16 +248,13 @@ local Library = {
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.BuilderSans,
 
-    -- frames --
     OpenedFrames = {};
     DependencyBoxes = {};
     DependencyGroupboxes = {};
 
-    -- signals --
     UnloadSignals = {};
     Signals = {};
 
-    -- gui --
     ActiveTab = nil;
     TotalTabs = 0;
 
@@ -8799,7 +8795,6 @@ function Library.PlayerList:UpdateSelection()
             pData.NameLbl.TextColor3 = Library.FontColor
         end
     end
-
     if plr then
         if self.Elements.NameLabel and self.Elements.NameLabel.SetText then
             self.Elements.NameLabel:SetText("Name: " .. plr.Name)
@@ -8810,7 +8805,6 @@ function Library.PlayerList:UpdateSelection()
         if self.Elements.IdLabel and self.Elements.IdLabel.SetText then
             self.Elements.IdLabel:SetText("User ID: " .. tostring(plr.UserId))
         end
-        
         local status = "Neutral"
         if Library.Priorities and Library.Priorities[plr.Name] then status = "Priority"
         elseif Library.Friendlies and Library.Friendlies[plr.Name] then status = "Friendly" end
