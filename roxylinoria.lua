@@ -1,4 +1,4 @@
--- gg
+-- gg 3/25/26 v223 -- hurry the fuck up github1
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8626,10 +8626,13 @@ function Library.PlayerList:AddPlayer(plr)
         LayoutOrder = 0
     })
 
-    local player_name = Library:CreateLabel({
+    local LocalPlayer = game:GetService("Players").LocalPlayer
+    local isLocal = plr == LocalPlayer
+    
+    local player_name = Library:Create("TextLabel", {
         Parent = TextButton,
         Font = Library.Font,
-        TextColor3 = (plr == game:GetService("Players").LocalPlayer) and Color3.fromRGB(0, 100, 255) or Library.FontColor,
+        TextColor3 = isLocal and Color3.fromRGB(0, 100, 255) or Library.FontColor,
         Text = plr.Name,
         BorderSizePixel = 0,
         BackgroundTransparency = 1,
@@ -8640,9 +8643,10 @@ function Library.PlayerList:AddPlayer(plr)
         ZIndex = 11,
         LayoutOrder = -100, 
     })
-    
-    local LocalPlayer = game:GetService("Players").LocalPlayer
-    local isLocal = plr == LocalPlayer
+    Library:ApplyTextStroke(player_name)
+    if not isLocal then
+        Library:AddToRegistry(player_name, { TextColor3 = "FontColor" })
+    end
     
     local pstatus = "Neutral"
     local pcolor = Library.FontColor
@@ -8651,7 +8655,7 @@ function Library.PlayerList:AddPlayer(plr)
         pcolor = Color3.fromRGB(0, 100, 255)
     end
     
-    local priority_text = Library:CreateLabel({
+    local priority_text = Library:Create("TextLabel", {
         Parent = TextButton,
         Name = "Status",
         Font = Library.Font,
@@ -8664,6 +8668,10 @@ function Library.PlayerList:AddPlayer(plr)
         TextSize = 12,
         ZIndex = 11,
     })
+    Library:ApplyTextStroke(priority_text)
+    if not isLocal then
+        Library:AddToRegistry(priority_text, { TextColor3 = "FontColor" })
+    end
 
     Library:Create("Frame", {
         Parent = priority_text,
