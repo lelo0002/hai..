@@ -1,4 +1,4 @@
--- fuck you github
+-- this shit better work...
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8416,9 +8416,9 @@ function Library.PlayerList:Build(Tab)
         oldResize(Tab, ...)
         if Tab.LeftSideFrame then
             Tab.LeftSideFrame.Size = UDim2.new(1, -14, 1, -14)
-            if self.Elements.ListboxHolder then
+            if Library.PlayerList.Elements and Library.PlayerList.Elements.ListboxHolder then
                 local remainingHeight = Tab.LeftSideFrame.AbsoluteSize.Y - 185
-                self.Elements.ListboxHolder.Size = UDim2.new(1, 0, 0, math.max(150, remainingHeight))
+                Library.PlayerList.Elements.ListboxHolder.Size = UDim2.new(1, 0, 0, math.max(150, remainingHeight))
             end
         end
         if Tab.RightSideFrame then
@@ -8809,9 +8809,9 @@ function Library.PlayerList:FilterList()
 end
 
 function Library.PlayerList:UpdateSelection()
-    local plr = self.CurrentTarget
+    local plr = Library.PlayerList.CurrentTarget
     
-    for name, pData in pairs(self.PlayersData) do
+    for name, pData in pairs(Library.PlayerList.PlayersData) do
         if pData.Player == plr then
             pData.NameLbl.TextColor3 = Library.AccentColor
         else
@@ -8820,36 +8820,36 @@ function Library.PlayerList:UpdateSelection()
     end
 
     if plr then
-        if self.Elements.NameLabel and self.Elements.NameLabel.SetText then
-            self.Elements.NameLabel:SetText("Name: " .. plr.Name)
+        if Library.PlayerList.Elements.NameLabel and Library.PlayerList.Elements.NameLabel.SetText then
+            Library.PlayerList.Elements.NameLabel:SetText("Name: " .. plr.Name)
         end
-        if self.Elements.DisplayLabel and self.Elements.DisplayLabel.SetText then
-            self.Elements.DisplayLabel:SetText("Display Name: " .. plr.DisplayName)
+        if Library.PlayerList.Elements.DisplayLabel and Library.PlayerList.Elements.DisplayLabel.SetText then
+            Library.PlayerList.Elements.DisplayLabel:SetText("Display Name: " .. plr.DisplayName)
         end
-        if self.Elements.IdLabel and self.Elements.IdLabel.SetText then
-            self.Elements.IdLabel:SetText("User ID: " .. tostring(plr.UserId))
+        if Library.PlayerList.Elements.IdLabel and Library.PlayerList.Elements.IdLabel.SetText then
+            Library.PlayerList.Elements.IdLabel:SetText("User ID: " .. tostring(plr.UserId))
         end
         
         local status = "Neutral"
         if Library.Priorities and Library.Priorities[plr.Name] then status = "Priority"
         elseif Library.Friendlies and Library.Friendlies[plr.Name] then status = "Friendly" end
         
-        if self.Elements.PriorityDropdown and self.Elements.PriorityDropdown.SetValue then
-            self.Elements.PriorityDropdown:SetValue(status)
+        if Library.PlayerList.Elements.PriorityDropdown and Library.PlayerList.Elements.PriorityDropdown.SetValue then
+            Library.PlayerList.Elements.PriorityDropdown:SetValue(status)
         end
     else
-        if self.Elements.NameLabel and self.Elements.NameLabel.SetText then
-            self.Elements.NameLabel:SetText("Name: ??")
+        if Library.PlayerList.Elements.NameLabel and Library.PlayerList.Elements.NameLabel.SetText then
+            Library.PlayerList.Elements.NameLabel:SetText("Name: ??")
         end
-        if self.Elements.DisplayLabel and self.Elements.DisplayLabel.SetText then
-            self.Elements.DisplayLabel:SetText("Display Name: ??")
+        if Library.PlayerList.Elements.DisplayLabel and Library.PlayerList.Elements.DisplayLabel.SetText then
+            Library.PlayerList.Elements.DisplayLabel:SetText("Display Name: ??")
         end
-        if self.Elements.IdLabel and self.Elements.IdLabel.SetText then
-            self.Elements.IdLabel:SetText("User ID: ??")
+        if Library.PlayerList.Elements.IdLabel and Library.PlayerList.Elements.IdLabel.SetText then
+            Library.PlayerList.Elements.IdLabel:SetText("User ID: ??")
         end
         
-        if self.Elements.PriorityDropdown and self.Elements.PriorityDropdown.SetValue then
-            self.Elements.PriorityDropdown:SetValue("Neutral")
+        if Library.PlayerList.Elements.PriorityDropdown and Library.PlayerList.Elements.PriorityDropdown.SetValue then
+            Library.PlayerList.Elements.PriorityDropdown:SetValue("Neutral")
         end
     end
 end
