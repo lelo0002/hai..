@@ -1,4 +1,4 @@
- -- gonna kms if this ts doesnt work this time. 1
+-- gg 3/25/26 v223 -- hurry the fuck up github1
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6625,6 +6625,7 @@ function Library:CreateWindow(...)
         Name = "Window";
     })
     LibraryMainOuterFrame = Outer
+    Library.MainOuterFrame = Outer
     Library:MakeDraggable(Outer, 25, true, true)
     if WindowInfo.Resizable then Library:MakeResizable(Outer, Library.MinSize) end
 
