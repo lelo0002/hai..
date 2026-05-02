@@ -1,4 +1,4 @@
--- gg 3/25/2
+-- gg 3/25/26 v223 -- hurry the fuck up github1
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -562,7 +562,8 @@ function Library:UpdateBlur()
         Library.BlurEffect.Parent = game:GetService("Lighting")
     end
     local targetSize = (Library.Toggled and Library.UIBlur) and (Library.UIBlurIntensity or 15) or 0
-    TweenService:Create(Library.BlurEffect, TweenInfo.new(WindowInfo.MenuFadeTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = targetSize}):Play()
+    local fadeTime = (Library.WindowInfo and Library.WindowInfo.MenuFadeTime) or 0.2
+    TweenService:Create(Library.BlurEffect, TweenInfo.new(fadeTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = targetSize}):Play()
 end
 
 function Library:AddGlow(obj, baseTransparency)
@@ -6617,6 +6618,7 @@ function Library:CreateWindow(...)
             AutoShow = Arguments[2] or false
         }, Templates.Window)
     end
+    Library.WindowInfo = WindowInfo
 
     local ViewportSize: Vector2 = workspace.CurrentCamera.ViewportSize
     if RunService:IsStudio() and ViewportSize.X <= 5 and ViewportSize.Y <= 5 then
