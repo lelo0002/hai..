@@ -1,4 +1,4 @@
--- gg 3/25/26 v223 -- hurry the fuck up github1
+-- gg 3/25/2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -552,6 +552,17 @@ function Library:SetGlowAmount(amount)
             obj.ImageTransparency = math.clamp(1 - ((1 - base) * amount), 0, 1)
         end
     end
+end
+
+function Library:UpdateBlur()
+    if not Library.BlurEffect then
+        Library.BlurEffect = Instance.new("BlurEffect")
+        Library.BlurEffect.Name = "LinoriaUIBlur"
+        Library.BlurEffect.Size = 0
+        Library.BlurEffect.Parent = game:GetService("Lighting")
+    end
+    local targetSize = (Library.Toggled and Library.UIBlur) and (Library.UIBlurIntensity or 15) or 0
+    TweenService:Create(Library.BlurEffect, TweenInfo.new(WindowInfo.MenuFadeTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = targetSize}):Play()
 end
 
 function Library:AddGlow(obj, baseTransparency)
@@ -8083,6 +8094,7 @@ end
         Toggled = (not Toggled)
 
         Library.Toggled = Toggled
+        Library:UpdateBlur()
         if WindowInfo.UnlockMouseWhileOpen then
             ModalElement.Modal = Library.Toggled
         end
