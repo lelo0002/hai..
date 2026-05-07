@@ -1,4 +1,4 @@
--- gg 23
+-- gg 231111
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -786,6 +786,7 @@ function Library:AddToolTip(InfoStr, DisabledInfoStr, HoverInstance)
         
         TextSize = 14;
         Text = InfoStr;
+        RichText = true;
         TextColor3 = Library.FontColor;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = Tooltip.ZIndex + 1;
@@ -4018,6 +4019,7 @@ do
             Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
             Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
             Risky = if typeof(Info.Risky) == "boolean" then Info.Risky else false;
+            Blatant = if typeof(Info.Blatant) == "boolean" then Info.Blatant else false;
             OriginalText = Info.Text; Text = Info.Text;
 
             Callback = Info.Callback or function(Value) end;
@@ -4109,6 +4111,10 @@ do
             Toggle:Display()
         end
 
+        if Toggle.Blatant and typeof(Info.Tooltip) == "string" then
+            Info.Tooltip = "<font color='rgb(255, 50, 50)'>BLATANT | </font>" .. Info.Tooltip
+        end
+
         if typeof(Info.Tooltip) == "string" or typeof(Info.DisabledTooltip) == "string" then
             Tooltip = Library:AddToolTip(Info.Tooltip, Info.DisabledTooltip, ToggleRegion)
             Tooltip.Disabled = Toggle.Disabled
@@ -4128,7 +4134,7 @@ do
                 return
             end
 
-            ToggleLabel.TextColor3 = Toggle.Risky and Library.RiskColor or Color3.new(1, 1, 1)
+            ToggleLabel.TextColor3 = (Toggle.Risky or Toggle.Blatant) and Library.RiskColor or Color3.new(1, 1, 1)
 
             ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor
             ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor
@@ -4136,7 +4142,7 @@ do
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and "AccentColor" or "MainColor"
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and "AccentColorDark" or "OutlineColor"
 
-            Library.RegistryMap[ToggleLabel].Properties.TextColor3 = Toggle.Risky and "RiskColor" or nil
+            Library.RegistryMap[ToggleLabel].Properties.TextColor3 = (Toggle.Risky or Toggle.Blatant) and "RiskColor" or nil
         end
 
         function Toggle:OnChanged(Func)
@@ -4216,11 +4222,23 @@ do
             end
         end)
 
-        if Toggle.Risky == true then
+        if Toggle.Risky == true or Toggle.Blatant == true then
             Library:RemoveFromRegistry(ToggleLabel)
 
             ToggleLabel.TextColor3 = Library.RiskColor
             Library:AddToRegistry(ToggleLabel, { TextColor3 = "RiskColor" })
+
+            if Toggle.Blatant then
+                Library:CreateLabel({
+                    Size = UDim2.fromOffset(12, 11);
+                    TextSize = 14;
+                    Text = "⚠";
+                    TextColor3 = Library.RiskColor;
+                    ZIndex = 6;
+                    Parent = ToggleLabel;
+                    LayoutOrder = -1;
+                })
+            end
         end
 
         Toggle:Display()
