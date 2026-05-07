@@ -1,4 +1,4 @@
--- gg 23
+-- gg 232323232
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5954,7 +5954,7 @@ function BaseGroupboxFuncs:AddDependencyBox()
         Position = UDim2.new(0, 6.5, 0, -1);
         Size = UDim2.new(0, 1, 1, 2);
         Visible = true;
-        ZIndex = 5;
+        ZIndex = 10;
         Parent = Holder;
     })
 
@@ -6022,16 +6022,25 @@ function BaseGroupboxFuncs:AddDependencyBox()
             
             if not i then return end
 
-            local Prev = Children[i-1]
-            local Next = Children[i+1]
-            
-            local HasPrev = Prev and Prev:IsA("Frame") and Prev.Visible and Prev:FindFirstChild("VerticalLine")
-            local HasNext = Next and Next:IsA("Frame") and Next.Visible and Next:FindFirstChild("VerticalLine")
+            local function Check(dir)
+                local curr = i + dir
+                while Children[curr] do
+                    local c = Children[curr]
+                    if c.Visible and not (c:IsA("UIListLayout") or c:IsA("UIPadding")) then
+                        return c:FindFirstChild("VerticalLine") ~= nil
+                    end
+                    curr = curr + dir
+                end
+                return false
+            end
+
+            local HasPrev = Check(-1)
+            local HasNext = Check(1)
             
             LineGradient.Transparency = NumberSequence.new({
                 NumberSequenceKeypoint.new(0, HasPrev and 0 or 1),
-                NumberSequenceKeypoint.new(HasPrev and 0 or 0.05, 0),
-                NumberSequenceKeypoint.new(HasNext and 1 or 0.85, 0),
+                NumberSequenceKeypoint.new(HasPrev and 0 or 0.15, 0),
+                NumberSequenceKeypoint.new(HasNext and 1 or 0.8, 0),
                 NumberSequenceKeypoint.new(1, HasNext and 0 or 1)
             })
         end)
