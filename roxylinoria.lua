@@ -1,4 +1,4 @@
--- gg 2323
+-- gg 2344
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6041,8 +6041,8 @@ function BaseGroupboxFuncs:AddDependencyBox()
 
             LineGradient.Transparency = NumberSequence.new({
                 NumberSequenceKeypoint.new(0, HasPrev and 0 or 1),
-                NumberSequenceKeypoint.new(HasPrev and 0 or 0.05, 0),
-                NumberSequenceKeypoint.new(HasNext and 1 or 0.95, 0),
+                NumberSequenceKeypoint.new(HasPrev and 0 or 0.15, 0),
+                NumberSequenceKeypoint.new(HasNext and 1 or 0.85, 0),
                 NumberSequenceKeypoint.new(1, HasNext and 0 or 1)
             })
         end)
