@@ -1,4 +1,4 @@
--- gg 231111
+-- gg 23
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -4112,7 +4112,7 @@ do
         end
 
         if Toggle.Blatant and typeof(Info.Tooltip) == "string" then
-            Info.Tooltip = "<font color='rgb(255, 50, 50)'>BLATANT | </font>" .. Info.Tooltip
+            Info.Tooltip = "<font color='rgb(255, 50, 50)'>BLATANT</font> " .. Info.Tooltip
         end
 
         if typeof(Info.Tooltip) == "string" or typeof(Info.DisabledTooltip) == "string" then
@@ -4229,7 +4229,7 @@ do
             Library:AddToRegistry(ToggleLabel, { TextColor3 = "RiskColor" })
 
             if Toggle.Blatant then
-                Library:CreateLabel({
+                local BlatantLabel = Library:CreateLabel({
                     Size = UDim2.fromOffset(12, 11);
                     TextSize = 14;
                     Text = "⚠";
@@ -4238,6 +4238,9 @@ do
                     Parent = ToggleLabel;
                     LayoutOrder = -1;
                 })
+
+                Library:RemoveFromRegistry(BlatantLabel)
+                Library:AddToRegistry(BlatantLabel, { TextColor3 = "RiskColor" })
             end
         end
 
