@@ -1,4 +1,4 @@
--- gg 
+-- gg 2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5941,7 +5941,6 @@ function BaseGroupboxFuncs:AddDependencyBox()
 
     local Holder = Library:Create("Frame", {
         BackgroundTransparency = 1;
-        ClipsDescendants = false;
         Size = UDim2.new(1, 0, 0, 0);
         Visible = false;
         Parent = Container;
@@ -5950,11 +5949,22 @@ function BaseGroupboxFuncs:AddDependencyBox()
     local VerticalLine = Library:Create("Frame", {
         BackgroundColor3 = Library.AccentColor;
         BorderSizePixel = 0;
-        AnchorPoint = Vector2.new(0, 0);
-        Position = UDim2.new(0, 6, 0, 6);
+        Position = UDim2.new(0, 6, 0, 4);
         Size = UDim2.new(0, 1, 1, -12);
+        Visible = true;
         ZIndex = 5;
         Parent = Holder;
+    })
+
+    Library:Create("UIGradient", {
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.25, 0),
+            NumberSequenceKeypoint.new(0.75, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        }),
+        Rotation = 90,
+        Parent = VerticalLine
     })
 
     Library:AddToRegistry(VerticalLine, {
@@ -5965,6 +5975,7 @@ function BaseGroupboxFuncs:AddDependencyBox()
         BackgroundTransparency = 1;
         Size = UDim2.new(1, -20, 1, 0);
         Position = UDim2.new(0, 20, 0, 0);
+        Visible = true;
         Parent = Holder;
     })
 
@@ -5975,11 +5986,7 @@ function BaseGroupboxFuncs:AddDependencyBox()
     })
 
     function Depbox:Resize()
-        local Y = Layout.AbsoluteContentSize.Y
-
-        Holder.Size = UDim2.new(1, 0, 0, Y)
-        VerticalLine.Size = UDim2.new(0, 1, 0, math.max(Y - 12, 1))
-
+        Holder.Size = UDim2.new(1, 0, 0, Layout.AbsoluteContentSize.Y)
         Groupbox:Resize()
     end
 
@@ -5993,7 +6000,8 @@ function BaseGroupboxFuncs:AddDependencyBox()
 
     function Depbox:Update()
         for _, Dependency in next, Depbox.Dependencies do
-            local Elem, Value = Dependency[1], Dependency[2]
+            local Elem = Dependency[1]
+            local Value = Dependency[2]
 
             local Failed = Elem.Multi
                 and not table.find(Elem:GetActiveValues(), Value)
