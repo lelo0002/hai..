@@ -1,4 +1,4 @@
--- gg 72
+-- gg 222
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5957,11 +5957,11 @@ do
         })
 
         Library:Create("UIGradient", {
-            Transparency = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, 1),
-                ColorSequenceKeypoint.new(0.1, 0),
-                ColorSequenceKeypoint.new(0.9, 0),
-                ColorSequenceKeypoint.new(1, 1)
+            Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 1),
+                NumberSequenceKeypoint.new(0.1, 0),
+                NumberSequenceKeypoint.new(0.9, 0),
+                NumberSequenceKeypoint.new(1, 1)
             }),
             Rotation = 90,
             Parent = VerticalLine
