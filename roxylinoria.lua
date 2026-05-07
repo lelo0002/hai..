@@ -1,4 +1,4 @@
--- gg 
+-- gg 2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5949,8 +5949,8 @@ do
         local VerticalLine = Library:Create("Frame", {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 6, 0, 4);
-            Size = UDim2.new(0, 1, 1, -12);
+            Position = UDim2.new(0, 6, 0, 0);
+            Size = UDim2.new(0, 1, 1, 0);
             Visible = true;
             ZIndex = 5;
             Parent = Holder;
@@ -5959,8 +5959,8 @@ do
         Library:Create("UIGradient", {
             Transparency = NumberSequence.new({
                 NumberSequenceKeypoint.new(0, 1),
-                NumberSequenceKeypoint.new(0.25, 0),
-                NumberSequenceKeypoint.new(0.75, 0),
+                NumberSequenceKeypoint.new(0.2, 0),
+                NumberSequenceKeypoint.new(0.8, 0),
                 NumberSequenceKeypoint.new(1, 1)
             }),
             Rotation = 90,
