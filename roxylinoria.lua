@@ -1,4 +1,4 @@
--- gg 4
+-- gg 43
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5929,101 +5929,97 @@ do
         return Passthrough
     end
 
-    function BaseGroupboxFuncs:AddDependencyBox()
-        local Depbox = {
-            Elements = {};
-            Dependencies = {};
-            TableType = "DepBox";
-        }
+function BaseGroupboxFuncs:AddDependencyBox()
+    local Depbox = {
+        Elements = {};
+        Dependencies = {};
+        TableType = "DepBox";
+    }
 
-        local Groupbox = self
-        local Container = Groupbox.Container
+    local Groupbox = self
+    local Container = Groupbox.Container
 
-        local Holder = Library:Create("Frame", {
-            BackgroundTransparency = 1;
-            Size = UDim2.new(1, 0, 0, 0);
-            Visible = false;
-            Parent = Container;
-        })
+    local Holder = Library:Create("Frame", {
+        BackgroundTransparency = 1;
+        ClipsDescendants = false;
+        Size = UDim2.new(1, 0, 0, 0);
+        Visible = false;
+        Parent = Container;
+    })
 
-        local VerticalLine = Library:Create("Frame", {
-            BackgroundColor3 = Library.AccentColor;
-            BorderSizePixel = 0;
-            Position = UDim2.new(0, 6, 0, 0);
-            Size = UDim2.new(0, 1, 1, 0);
-            Visible = true;
-            ZIndex = 5;
-            Parent = Holder;
-        })
+    local VerticalLine = Library:Create("Frame", {
+        BackgroundColor3 = Library.AccentColor;
+        BorderSizePixel = 0;
+        AnchorPoint = Vector2.new(0, 0);
+        Position = UDim2.new(0, 6, 0, 6);
+        Size = UDim2.new(0, 1, 1, -12);
+        ZIndex = 5;
+        Parent = Holder;
+    })
 
-        Library:Create("UIGradient", {
-            Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 1),
-                NumberSequenceKeypoint.new(0.2, 0),
-                NumberSequenceKeypoint.new(0.8, 0),
-                NumberSequenceKeypoint.new(1, 1)
-            }),
-            Rotation = 90,
-            Parent = VerticalLine
-        })
+    Library:AddToRegistry(VerticalLine, {
+        BackgroundColor3 = "AccentColor";
+    })
 
-        Library:AddToRegistry(VerticalLine, {
-            BackgroundColor3 = "AccentColor";
-        })
+    local Frame = Library:Create("Frame", {
+        BackgroundTransparency = 1;
+        Size = UDim2.new(1, -20, 1, 0);
+        Position = UDim2.new(0, 20, 0, 0);
+        Parent = Holder;
+    })
 
-        local Frame = Library:Create("Frame", {
-            BackgroundTransparency = 1;
-            Size = UDim2.new(1, -20, 1, 0);
-            Position = UDim2.new(0, 20, 0, 0);
-            Visible = true;
-            Parent = Holder;
-        })
+    local Layout = Library:Create("UIListLayout", {
+        FillDirection = Enum.FillDirection.Vertical;
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        Parent = Frame;
+    })
 
-        local Layout = Library:Create("UIListLayout", {
-            FillDirection = Enum.FillDirection.Vertical;
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Parent = Frame;
-        })
+    function Depbox:Resize()
+        local Y = Layout.AbsoluteContentSize.Y
 
-        function Depbox:Resize()
-            Holder.Size = UDim2.new(1, 0, 0, Layout.AbsoluteContentSize.Y)
-            Groupbox:Resize()
-        end
+        Holder.Size = UDim2.new(1, 0, 0, Y)
+        VerticalLine.Size = UDim2.new(0, 1, 0, math.max(Y - 12, 1))
 
-        Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            Depbox:Resize()
-        end)
+        Groupbox:Resize()
+    end
 
-        Holder:GetPropertyChangedSignal("Visible"):Connect(function()
-            Depbox:Resize()
-        end)
+    Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        Depbox:Resize()
+    end)
 
-        function Depbox:Update()
-            for _, Dependency in next, Depbox.Dependencies do
-                local Elem = Dependency[1]
-                local Value = Dependency[2]
+    Holder:GetPropertyChangedSignal("Visible"):Connect(function()
+        Depbox:Resize()
+    end)
 
-                if if Elem.Multi then not table.find(Elem:GetActiveValues(), Value) else Elem.Value ~= Value then
-                    Holder.Visible = false
-                    Depbox:Resize()
-                    return
-                end
+    function Depbox:Update()
+        for _, Dependency in next, Depbox.Dependencies do
+            local Elem, Value = Dependency[1], Dependency[2]
+
+            local Failed = Elem.Multi
+                and not table.find(Elem:GetActiveValues(), Value)
+                or not Elem.Multi and Elem.Value ~= Value
+
+            if Failed then
+                Holder.Visible = false
+                Depbox:Resize()
+                return
             end
-
-            Holder.Visible = true
-            Depbox:Resize()
         end
 
-        function Depbox:SetupDependencies(Dependencies)
-            for _, Dependency in next, Dependencies do
-                assert(typeof(Dependency) == "table", "SetupDependencies: Dependency is not of type `table`.")
-                assert(Dependency[1], "SetupDependencies: Dependency is missing element argument.")
-                assert(Dependency[2] ~= nil, "SetupDependencies: Dependency is missing value argument.")
-            end
+        Holder.Visible = true
+        Depbox:Resize()
+    end
 
-            Depbox.Dependencies = Dependencies
-            Depbox:Update()
+    function Depbox:SetupDependencies(Dependencies)
+        for _, Dependency in next, Dependencies do
+            assert(typeof(Dependency) == "table", "SetupDependencies: Dependency is not of type `table`.")
+            assert(Dependency[1], "SetupDependencies: Dependency is missing element argument.")
+            assert(Dependency[2] ~= nil, "SetupDependencies: Dependency is missing value argument.")
         end
+
+        Depbox.Dependencies = Dependencies
+        Depbox:Update()
+    end
 
         Depbox.Container = Frame
 
