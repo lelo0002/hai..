@@ -1,4 +1,4 @@
--- gg 
+-- gg2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5946,9 +5946,24 @@ do
             Parent = Container;
         })
 
+        local VerticalLine = Library:Create("Frame", {
+            BackgroundColor3 = Library.AccentColor;
+            BorderSizePixel = 0;
+            Position = UDim2.new(0, 6, 0, 0);
+            Size = UDim2.new(0, 1, 1, 0);
+            Visible = true;
+            ZIndex = 5;
+            Parent = Holder;
+        })
+
+        Library:AddToRegistry(VerticalLine, {
+            BackgroundColor3 = "AccentColor";
+        })
+
         local Frame = Library:Create("Frame", {
             BackgroundTransparency = 1;
-            Size = UDim2.new(1, 0, 1, 0);
+            Size = UDim2.new(1, -20, 1, 0);
+            Position = UDim2.new(0, 20, 0, 0);
             Visible = true;
             Parent = Holder;
         })
