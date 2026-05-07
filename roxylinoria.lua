@@ -5949,8 +5949,9 @@ function BaseGroupboxFuncs:AddDependencyBox()
     local VerticalLine = Library:Create("Frame", {
         BackgroundColor3 = Library.AccentColor;
         BorderSizePixel = 0;
-        Position = UDim2.new(0, 6, 0, 4);
-        Size = UDim2.new(0, 1, 1, -12);
+        AnchorPoint = Vector2.new(0.5, 0);
+        Position = UDim2.new(0, 6.5, 0, 4);
+        Size = UDim2.new(0, 2, 1, -12);
         Visible = true;
         ZIndex = 5;
         Parent = Holder;
@@ -6028,6 +6029,7 @@ function BaseGroupboxFuncs:AddDependencyBox()
         Depbox.Dependencies = Dependencies
         Depbox:Update()
     end
+
 
         Depbox.Container = Frame
 
