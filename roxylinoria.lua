@@ -1,4 +1,4 @@
--- gg
+-- gg 234
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5947,23 +5947,18 @@ function BaseGroupboxFuncs:AddDependencyBox()
     })
 
     local VerticalLine = Library:Create("Frame", {
+        Name = "VerticalLine";
         BackgroundColor3 = Library.AccentColor;
         BorderSizePixel = 0;
         AnchorPoint = Vector2.new(0.5, 0);
-        Position = UDim2.new(0, 6.5, 0, 0);
-        Size = UDim2.new(0, 1, 1, 0);
+        Position = UDim2.new(0, 6.5, 0, -1);
+        Size = UDim2.new(0, 1, 1, 2);
         Visible = true;
         ZIndex = 5;
         Parent = Holder;
     })
 
-    Library:Create("UIGradient", {
-        Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.05, 0),
-            NumberSequenceKeypoint.new(0.95, 0),
-            NumberSequenceKeypoint.new(1, 1)
-        }),
+    local LineGradient = Library:Create("UIGradient", {
         Rotation = 90,
         Parent = VerticalLine
     })
@@ -6017,6 +6012,29 @@ function BaseGroupboxFuncs:AddDependencyBox()
 
         Holder.Visible = true
         Depbox:Resize()
+
+        task.defer(function()
+            if not Holder.Visible then return end
+            
+            local Parent = Holder.Parent
+            local Children = Parent:GetChildren()
+            local i = table.find(Children, Holder)
+            
+            if not i then return end
+
+            local Prev = Children[i-1]
+            local Next = Children[i+1]
+            
+            local HasPrev = Prev and Prev:IsA("Frame") and Prev.Visible and Prev:FindFirstChild("VerticalLine")
+            local HasNext = Next and Next:IsA("Frame") and Next.Visible and Next:FindFirstChild("VerticalLine")
+            
+            LineGradient.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, HasPrev and 0 or 1),
+                NumberSequenceKeypoint.new(0.05, 0),
+                NumberSequenceKeypoint.new(0.95, 0),
+                NumberSequenceKeypoint.new(1, HasNext and 0 or 1)
+            })
+        end)
     end
 
     function Depbox:SetupDependencies(Dependencies)
