@@ -1,4 +1,4 @@
--- gg354
+-- gg 7
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5949,11 +5949,22 @@ do
         local VerticalLine = Library:Create("Frame", {
             BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
-            Position = UDim2.new(0, 6, 0, 0);
-            Size = UDim2.new(0, 1, 1, 0);
+            Position = UDim2.new(0, 6, 0, 4);
+            Size = UDim2.new(0, 1, 1, -8);
             Visible = true;
             ZIndex = 5;
             Parent = Holder;
+        })
+
+        Library:Create("UIGradient", {
+            Transparency = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, 1),
+                ColorSequenceKeypoint.new(0.1, 0),
+                ColorSequenceKeypoint.new(0.9, 0),
+                ColorSequenceKeypoint.new(1, 1)
+            }),
+            Rotation = 90,
+            Parent = VerticalLine
         })
 
         Library:AddToRegistry(VerticalLine, {
