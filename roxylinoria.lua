@@ -1,4 +1,4 @@
--- gg 23
+-- gg
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -5950,8 +5950,8 @@ function BaseGroupboxFuncs:AddDependencyBox()
         BackgroundColor3 = Library.AccentColor;
         BorderSizePixel = 0;
         AnchorPoint = Vector2.new(0.5, 0);
-        Position = UDim2.new(0, 6.5, 0, 4);
-        Size = UDim2.new(0, 2, 1, -12);
+        Position = UDim2.new(0, 6.5, 0, 0);
+        Size = UDim2.new(0, 1, 1, 0);
         Visible = true;
         ZIndex = 5;
         Parent = Holder;
@@ -5960,8 +5960,8 @@ function BaseGroupboxFuncs:AddDependencyBox()
     Library:Create("UIGradient", {
         Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.25, 0),
-            NumberSequenceKeypoint.new(0.75, 0),
+            NumberSequenceKeypoint.new(0.05, 0),
+            NumberSequenceKeypoint.new(0.95, 0),
             NumberSequenceKeypoint.new(1, 1)
         }),
         Rotation = 90,
