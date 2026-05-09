@@ -6431,7 +6431,7 @@ do
     Library.BottomNotificationArea = Library:Create("Frame", {
         AnchorPoint = Vector2.new(0.5, 1);
         BackgroundTransparency = 1;
-        Position = UDim2.new(0.5, 0, 1, -40);
+        Position = UDim2.new(0.5, 0, 1, -140);
         Size = UDim2.new(0, 300, 0, 200);
         ZIndex = 11000;
         Parent = ScreenGui;
