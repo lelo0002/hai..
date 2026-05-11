@@ -1,4 +1,3 @@
--- gg 23
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -445,8 +444,15 @@ function Library:GetBetterColor(Color: Color3, Add: number): Color3
     )
 end
 
-
-
+function Library:SetFont(font)
+    Library.Font = font
+    for _, Object in next, Library.Registry do
+        local inst = Object.Instance
+        if inst and inst.Parent and Object.Properties["Font"] == "Font" then
+            pcall(function() inst.Font = font end)
+        end
+    end
+end
 
 --// Library Functions \\--
 function Library:Validate(Table: { [string]: any }, Template: { [string]: any }): { [string]: any }
@@ -584,6 +590,7 @@ function Library:CreateLabel(Properties, IsHud)
 
     Library:AddToRegistry(_Instance, {
         TextColor3 = "FontColor";
+        Font = "Font";
     }, IsHud)
 
     return Library:Create(_Instance, Properties)
@@ -1079,12 +1086,14 @@ function Library:UpdateColorsUsingRegistry()
 
     -- The above would be especially efficient for a rainbow menu color or live color-changing.
 
-    for Idx, Object in next, Library.Registry do
+    for _, Object in next, Library.Registry do
+        local inst = Object.Instance
+        if not inst or not inst.Parent then continue end
         for Property, ColorIdx in next, Object.Properties do
             if typeof(ColorIdx) == "string" then
-                Object.Instance[Property] = Library[ColorIdx]
+                pcall(function() inst[Property] = Library[ColorIdx] end)
             elseif typeof(ColorIdx) == "function" then
-                Object.Instance[Property] = ColorIdx()
+                pcall(function() inst[Property] = ColorIdx() end)
             end
         end
     end
