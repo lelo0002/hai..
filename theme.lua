@@ -116,6 +116,20 @@ ThemeManager.BuiltInThemes = {
 		['Arcade'] = Enum.Font.Arcade
 	}
 
+	function ThemeManager:UpdateFont()
+		local fontName = self.Library.Options.Font.Value
+		local fontEnum = FontMapping[fontName] or Enum.Font.FredokaOne
+		
+		self.Library.Font = fontEnum
+		
+		for _, data in next, self.Library.Registry do
+			local instance = data.Instance
+			if instance:IsA("TextLabel") or instance:IsA("TextButton") or instance:IsA("TextBox") then
+				instance.Font = fontEnum
+			end
+		end
+	end
+
 	function ThemeManager:SetLibrary(library)
 		self.Library = library
 	end
@@ -188,19 +202,7 @@ ThemeManager.BuiltInThemes = {
 		for i, field in next, ThemeFields do
 			if self.Library.Options and self.Library.Options[field] then
 				if field == "Font" then
-					local fontName = self.Library.Options[field].Value
-					local fontEnum = FontMapping[fontName] or Enum.Font.FredokaOne
-					
-					if self.Library.Font ~= fontEnum then
-						self.Library.Font = fontEnum
-						
-						for _, data in next, self.Library.Registry do
-							local instance = data.Instance
-							if instance:IsA("TextLabel") or instance:IsA("TextButton") or instance:IsA("TextBox") then
-								instance.Font = fontEnum
-							end
-						end
-					end
+					self:UpdateFont()
 				else
 					self.Library[field] = self.Library.Options[field].Value
 				end
@@ -424,12 +426,12 @@ ThemeManager.BuiltInThemes = {
 		self.Library.Options.AccentColor:OnChanged(UpdateTheme)
 		self.Library.Options.OutlineColor:OnChanged(UpdateTheme)
 		self.Library.Options.FontColor:OnChanged(UpdateTheme)
-		self.Library.Options.Font:OnChanged(UpdateTheme)
+		self.Library.Options.Font:OnChanged(function() self:UpdateFont() end)
 	end
 
 	function ThemeManager:CreateGroupBox(tab)
 		assert(self.Library, 'ThemeManager:CreateGroupBox -> Must set ThemeManager.Library first!')
-		return tab:AddRightGroupbox('Themes')
+		return tab:AddLeftGroupbox('Themes')
 	end
 
 	function ThemeManager:ApplyToTab(tab)
