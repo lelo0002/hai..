@@ -1,4 +1,3 @@
---1
 local cloneref = (cloneref or clonereference or function(instance: any)
     return instance
 end)
@@ -49,7 +48,7 @@ if typeof(clonefunction) == "function" then
 end
 
 local ThemeManager = {} do
-	local ThemeFields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "Font" }
+	local ThemeFields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "VideoLink" }
 	ThemeManager.Folder = "LinoriaLibSettings"
 	-- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
 
@@ -107,28 +106,41 @@ ThemeManager.BuiltInThemes = {
 	['Cobalt']           = { 50, { FontColor = "ffffff", MainColor = "162033", AccentColor = "3b82f6", BackgroundColor = "101722", OutlineColor = "26364d" } },
 }
 
-	local FontMapping = {
-		['Fredoka One'] = Enum.Font.FredokaOne,
-		['Ubuntu'] = Enum.Font.Ubuntu,
-		['Roboto Mono'] = Enum.Font.RobotoMono,
-		['Gotham'] = Enum.Font.Gotham,
-		['Gotham Bold'] = Enum.Font.GothamBold,
-		['Source Sans Pro'] = Enum.Font.SourceSans,
-		['Arcade'] = Enum.Font.Arcade
-	}
+	function ApplyBackgroundVideo(videoLink)
+		if
+			typeof(videoLink) ~= "string" or
+			not (getassetfunc and writefile and readfile and isfile) or
+			not (ThemeManager.Library and ThemeManager.Library.InnerVideoBackground)
+		then return; end;
 
-	function ThemeManager:UpdateFont()
-		local fontName = self.Library.Options.Font.Value
-		local fontEnum = FontMapping[fontName] or Enum.Font.FredokaOne
-		
-		self.Library.Font = fontEnum
-		
-		for _, data in next, self.Library.Registry do
-			local instance = data.Instance
-			if instance:IsA("TextLabel") or instance:IsA("TextButton") or instance:IsA("TextBox") then
-				instance.Font = fontEnum
-			end
+		--// Variables \\--
+		local videoInstance = ThemeManager.Library.InnerVideoBackground;
+		local extension = videoLink:match(".*/(.-)?") or videoLink:match(".*/(.-)$"); extension = tostring(extension);
+		local filename = string.sub(extension, 0, -6);
+		local _, domain = videoLink:match("^(https?://)([^/]+)"); domain = tostring(domain); -- _ is protocol
+
+		--// Check URL \\--
+		if videoLink == "" then
+			videoInstance:Pause();
+			videoInstance.Video = "";
+			videoInstance.Visible = false;
+			return
 		end
+		if #extension > 5 and string.sub(extension, -5) ~= ".webm" then return; end;
+
+		--// Fetch Video Data \\--
+		local videoFile = ThemeManager.Folder .. "/themes/" .. string.gsub(domain .. filename, 0, 249) .. ".webm";
+		if not isfile(videoFile) then
+			local success, requestRes = pcall(httprequest, { Url = videoLink, Method = 'GET' })
+			if not (success and typeof(requestRes) == "table" and typeof(requestRes.Body) == "string") then return; end;
+
+			writefile(videoFile, requestRes.Body)
+		end
+
+		--// Play Video \\--
+		videoInstance.Video = getassetfunc(videoFile);
+		videoInstance.Visible = true;
+		videoInstance:Play();
 	end
 
 	function ThemeManager:SetLibrary(library)
@@ -179,14 +191,20 @@ ThemeManager.BuiltInThemes = {
 		if not data then return end
 
 		-- custom themes are just regular dictionaries instead of an array with { index, dictionary }
+		if self.Library.InnerVideoBackground ~= nil then
+			self.Library.InnerVideoBackground.Visible = false
+		end
+		
 		local scheme = data[2]
 		for idx, col in next, customThemeData or scheme do
-			if idx == "Font" then
+			if idx == "VideoLink" then
 				self.Library[idx] = col
 				
 				if self.Library.Options[idx] then
 					self.Library.Options[idx]:SetValue(col)
 				end
+				
+				ApplyBackgroundVideo(col)
 			else
 				self.Library[idx] = Color3.fromHex(col)
 				
@@ -200,12 +218,17 @@ ThemeManager.BuiltInThemes = {
 	end
 
 	function ThemeManager:ThemeUpdate()
+		-- This allows us to force apply themes without loading the themes tab :)
+		if self.Library.InnerVideoBackground ~= nil then
+			self.Library.InnerVideoBackground.Visible = false
+		end
+
 		for i, field in next, ThemeFields do
 			if self.Library.Options and self.Library.Options[field] then
-				if field == "Font" then
-					self:UpdateFont()
-				else
-					self.Library[field] = self.Library.Options[field].Value
+				self.Library[field] = self.Library.Options[field].Value
+
+				if field == "VideoLink" then
+					ApplyBackgroundVideo(self.Library.Options[field].Value)
 				end
 			end
 		end
@@ -266,7 +289,7 @@ ThemeManager.BuiltInThemes = {
 
 		local theme = {}
 		for _, field in next, ThemeFields do
-			if field == "Font" then
+			if field == "VideoLink" then
 				theme[field] = self.Library.Options[field].Value
 			else
 				theme[field] = self.Library.Options[field].Value:ToHex()
@@ -324,14 +347,7 @@ ThemeManager.BuiltInThemes = {
 		groupbox:AddLabel('Accent color'):AddColorPicker('AccentColor', { Default = self.Library.AccentColor });
 		groupbox:AddLabel('Outline color'):AddColorPicker('OutlineColor', { Default = self.Library.OutlineColor });
 		groupbox:AddLabel('Font color')	:AddColorPicker('FontColor', { Default = self.Library.FontColor });
-		
-		local Fonts = {}
-		for Name, _ in next, FontMapping do
-			table.insert(Fonts, Name)
-		end
-		table.sort(Fonts)
-
-		groupbox:AddDropdown('Font', { Text = 'Library font', Values = Fonts, Default = 'Fredoka One' });
+		groupbox:AddInput('VideoLink', { Text = '.webm Video Background (Link)', Default = self.Library.VideoLink });
 		
 		local ThemesArray = {}
 		for Name, Theme in next, self.BuiltInThemes do
@@ -427,7 +443,6 @@ ThemeManager.BuiltInThemes = {
 		self.Library.Options.AccentColor:OnChanged(UpdateTheme)
 		self.Library.Options.OutlineColor:OnChanged(UpdateTheme)
 		self.Library.Options.FontColor:OnChanged(UpdateTheme)
-		self.Library.Options.Font:OnChanged(function() self:UpdateFont() end)
 	end
 
 	function ThemeManager:CreateGroupBox(tab)
