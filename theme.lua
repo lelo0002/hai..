@@ -429,7 +429,7 @@ ThemeManager.BuiltInThemes = {
 
 	function ThemeManager:CreateGroupBox(tab)
 		assert(self.Library, 'ThemeManager:CreateGroupBox -> Must set ThemeManager.Library first!')
-		return tab:AddLeftGroupbox('Themes')
+		return tab:AddRightGroupbox('Themes')
 	end
 
 	function ThemeManager:ApplyToTab(tab)
