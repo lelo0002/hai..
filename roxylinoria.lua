@@ -1,3 +1,4 @@
+-- fuck roblox, fuck rivals
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -1159,7 +1160,7 @@ local Templates = { -- TO-DO: do it for missing elements.
         ShowCustomCursor = true,
         UnlockMouseWhileOpen = true,
         Center = false,
-        BackgroundImage = "rbxassetid://85518703715983"
+        BackgroundImage = "rbxassetid://138978717574592"
     },
 
     --// Elements \\--
