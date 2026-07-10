@@ -54,7 +54,7 @@ local ThemeManager = {} do
 
 	ThemeManager.Library = nil
 ThemeManager.BuiltInThemes = {
-	['Gunmetal']         = { 1,  { FontColor = "ffffff", MainColor = "23272e", AccentColor = "7289da", BackgroundColor = "1b1f24", OutlineColor = "323841" } },
+	['Columba.cc'] = { 1, { FontColor = "ffffff", MainColor = "1b1b1b", AccentColor = "d2cfe7", BackgroundColor = "1c1c1c", OutlineColor = "373737" } },
 	['Tokyo Night']      = { 2,  { FontColor = "ffffff", MainColor = "191925", AccentColor = "6759b3", BackgroundColor = "16161f", OutlineColor = "323232" } },
 	['Minimal Blue']     = { 3,  { FontColor = "ffffff", MainColor = "1d1d1d", AccentColor = "4488ff", BackgroundColor = "141414", OutlineColor = "2c2c2c" } },
 	['Neverlose']        = { 4,  { FontColor = "ffffff", MainColor = "202020", AccentColor = "00b4ff", BackgroundColor = "151515", OutlineColor = "303030" } },
