@@ -233,13 +233,13 @@ local Library = {
 
     -- colors and font --
 		FontColor = Color3.fromRGB(255, 255, 255),
-		MainColor = Color3.fromRGB(22, 22, 22),
-		BackgroundColor = Color3.fromRGB(19, 19, 19),
+		MainColor = Color3.fromRGB(27, 27, 27),
+		BackgroundColor = Color3.fromRGB(28, 28, 28),
 
-		AccentColor = Color3.fromRGB(114, 137, 218),
+		AccentColor = Color3.fromRGB(210, 207, 231),
 		DisabledAccentColor = Color3.fromRGB(142, 142, 142),
 
-		OutlineColor = Color3.fromRGB(50, 56, 65),
+		OutlineColor = Color3.fromRGB(55,55,55),
 		DisabledOutlineColor = Color3.fromRGB(70, 70, 70),
 
 		DisabledTextColor = Color3.fromRGB(142, 142, 142),
