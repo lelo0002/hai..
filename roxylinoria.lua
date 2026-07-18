@@ -2642,7 +2642,7 @@ do
             Type = "Dropdown";
             SpecialType = Info.SpecialType; -- can be either "Player" or "Team"
             Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
-            Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
+            Disabled = if typeof(Info.disabled) == "boolean" then Info.disabled else (if typeof(Info.Disabled) == "boolean" then Info.Disabled else false);
             Callback = Info.Callback or function(Value) end;
             Changed = Info.Changed or function(Value) end;
 
@@ -3516,6 +3516,7 @@ do
         Button.OriginalText = Button.Text
         Button.Func = Button.Func or Button.Callback
         assert(typeof(Button.Func) == "function", "AddButton: `Func` callback is missing.")
+        Button.Disabled = if typeof(Button.disabled) == "boolean" then Button.disabled else (if typeof(Button.Disabled) == "boolean" then Button.Disabled else false)
 
         local Blank = nil
         local Groupbox = self
@@ -3656,6 +3657,7 @@ do
             SubButton.OriginalText = SubButton.Text
             SubButton.Func = SubButton.Func or SubButton.Callback
             assert(typeof(SubButton.Func) == "function", "AddButton: `Func` callback is missing.")
+            SubButton.Disabled = if typeof(SubButton.disabled) == "boolean" then SubButton.disabled else (if typeof(SubButton.Disabled) == "boolean" then SubButton.Disabled else false)
 
             self.Outer.Size = UDim2.new(0.5, -2, 0, 20 * DPIScale)
 
@@ -3666,7 +3668,7 @@ do
             SubButton.Outer.Parent = self.Outer
 
             function SubButton:UpdateColors()
-                SubButton.Label.TextColor3 = SubButton.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
+                SubButton.Label.TextColor3 = SubButton.Disabled and Library.DisabledTextColor or Color3.new(1, 1, 1)
             end
 
             function SubButton:AddToolTip(tooltip, disabledTooltip)
@@ -3712,7 +3714,7 @@ do
         end
 
         function Button:UpdateColors()
-            Button.Label.TextColor3 = Button.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
+            Button.Label.TextColor3 = Button.Disabled and Library.DisabledTextColor or Color3.new(1, 1, 1)
         end
 
         function Button:AddToolTip(tooltip, disabledTooltip)
@@ -3779,7 +3781,7 @@ do
             Numeric = Info.Numeric or false;
             Finished = Info.Finished or false;
             Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
-            Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
+            Disabled = if typeof(Info.disabled) == "boolean" then Info.disabled else (if typeof(Info.Disabled) == "boolean" then Info.Disabled else false);
             AllowEmpty = if typeof(Info.AllowEmpty) == "boolean" then Info.AllowEmpty else true;
             EmptyReset = if typeof(Info.EmptyReset) == "string" then Info.EmptyReset else "---";
             Type = "Input";
@@ -3900,8 +3902,10 @@ do
 
         function Textbox:UpdateColors()
             Box.TextColor3 = Textbox.Disabled and Library.DisabledAccentColor or Library.FontColor
+            InputLabel.TextColor3 = Textbox.Disabled and Library.DisabledTextColor or Library.FontColor
 
             Library.RegistryMap[Box].Properties.TextColor3 = Textbox.Disabled and "DisabledAccentColor" or "FontColor"
+            Library.RegistryMap[InputLabel].Properties.TextColor3 = Textbox.Disabled and "DisabledTextColor" or "FontColor"
         end
 
         function Textbox:Display()
@@ -4027,7 +4031,7 @@ do
             Value = Info.Default or false;
             Type = "Toggle";
             Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
-            Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
+            Disabled = if typeof(Info.disabled) == "boolean" then Info.disabled else (if typeof(Info.Disabled) == "boolean" then Info.Disabled else false);
             Risky = if typeof(Info.Risky) == "boolean" then Info.Risky else false;
             Blatant = if typeof(Info.Blatant) == "boolean" then Info.Blatant else false;
             OriginalText = Info.Text; Text = Info.Text;
@@ -4144,7 +4148,7 @@ do
                 return
             end
 
-            ToggleLabel.TextColor3 = (Toggle.Risky or Toggle.Blatant) and Library.RiskColor or Color3.new(1, 1, 1)
+            ToggleLabel.TextColor3 = (Toggle.Risky or Toggle.Blatant) and Library.RiskColor or Library.FontColor
 
             ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor
             ToggleInner.BorderColor3 = Toggle.Value and Library.AccentColorDark or Library.OutlineColor
@@ -4152,7 +4156,7 @@ do
             Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and "AccentColor" or "MainColor"
             Library.RegistryMap[ToggleInner].Properties.BorderColor3 = Toggle.Value and "AccentColorDark" or "OutlineColor"
 
-            Library.RegistryMap[ToggleLabel].Properties.TextColor3 = (Toggle.Risky or Toggle.Blatant) and "RiskColor" or nil
+            Library.RegistryMap[ToggleLabel].Properties.TextColor3 = (Toggle.Risky or Toggle.Blatant) and "RiskColor" or "FontColor"
         end
 
         function Toggle:OnChanged(Func)
@@ -4289,7 +4293,7 @@ do
             MaxSize = 232;
             Type = "Slider";
             Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
-            Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
+            Disabled = if typeof(Info.disabled) == "boolean" then Info.disabled else (if typeof(Info.Disabled) == "boolean" then Info.Disabled else false);
             OriginalText = Info.Text; Text = Info.Text;
 
             Prefix = typeof(Info.Prefix) == "string" and Info.Prefix or "";
@@ -4401,7 +4405,8 @@ do
 
         function Slider:UpdateColors()
             if SliderText then
-                SliderText.TextColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
+                SliderText.TextColor3 = Slider.Disabled and Library.DisabledTextColor or Library.FontColor
+                Library.RegistryMap[SliderText].Properties.TextColor3 = Slider.Disabled and "DisabledTextColor" or "FontColor"
             end
             DisplayLabel.TextColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
 
@@ -4662,7 +4667,7 @@ do
             Type = "Dropdown";
             SpecialType = Info.SpecialType; -- can be either "Player" or "Team"
             Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
-            Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
+            Disabled = if typeof(Info.disabled) == "boolean" then Info.disabled else (if typeof(Info.Disabled) == "boolean" then Info.Disabled else false);
             Callback = Info.Callback or function(Value) end;
             Changed = Info.Changed or function(Value) end;
 
@@ -4873,7 +4878,8 @@ do
 
         function Dropdown:UpdateColors()
             if DropdownLabel then
-                DropdownLabel.TextColor3 = Dropdown.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
+                DropdownLabel.TextColor3 = Dropdown.Disabled and Library.DisabledTextColor or Library.FontColor
+                Library.RegistryMap[DropdownLabel].Properties.TextColor3 = Dropdown.Disabled and "DisabledTextColor" or "FontColor"
             end
 
             ItemList.TextColor3 = Dropdown.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
@@ -6355,19 +6361,9 @@ do
         end
     })
 
-    local WatermarkIcon = Library:Create("ImageLabel", {
-        Image = "rbxassetid://105772752642203";
-        Position = UDim2.new(0, -2, 0.5, 0);
-        AnchorPoint = Vector2.new(0, 0.5);
-        Size = UDim2.fromOffset(33, 33);
-        BackgroundTransparency = 1;
-        ZIndex = 203;
-        Parent = InnerFrame;
-    })
-
     local WatermarkLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 33, 0, 0);
-        Size = UDim2.new(1, -38, 1, 0);
+        Position = UDim2.new(0, 4, 0, 0);
+        Size = UDim2.new(1, -8, 1, 0);
         TextSize = 14;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 203;
@@ -6386,17 +6382,9 @@ do
         Text = tostring(Text or "")
         local X, Y = Library:GetTextBounds(Text, Library.Font, 14)
 
-        if Library.HideImages then
-            if WatermarkIcon then WatermarkIcon.Visible = false end
-            Library.Watermark.Size = UDim2.new(0, X + 8, 0, (Y * 1.5) + 3)
-            Library.WatermarkText.Position = UDim2.new(0, 4, 0, 0)
-            Library.WatermarkText.Size = UDim2.new(1, -8, 1, 0)
-        else
-            if WatermarkIcon then WatermarkIcon.Visible = true end
-            Library.Watermark.Size = UDim2.new(0, X + 38, 0, (Y * 1.5) + 3)
-            Library.WatermarkText.Position = UDim2.new(0, 33, 0, 0)
-            Library.WatermarkText.Size = UDim2.new(1, -38, 1, 0)
-        end
+        Library.Watermark.Size = UDim2.new(0, X + 8, 0, (Y * 1.5) + 3)
+        Library.WatermarkText.Position = UDim2.new(0, 4, 0, 0)
+        Library.WatermarkText.Size = UDim2.new(1, -8, 1, 0)
 
         Library:SetWatermarkVisibility(true)
         Library.WatermarkText.Text = Text
