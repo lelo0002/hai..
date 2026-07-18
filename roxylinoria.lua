@@ -1,4 +1,4 @@
--- fuck roblox, fuck rivals
+-- fuck roblox, fuck rivals22222
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -6930,12 +6930,15 @@ function Library:CreateWindow(...)
         AnchorPoint = Vector2.new(0.5, 0.5);
         Size = UDim2.fromScale(1, 1);
         ZIndex = 5;
+        Active = false;
+        Selectable = false;
         BackgroundTransparency = 1;
-        TextTransparency = 0.95;
-        TextSize = 85;
-        Font = Library.Font;
+        TextTransparency = 0.9;
+        Font = Enum.Font.GothamBold;
         RichText = true;
         Text = "";
+        TextXAlignment = Enum.TextXAlignment.Center;
+        TextYAlignment = Enum.TextYAlignment.Center;
         TextColor3 = Library.FontColor;
         Parent = TabContainer;
         Visible = false;
@@ -7770,7 +7773,7 @@ end
                 Tab:HideTab()
             end
 
-            Library.ActiveTab = Tab
+            Library.ActiveTab = Name
 
             Blocker.BackgroundTransparency = 0
             TabButton.BackgroundColor3 = Library.MainColor
@@ -8184,8 +8187,9 @@ end
             task.spawn(function()
                 task.wait()
                 task.wait()
-                if Library.ActiveTab and Library.ActiveTab.UpdateGlider then
-                    Library.ActiveTab:UpdateGlider()
+                local ActiveTabObj = Library.ActiveTab and Window.Tabs[Library.ActiveTab]
+                if ActiveTabObj and ActiveTabObj.UpdateGlider then
+                    ActiveTabObj:UpdateGlider()
                 end
             end)
 
