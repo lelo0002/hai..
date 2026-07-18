@@ -548,7 +548,7 @@ function Library:ApplyTextStroke(Inst)
 end
 
 Library.GlowElements = {}
-Library.GlowAmount = 1
+Library.GlowAmount = 0
 
 function Library:SetGlowAmount(amount)
     Library.GlowAmount = amount
@@ -597,47 +597,75 @@ function Library:CreateLabel(Properties, IsHud)
     return Library:Create(_Instance, Properties)
 end
 
-function Library:MakeDraggable(Instance, Cutoff, IsMainWindow, Smooth)
-    Instance.Active = true
+function Library:MakeDraggable(Instance, Cutoff, IsMainWindow, Smooth, DragHeader)
+    local Target = Instance
+    local Header = DragHeader or Instance
+    Header.Active = true
 
     local Dragging = false
-    local DragInput, DragStart, StartPos
+    local DragInput, DragStart, StartPos, StartAbsolutePos
+    local DragOutline = nil
 
     local function Update(Input)
-        if not Dragging then return end
+        if not Dragging or not DragOutline then return end
         local Delta = Input.Position - DragStart
-        local TargetPos = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
-        
-        if Smooth then
-            TweenService:Create(Instance, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = TargetPos }):Play()
-        else
-            Instance.Position = TargetPos
-        end
+        DragOutline.Position = UDim2.fromOffset(StartAbsolutePos.X + Delta.X, StartAbsolutePos.Y + Delta.Y)
     end
 
-    Instance.InputBegan:Connect(function(Input)
+    Header.InputBegan:Connect(function(Input)
         if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) then
             if IsMainWindow and Library.CantDragForced then return end
             
-            local ObjPos = Input.Position - Vector3.new(Instance.AbsolutePosition.X, Instance.AbsolutePosition.Y, 0)
+            local ObjPos = Input.Position - Vector3.new(Header.AbsolutePosition.X, Header.AbsolutePosition.Y, 0)
             if ObjPos.Y > (Cutoff or 40) then return end
             
             Dragging = true
             DragStart = Input.Position
-            StartPos = Instance.Position
+            StartPos = Target.Position
+            StartAbsolutePos = Target.AbsolutePosition
             DragInput = Input
+
+            DragOutline = Instance.new("Frame")
+            DragOutline.Name = "DragOutline"
+            DragOutline.BackgroundTransparency = 1
+            DragOutline.BorderSizePixel = 0
+            DragOutline.Size = UDim2.fromOffset(Target.AbsoluteSize.X, Target.AbsoluteSize.Y)
+            DragOutline.Position = UDim2.fromOffset(StartAbsolutePos.X, StartAbsolutePos.Y)
+            DragOutline.ZIndex = 99999
+
+            local Stroke = Instance.new("UIStroke")
+            Stroke.Color = Color3.new(0, 0, 0)
+            Stroke.Thickness = 1.5
+            Stroke.LineJoinMode = Enum.LineJoinMode.Miter
+            Stroke.Parent = DragOutline
+
+            DragOutline.Parent = ScreenGui
 
             local Connection
             Connection = InputService.InputEnded:Connect(function(EndInput)
                 if EndInput == Input or EndInput.UserInputType == Enum.UserInputType.MouseButton1 or EndInput.UserInputType == Enum.UserInputType.Touch then
                     Dragging = false
                     Connection:Disconnect()
+
+                    if DragOutline then
+                        local Delta = EndInput.Position - DragStart
+                        local TargetPos = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+                        
+                        DragOutline:Destroy()
+                        DragOutline = nil
+
+                        if Smooth then
+                            TweenService:Create(Target, TweenInfo.new(0.15, Enum.EasingStyle.Out, Enum.EasingDirection.Quad), { Position = TargetPos }):Play()
+                        else
+                            Target.Position = TargetPos
+                        end
+                    end
                 end
             end)
         end
     end)
 
-    Instance.InputChanged:Connect(function(Input)
+    Header.InputChanged:Connect(function(Input)
         if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
             DragInput = Input
         end
@@ -651,39 +679,7 @@ function Library:MakeDraggable(Instance, Cutoff, IsMainWindow, Smooth)
 end
 
 function Library:MakeDraggableUsingParent(Instance, Parent, Cutoff, IsMainWindow)
-    Instance.Active = true
-
-    if Library.IsMobile == false then
-        Instance.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                if IsMainWindow == true and Library.CantDragForced == true then
-                    return
-                end
-  
-                local ObjPos = Vector2.new(
-                    Mouse.X - Parent.AbsolutePosition.X,
-                    Mouse.Y - Parent.AbsolutePosition.Y
-                )
-
-                if ObjPos.Y > (Cutoff or 40) then
-                    return
-                end
-
-                while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-                    Parent.Position = UDim2.new(
-                        0,
-                        Mouse.X - ObjPos.X + (Parent.Size.X.Offset * Parent.AnchorPoint.X),
-                        0,
-                        Mouse.Y - ObjPos.Y + (Parent.Size.Y.Offset * Parent.AnchorPoint.Y)
-                    )
-
-                    RunService.RenderStepped:Wait()
-                end
-            end
-        end)
-    else  
-        Library:MakeDraggable(Parent, Cutoff, IsMainWindow)
-    end
+    Library:MakeDraggable(Parent, Cutoff, IsMainWindow, false, Instance)
 end
 
 function Library:MakeResizable(Instance, MinSize)
@@ -1160,7 +1156,7 @@ local Templates = { -- TO-DO: do it for missing elements.
         ShowCustomCursor = true,
         UnlockMouseWhileOpen = true,
         Center = false,
-        BackgroundImage = "rbxassetid://138978717574592"
+        BackgroundImage = ""
     },
 
     --// Elements \\--
@@ -6929,18 +6925,22 @@ function Library:CreateWindow(...)
     })
     Library.InnerVideoBackground = InnerVideoBackground
 
-    local BackgroundImage = Library:Create("ImageLabel", {
-        Image = "";
-        Position = UDim2.fromScale(0, 0);
+    local BackgroundLabel = Library:Create("TextLabel", {
+        Position = UDim2.fromScale(0.5, 0.5);
+        AnchorPoint = Vector2.new(0.5, 0.5);
         Size = UDim2.fromScale(1, 1);
-        ScaleType = Enum.ScaleType.Stretch;
         ZIndex = 5;
         BackgroundTransparency = 1;
-        ImageTransparency = 0.8;
+        TextTransparency = 0.95;
+        TextSize = 85;
+        Font = Library.Font;
+        RichText = true;
+        Text = "";
+        TextColor3 = Library.FontColor;
         Parent = TabContainer;
-        Visible = true;
+        Visible = false;
     })
-    Library.BackgroundImage = BackgroundImage
+    Library.BackgroundLabel = BackgroundLabel
 
     Library:AddToRegistry(TabContainer, {
         BackgroundColor3 = "MainColor";
@@ -6954,34 +6954,21 @@ function Library:CreateWindow(...)
         end
     end
 
-    function Window:SetBackgroundImage(NewImage)
-        if tonumber(NewImage) then
-            NewImage = "rbxassetid://" .. NewImage
-        end
+    function Window:SetBackgroundText(NewText)
+        assert(typeof(NewText) == "string", "Text must be a string.")
 
-        assert(typeof(NewImage) == "string", "Image must be a string.")
+        BackgroundLabel.Text = NewText
 
-        local Icon = Library:GetCustomIcon(NewImage)
-        if not Icon then
-            BackgroundImage.Visible = false
-            return
-        end
-        
-        assert(Icon, "Image must be a valid Roblox asset or a valid URL or a valid lucide icon.")
-
-        BackgroundImage.Image = Icon.Url
-        BackgroundImage.ImageRectOffset = Icon.ImageRectOffset
-        BackgroundImage.ImageRectSize = Icon.ImageRectSize
-
-        if not Library.HideImages then
-            BackgroundImage.Visible = true
+        if NewText == "" then
+            BackgroundLabel.Visible = false
         else
-            BackgroundImage.Visible = false
+            BackgroundLabel.Visible = true
         end
     end
+    Window.SetBackgroundImage = Window.SetBackgroundText
 
     if WindowInfo.BackgroundImage and WindowInfo.BackgroundImage ~= "" then
-        Window:SetBackgroundImage(WindowInfo.BackgroundImage)
+        Window:SetBackgroundText(WindowInfo.BackgroundImage)
     end
 
     function Window:AddDialog(Idx, Info)
@@ -7779,10 +7766,11 @@ end
         end
 
         function Tab:ShowTab()
-            Library.ActiveTab = Name
             for _, Tab in next, Window.Tabs do
                 Tab:HideTab()
             end
+
+            Library.ActiveTab = Tab
 
             Blocker.BackgroundTransparency = 0
             TabButton.BackgroundColor3 = Library.MainColor
@@ -7794,6 +7782,8 @@ end
             if TabButton.AbsolutePosition.X == 0 then
                 task.spawn(function()
                     repeat task.wait() until TabButton.AbsolutePosition.X ~= 0
+                    task.wait()
+                    task.wait()
                     Tab:UpdateGlider()
                 end)
             else
@@ -8190,6 +8180,14 @@ end
         if Toggled then
             -- A bit scuffed, but if we're going from not toggled -> toggled we want to show the frame immediately so that the fade is visible.
             Outer.Visible = true
+
+            task.spawn(function()
+                task.wait()
+                task.wait()
+                if Library.ActiveTab and Library.ActiveTab.UpdateGlider then
+                    Library.ActiveTab:UpdateGlider()
+                end
+            end)
 
             if DrawingLib.drawing_replaced ~= true and IsBadDrawingLib ~= true then
                 IsBadDrawingLib = not (pcall(function()
