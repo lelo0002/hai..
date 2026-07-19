@@ -655,7 +655,7 @@ function Library:MakeDraggable(UIInstance, Cutoff, IsMainWindow, Smooth, DragHea
                         DragOutline = nil
 
                         if Smooth then
-                            TweenService:Create(Target, TweenInfo.new(0.15, Enum.EasingStyle.Out, Enum.EasingDirection.Quad), { Position = TargetPos }):Play()
+                            TweenService:Create(Target, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = TargetPos }):Play()
                         else
                             Target.Position = TargetPos
                         end
