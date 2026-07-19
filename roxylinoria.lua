@@ -597,9 +597,9 @@ function Library:CreateLabel(Properties, IsHud)
     return Library:Create(_Instance, Properties)
 end
 
-function Library:MakeDraggable(Instance, Cutoff, IsMainWindow, Smooth, DragHeader)
-    local Target = Instance
-    local Header = DragHeader or Instance
+function Library:MakeDraggable(UIInstance, Cutoff, IsMainWindow, Smooth, DragHeader)
+    local Target = UIInstance
+    local Header = DragHeader or UIInstance
     Header.Active = true
 
     local Dragging = false
