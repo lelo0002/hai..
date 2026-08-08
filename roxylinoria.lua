@@ -1,4 +1,4 @@
--- fuck roblox, fuck rivals22222
+-- f
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -1525,6 +1525,7 @@ do
         })
 
         local function UpdateMenuOuterPos()
+            if not ModeSelectOuter.Visible then return end
             ModeSelectOuter.Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y)
         end
 
@@ -1897,40 +1898,56 @@ do
         
             if (not Picking) and (not InputService:GetFocusedTextBox()) then
                 local Key = KeyPicker.Value
-                local HoldingModifiers = AreModifiersHeld(KeyPicker.Modifiers)
-                local HoldingKey = false
+                
+                local IsOurKey = false
+                if Input.UserInputType == Enum.UserInputType.Keyboard then
+                    if Input.KeyCode.Name == Key or table.find(KeyPicker.Modifiers or {}, Input.KeyCode.Name) then
+                        IsOurKey = true
+                    end
+                elseif SpecialKeysInput[Input.UserInputType] == Key then
+                    IsOurKey = true
+                end
 
-                if HoldingModifiers then
-                    if Input.UserInputType == Enum.UserInputType.Keyboard then
-                        if Input.KeyCode.Name == Key then
+                if IsOurKey then
+                    local HoldingModifiers = AreModifiersHeld(KeyPicker.Modifiers)
+                    local HoldingKey = false
+
+                    if HoldingModifiers then
+                        if Input.UserInputType == Enum.UserInputType.Keyboard then
+                            if Input.KeyCode.Name == Key then
+                                HoldingKey = true
+                            end
+                        elseif SpecialKeysInput[Input.UserInputType] == Key then
                             HoldingKey = true
                         end
-                    elseif SpecialKeysInput[Input.UserInputType] == Key then
-                        HoldingKey = true
+                    end
+
+                    if KeyPicker.Mode == "Toggle" then
+                        if HoldingKey then
+                            KeyPicker.Toggled = not KeyPicker.Toggled
+                            KeyPicker:DoClick()
+                            KeyPicker:Update()
+                        end
+                    elseif KeyPicker.Mode == "Press" then
+                        if HoldingKey then
+                            KeyPicker:DoClick()
+                            KeyPicker:Update()
+                        end
+                    else
+                        KeyPicker:Update()
                     end
                 end
-
-                if KeyPicker.Mode == "Toggle" then
-                    if HoldingKey then
-                        KeyPicker.Toggled = not KeyPicker.Toggled
-                        KeyPicker:DoClick()
-                    end
-                elseif KeyPicker.Mode == "Press" then
-                    if HoldingKey then
-                        KeyPicker:DoClick()
-                    end
-                end
-
-                KeyPicker:Update()
             end
 
             if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                local AbsPos, AbsSize = ModeSelectOuter.AbsolutePosition, ModeSelectOuter.AbsoluteSize
+                if ModeSelectOuter.Visible then
+                    local AbsPos, AbsSize = ModeSelectOuter.AbsolutePosition, ModeSelectOuter.AbsoluteSize
 
-                if Mouse.X < AbsPos.X or Mouse.X > AbsPos.X + AbsSize.X
-                    or Mouse.Y < (AbsPos.Y - 20 - 1) or Mouse.Y > AbsPos.Y + AbsSize.Y then
+                    if Mouse.X < AbsPos.X or Mouse.X > AbsPos.X + AbsSize.X
+                        or Mouse.Y < (AbsPos.Y - 20 - 1) or Mouse.Y > AbsPos.Y + AbsSize.Y then
 
-                    KeyPicker:SetModePickerVisibility(false)
+                        KeyPicker:SetModePickerVisibility(false)
+                    end
                 end
             end
         end))
@@ -1941,7 +1958,19 @@ do
             end
 
             if (not Picking) then
-                KeyPicker:Update()
+                local Key = KeyPicker.Value
+                local IsOurKey = false
+                if Input.UserInputType == Enum.UserInputType.Keyboard then
+                    if Input.KeyCode.Name == Key or table.find(KeyPicker.Modifiers or {}, Input.KeyCode.Name) then
+                        IsOurKey = true
+                    end
+                elseif SpecialKeysInput[Input.UserInputType] == Key then
+                    IsOurKey = true
+                end
+
+                if IsOurKey then
+                    KeyPicker:Update()
+                end
             end
         end))
         
@@ -2040,6 +2069,7 @@ do
         })
 
         DisplayFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+            if not PickerFrameOuter.Visible then return end
             PickerFrameOuter.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18)
         end)
 
@@ -2272,6 +2302,7 @@ do
             })
 
             local function updateMenuPosition()
+                if not ContextMenu.Container.Visible then return end
                 ContextMenu.Container.Position = UDim2.fromOffset(
                     (DisplayFrame.AbsolutePosition.X + DisplayFrame.AbsoluteSize.X) + 4,
                     DisplayFrame.AbsolutePosition.Y + 1
@@ -2309,6 +2340,7 @@ do
                 end
 
                 self.Container.Visible = true
+                updateMenuPosition()
             end
 
             function ContextMenu:Hide()
@@ -2437,6 +2469,7 @@ do
 
             PickerFrameOuter.Visible = true
             Library.OpenedFrames[PickerFrameOuter] = true
+            PickerFrameOuter.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18)
         end
 
         function ColorPicker:Hide()
@@ -2573,6 +2606,10 @@ do
 
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if Library.Unloaded then
+                return
+            end
+
+            if not PickerFrameOuter.Visible and not ContextMenu.Container.Visible then
                 return
             end
 
@@ -2778,10 +2815,12 @@ do
         local OpenedXSizeForList = 0
 
         local function RecalculateListPosition()
+            if not ListOuter.Visible then return end
             ListOuter.Position = UDim2.fromOffset(DropdownOuter.AbsolutePosition.X, DropdownOuter.AbsolutePosition.Y + DropdownOuter.Size.Y.Offset + 1)
         end
 
         local function RecalculateListSize(YSize)
+            if not ListOuter.Visible then return end
             local Y = YSize or math.clamp(GetTableSize(Dropdown.Values) * (20 * DPIScale), 0, MAX_DROPDOWN_ITEMS * (20 * DPIScale)) + 1
             ListOuter.Size = UDim2.fromOffset(ListOuter.Visible and OpenedXSizeForList or DropdownOuter.AbsoluteSize.X + 0.5, Y)
         end
@@ -3114,6 +3153,7 @@ end
             DropdownArrow.Rotation = 180
 
             Dropdown:Display()
+            RecalculateListPosition()
             RecalculateListSize()
         end
 
@@ -3201,6 +3241,7 @@ end
         end
 
         InputService.InputBegan:Connect(function(Input)
+            if not ListOuter.Visible then return end
             if Dropdown.Disabled then
                 return
             end
@@ -4818,10 +4859,12 @@ do
         })
 
         local function RecalculateListPosition()
+            if not ListOuter.Visible then return end
             ListOuter.Position = UDim2.fromOffset(DropdownOuter.AbsolutePosition.X, DropdownOuter.AbsolutePosition.Y + DropdownOuter.Size.Y.Offset + 1)
         end
 
         local function RecalculateListSize(YSize)
+            if not ListOuter.Visible then return end
             local Y = YSize or math.clamp(GetTableSize(Dropdown.Values) * (20 * DPIScale), 0, MAX_DROPDOWN_ITEMS * (20 * DPIScale)) + 1
             ListOuter.Size = UDim2.fromOffset(DropdownOuter.AbsoluteSize.X + 0.5, Y)
         end
@@ -5147,6 +5190,7 @@ do
             Library.OpenedFrames[ListOuter] = true
             DropdownArrow.Rotation = 180
 
+            RecalculateListPosition()
             RecalculateListSize()
         end
 
@@ -5236,6 +5280,7 @@ do
         end
 
         InputService.InputBegan:Connect(function(Input)
+            if not ListOuter.Visible then return end
             if Dropdown.Disabled then
                 return
             end
@@ -7491,13 +7536,7 @@ function Library:CreateWindow(...)
             Parent = TabButton;
         })
 
-        TabButton:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
-            if Library.ActiveTab == Tab.Name then
-                local TargetX = TabButton.AbsolutePosition.X - Window.TabButtonContainer.AbsolutePosition.X
-                Window.TabGlider.Position = UDim2.new(0, TargetX, 0, 0)
-                Window.TabGlider.Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
-            end
-        end)
+        -- TabButton:GetPropertyChangedSignal removed to optimize dragging
 
         local Blocker = Library:Create("Frame", {
             BackgroundColor3 = Library.MainColor;
