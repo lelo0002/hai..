@@ -1,4 +1,4 @@
--- f
+--d2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -8287,44 +8287,86 @@ end
             end)
         end
 
-        for _, Desc in next, Outer:GetDescendants() do
-            local Properties = {}
+        local currentDescendants = Outer:GetDescendants()
+        if not Library.FadeCache or Library.FadeCache.Count ~= #currentDescendants then
+            Library.FadeCache = { Count = #currentDescendants, Elements = {} }
+            for _, Desc in next, currentDescendants do
+                local Properties = {}
 
-            if Desc:IsA("ImageLabel") then
-                table.insert(Properties, "ImageTransparency")
-                table.insert(Properties, "BackgroundTransparency")
-
-            elseif Desc:IsA("TextLabel") or Desc:IsA("TextBox") then
-                table.insert(Properties, "TextTransparency")
-
-            elseif Desc:IsA("Frame") or Desc:IsA("ScrollingFrame") then
-                table.insert(Properties, "BackgroundTransparency")
-                
-            elseif Desc:IsA("UIStroke") then
-                table.insert(Properties, "Transparency")
-            end
-
-            local Cache = TransparencyCache[Desc]
-
-            if (not Cache) then
-                Cache = {}
-                TransparencyCache[Desc] = Cache
-            end
-
-            for _, Prop in next, Properties do
-                if not Cache[Prop] then
-                    Cache[Prop] = Desc[Prop]
+                if Desc:IsA("ImageLabel") then
+                    table.insert(Properties, "ImageTransparency")
+                    table.insert(Properties, "BackgroundTransparency")
+                elseif Desc:IsA("TextLabel") or Desc:IsA("TextBox") then
+                    table.insert(Properties, "TextTransparency")
+                elseif Desc:IsA("Frame") or Desc:IsA("ScrollingFrame") then
+                    table.insert(Properties, "BackgroundTransparency")
+                elseif Desc:IsA("UIStroke") then
+                    table.insert(Properties, "Transparency")
                 end
 
-                if Cache[Prop] == 1 then
-                    continue
-                end
+                if #Properties > 0 then
+                    local Cache = TransparencyCache[Desc]
+                    if not Cache then
+                        Cache = {}
+                        TransparencyCache[Desc] = Cache
+                    end
 
-                TweenService:Create(Desc, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { [Prop] = Toggled and Cache[Prop] or 1 }):Play()
+                    for _, Prop in next, Properties do
+                        if not Cache[Prop] then
+                            Cache[Prop] = Desc[Prop]
+                        end
+                        if Cache[Prop] < 1 then
+                            table.insert(Library.FadeCache.Elements, { Desc = Desc, Prop = Prop, Target = Cache[Prop] })
+                        end
+                    end
+                end
             end
         end
 
+        if FadeTime == 0 then
+            local finalAlpha = Toggled and 1 or 0
+            for _, data in next, Library.FadeCache.Elements do
+                if data.Desc.Parent then
+                    data.Desc[data.Prop] = 1 + finalAlpha * (data.Target - 1)
+                end
+            end
+            Outer.Visible = Toggled
+            Fading = false
+            return
+        end
+
+        if not Library.FadeProxy then
+            Library.FadeProxy = Instance.new("NumberValue")
+        end
+        Library.FadeProxy.Value = Toggled and 0 or 1
+
+        local fadeTween = TweenService:Create(Library.FadeProxy, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { Value = Toggled and 1 or 0 })
+        
+        if Library.FadeConnection then Library.FadeConnection:Disconnect() end
+        Library.FadeConnection = RunService.RenderStepped:Connect(function()
+            local alpha = Library.FadeProxy.Value
+            for _, data in next, Library.FadeCache.Elements do
+                if data.Desc.Parent then
+                    data.Desc[data.Prop] = 1 + alpha * (data.Target - 1)
+                end
+            end
+        end)
+
+        fadeTween:Play()
         task.wait(FadeTime)
+        
+        if Library.FadeConnection then
+            Library.FadeConnection:Disconnect()
+            Library.FadeConnection = nil
+        end
+        
+        local finalAlpha = Toggled and 1 or 0
+        for _, data in next, Library.FadeCache.Elements do
+            if data.Desc.Parent then
+                data.Desc[data.Prop] = 1 + finalAlpha * (data.Target - 1)
+            end
+        end
+
         Outer.Visible = Toggled
         Fading = false
     end
