@@ -1,4 +1,4 @@
---d2
+--d22323
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -20,7 +20,8 @@ if typeof(getgenv) == "function" and typeof(getgenv().Drawing) == "table" then
     DrawingLib = getgenv().Drawing
 end
 
-local setclipboard = setclipboard or nil
+local setclipboard = setclipboard or toclipboard or set_clipboard or (syn and syn.write_clipboard) or (Clipboard and Clipboard.set) or function(...) end
+local getclipboard = getclipboard or get_clipboard or (syn and syn.read_clipboard) or (Clipboard and Clipboard.get) or nil
 local getgenv = getgenv or function()
 	return shared
 end
@@ -1526,10 +1527,13 @@ do
 
         local function UpdateMenuOuterPos()
             if not ModeSelectOuter.Visible then return end
-            ModeSelectOuter.Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y)
+            ModeSelectOuter.Position = UDim2.fromOffset(PickOuter.AbsolutePosition.X + PickOuter.AbsoluteSize.X + 4, PickOuter.AbsolutePosition.Y)
         end
 
         UpdateMenuOuterPos()
+        if PickOuter then
+            PickOuter:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateMenuOuterPos)
+        end
         if ToggleLabel then
             ToggleLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateMenuOuterPos)
         end
@@ -1806,6 +1810,9 @@ do
 
         function KeyPicker:SetModePickerVisibility(bool)
             ModeSelectOuter.Visible = bool
+            if bool then
+                UpdateMenuOuterPos()
+            end
         end
 
         function KeyPicker:GetModePickerVisibility()
@@ -2372,11 +2379,12 @@ do
                 )
 
                 Button.InputBegan:Connect(function(Input)
-                    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 or Input.UserInputType ~= Enum.UserInputType.Touch then
+                    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then
                         return
                     end
 
                     Callback()
+                    ContextMenu:Hide()
                 end)
             end
 
@@ -2387,12 +2395,34 @@ do
 
             ColorPicker.SetValueRGB = function(...) end --// make luau lsp shut up
             ContextMenu:AddOption("Paste color", function()
-                if not Library.ColorClipboard then
-                    Library:Notify("You have not copied a color!", 2)
+                if Library.ColorClipboard then
+                    ColorPicker:SetValueRGB(Library.ColorClipboard, ColorPicker.Transparency)
+                    Library:Notify("Pasted color!", 2)
                     return
                 end
 
-                ColorPicker:SetValueRGB(Library.ColorClipboard)
+                if getclipboard then
+                    local success, text = pcall(getclipboard)
+                    if success and typeof(text) == "string" then
+                        text = text:gsub("%s+", "")
+                        local hexSuccess, hexColor = pcall(Color3.fromHex, text)
+                        if hexSuccess and typeof(hexColor) == "Color3" then
+                            ColorPicker:SetValueRGB(hexColor, ColorPicker.Transparency)
+                            Library:Notify("Pasted color from clipboard!", 2)
+                            return
+                        end
+
+                        local r, g, b = text:match("(%d+),(%d+),(%d+)")
+                        if r and g and b then
+                            local rgbColor = Color3.fromRGB(tonumber(r), tonumber(g), tonumber(b))
+                            ColorPicker:SetValueRGB(rgbColor, ColorPicker.Transparency)
+                            Library:Notify("Pasted color from clipboard!", 2)
+                            return
+                        end
+                    end
+                end
+
+                Library:Notify("You have not copied a color!", 2)
             end)
 
             ContextMenu:AddOption("Copy HEX", function()
@@ -2493,7 +2523,7 @@ do
         end
 
         function ColorPicker:SetValueRGB(Color, Transparency)
-            ColorPicker.Transparency = Transparency or 0
+            ColorPicker.Transparency = Transparency or ColorPicker.Transparency or 0
             ColorPicker:SetHSVFromRGB(Color)
             ColorPicker:Display()
 
