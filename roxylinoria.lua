@@ -1,4 +1,4 @@
---d22323
+--d2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -288,6 +288,7 @@ local Library = {
     ShowCustomCursor = true;
     HideImages = false;
     ShowToggleFrameInKeybinds = false;
+    ShowUntoggledKeybinds = false;
     NotifyOnError = false; -- true = Library:Notify for SafeCallback (still warns in the developer console)
 
     -- addons --
@@ -1673,7 +1674,7 @@ do
             if KeybindsToggle.Loaded then
                 KeybindsToggle:SetNormal(not ShowToggle)
 
-                local ShowKeybind = State and KeyPicker.Value ~= "None" and KeyPicker.Value ~= "Unknown"
+                local ShowKeybind = (State or Library.ShowUntoggledKeybinds) and KeyPicker.Value ~= "None" and KeyPicker.Value ~= "Unknown"
                 KeybindsToggle:SetVisibility(ShowKeybind)
                 KeybindsToggle:SetText(string.format("[%s] %s (%s)", tostring(KeyPicker.DisplayValue), Info.Text, KeyPicker.Mode))
                 KeybindsToggle:Display(State)
@@ -6447,6 +6448,15 @@ do
 
     function Library:SetWatermarkVisibility(Bool)
         Library.Watermark.Visible = Bool
+    end
+
+    function Library:SetShowUntoggledKeybinds(Bool)
+        Library.ShowUntoggledKeybinds = Bool
+        for _, Option in next, Options do
+            if Option.Type == "KeyPicker" then
+                Option:Update()
+            end
+        end
     end
 
     function Library:SetWatermark(Text)
