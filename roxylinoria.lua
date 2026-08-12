@@ -1,4 +1,4 @@
---d2 fix nigga
+--d2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -1588,6 +1588,7 @@ do
                 Library.RegistryMap[Label].Properties.TextColor3 = "AccentColor"
 
                 ModeSelectOuter.Visible = false
+                KeyPicker:Update()
             end
 
             function ModeButton:Deselect()
