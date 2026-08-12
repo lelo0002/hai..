@@ -1,4 +1,4 @@
---dpetterfgriffn
+--d2
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -1588,7 +1588,7 @@ do
                 Library.RegistryMap[Label].Properties.TextColor3 = "AccentColor"
 
                 ModeSelectOuter.Visible = false
-                if KeyPicker.Update then
+                if type(KeyPicker.Update) == "function" then
                     KeyPicker:Update()
                 end
             end
@@ -1607,7 +1607,9 @@ do
             end)
 
             if Mode == KeyPicker.Mode then
-                ModeButton:Select()
+                KeyPicker.Mode = Mode
+                Label.TextColor3 = Library.AccentColor
+                Library.RegistryMap[Label].Properties.TextColor3 = "AccentColor"
             end
 
             ModeButtons[Mode] = ModeButton
