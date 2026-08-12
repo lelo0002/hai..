@@ -1,4 +1,4 @@
---d2
+--dpetterfgriffn
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -1588,7 +1588,9 @@ do
                 Library.RegistryMap[Label].Properties.TextColor3 = "AccentColor"
 
                 ModeSelectOuter.Visible = false
-                KeyPicker:Update()
+                if KeyPicker.Update then
+                    KeyPicker:Update()
+                end
             end
 
             function ModeButton:Deselect()
