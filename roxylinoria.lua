@@ -1,4 +1,4 @@
---d2
+--d223323
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
@@ -673,11 +673,11 @@ function Library:MakeDraggable(UIInstance, Cutoff, IsMainWindow, Smooth, DragHea
         end
     end)
 
-    Library:GiveSignal(RunService.RenderStepped:Connect(function()
+    Library:GiveSignal(RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
         if Dragging and DragInput then
             Update(DragInput)
         end
-    end))
+    end)))
 end
 
 function Library:MakeDraggableUsingParent(Instance, Parent, Cutoff, IsMainWindow)
@@ -8388,14 +8388,14 @@ end
         local fadeTween = TweenService:Create(Library.FadeProxy, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { Value = Toggled and 1 or 0 })
         
         if Library.FadeConnection then Library.FadeConnection:Disconnect() end
-        Library.FadeConnection = RunService.RenderStepped:Connect(function()
+        Library.FadeConnection = RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
             local alpha = Library.FadeProxy.Value
             for _, data in next, Library.FadeCache.Elements do
                 if data.Desc.Parent then
                     data.Desc[data.Prop] = 1 + alpha * (data.Target - 1)
                 end
             end
-        end)
+        end))
 
         fadeTween:Play()
         task.wait(FadeTime)
@@ -8627,7 +8627,7 @@ Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
 local RainbowStep = 0
 local Hue = 0
 
-Library:GiveSignal(RunService.RenderStepped:Connect(function(Delta)
+Library:GiveSignal(RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function(Delta)
     if Library.Unloaded then
         return
     end
@@ -8645,7 +8645,7 @@ Library:GiveSignal(RunService.RenderStepped:Connect(function(Delta)
         Library.CurrentRainbowHue = Hue
         Library.CurrentRainbowColor = Color3.fromHSV(Hue, 0.8, 1)
     end
-end))
+end)))
 
 --// Player List Addon \\--
 Library.PlayerList = {
