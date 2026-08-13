@@ -1,4 +1,10 @@
---d223323
+--d2
+if not LPH_OBFUSCATED then
+    local fallback = function(...) return (...) end
+    pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
+    _G.LPH_NO_VIRTUALIZE = fallback
+    LPH_NO_VIRTUALIZE = fallback
+end
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
 end)
