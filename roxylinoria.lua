@@ -1,4 +1,4 @@
---d2
+--d2323232
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -95,7 +95,8 @@ ModalElement.Parent = ScreenGui
 
 local LibraryMainOuterFrame = nil
 
-local Toggles = setmetatable({}, {
+local Toggles, Options
+Toggles = setmetatable({}, {
     __index = function(t, k)
         if typeof(k) == "string" and k:lower() == "options" then
             return Options
@@ -104,7 +105,7 @@ local Toggles = setmetatable({}, {
     end
 })
 
-local Options = setmetatable({}, {
+Options = setmetatable({}, {
     __index = function(t, k)
         if typeof(k) == "string" and k:lower() == "toggles" then
             return Toggles
@@ -1173,7 +1174,7 @@ function Library:UpdateAccentGradients()
 
                         if parent.Name == "VerticalLine" or parent.Name == "SideColor" then
                             grad.Rotation = 90
-                        elif parent.Name == "Highlight" or parent.Name == "TabGlider" or parent.Name == "Fill" or parent.Name == "ColorFrame" then
+                        elseif parent.Name == "Highlight" or parent.Name == "TabGlider" or parent.Name == "Fill" or parent.Name == "ColorFrame" then
                             grad.Rotation = 0
                         else
                             grad.Rotation = 135
