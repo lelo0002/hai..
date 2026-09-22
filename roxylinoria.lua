@@ -244,7 +244,14 @@ local Library = {
 		BackgroundColor = Color3.fromRGB(28, 28, 28),
 
 		AccentColor = Color3.fromRGB(210, 207, 231),
+		AccentColor2 = Color3.fromRGB(130, 120, 200),
 		DisabledAccentColor = Color3.fromRGB(142, 142, 142),
+
+		AccentGradientEnabled = true,
+		AccentSpinEnabled = false,
+		AccentSpinSpeed = 1,
+		AccentSpinAngle = 135,
+		AccentGradients = {},
 
 		OutlineColor = Color3.fromRGB(55,55,55),
 		DisabledOutlineColor = Color3.fromRGB(70, 70, 70),
@@ -1044,6 +1051,69 @@ function Library:GetDarkerColor(Color)
 end
 Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor)
 
+function Library:CreateAccentGradient(Parent, Options)
+    if not Parent or typeof(Parent) ~= "Instance" then return nil end
+    local existing = Parent:FindFirstChild("AccentGradient")
+    if existing and existing:IsA("UIGradient") then
+        return existing
+    end
+
+    Options = Options or {}
+    local Gradient = Instance.new("UIGradient")
+    Gradient.Name = "AccentGradient"
+    Gradient.Rotation = Options.Rotation or Library.AccentSpinAngle or 135
+    Gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Library.AccentColor),
+        ColorSequenceKeypoint.new(1, Library.AccentColor2 or Library.AccentColor)
+    })
+
+    pcall(function() Gradient.Parent = Parent end)
+    table.insert(Library.AccentGradients, Gradient)
+
+    pcall(function()
+        Parent.Destroying:Connect(function()
+            local idx = table.find(Library.AccentGradients, Gradient)
+            if idx then
+                table.remove(Library.AccentGradients, idx)
+            end
+        end)
+    end)
+
+    return Gradient
+end
+
+function Library:UpdateAccentGradients()
+    local colorSeq = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Library.AccentColor),
+        ColorSequenceKeypoint.new(1, Library.AccentColor2 or Library.AccentColor)
+    })
+
+    for i = #Library.AccentGradients, 1, -1 do
+        local grad = Library.AccentGradients[i]
+        if grad and grad.Parent then
+            grad.Color = colorSeq
+            if not Library.AccentSpinEnabled then
+                grad.Rotation = 135
+            end
+
+            local parent = grad.Parent
+            local regData = Library.RegistryMap[parent]
+            if regData then
+                local isAccentActive = false
+                for _, propVal in next, regData.Properties do
+                    if propVal == "AccentColor" or propVal == "AccentColor2" then
+                        isAccentActive = true
+                        break
+                    end
+                end
+                grad.Enabled = isAccentActive
+            end
+        else
+            table.remove(Library.AccentGradients, i)
+        end
+    end
+end
+
 function Library:AddToRegistry(Instance, Properties, IsHud)
     local Idx = #Library.Registry + 1
     local Data = {
@@ -1057,6 +1127,15 @@ function Library:AddToRegistry(Instance, Properties, IsHud)
 
     if IsHud then
         table.insert(Library.HudRegistry, Data)
+    end
+
+    if Instance and (Instance:IsA("GuiObject") or Instance:IsA("UIStroke")) then
+        for Prop, Val in next, Properties do
+            if Val == "AccentColor" or Val == "AccentColor2" then
+                Library:CreateAccentGradient(Instance)
+                break
+            end
+        end
     end
 end
 
@@ -1081,22 +1160,19 @@ function Library:RemoveFromRegistry(Instance)
 end
 
 function Library:UpdateColorsUsingRegistry()
-    -- TODO: Could have an "active" list of objects
-    -- where the active list only contains Visible objects.
-
-    -- IMPL: Could setup .Changed events on the AddToRegistry function
-    -- that listens for the "Visible" propert being changed.
-    -- Visible: true => Add to active list, and call UpdateColors function
-    -- Visible: false => Remove from active list.
-
-    -- The above would be especially efficient for a rainbow menu color or live color-changing.
+    Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor)
+    Library:UpdateAccentGradients()
 
     for _, Object in next, Library.Registry do
         local inst = Object.Instance
         if not inst or not inst.Parent then continue end
         for Property, ColorIdx in next, Object.Properties do
             if typeof(ColorIdx) == "string" then
-                pcall(function() inst[Property] = Library[ColorIdx] end)
+                if (ColorIdx == "AccentColor" or ColorIdx == "AccentColor2") and inst:FindFirstChild("AccentGradient") then
+                    pcall(function() inst[Property] = Color3.new(1, 1, 1) end)
+                else
+                    pcall(function() inst[Property] = Library[ColorIdx] end)
+                end
             elseif typeof(ColorIdx) == "function" then
                 pcall(function() inst[Property] = ColorIdx() end)
             end
