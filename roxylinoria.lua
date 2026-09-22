@@ -1,4 +1,4 @@
---d2323232
+--d2
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -1085,9 +1085,13 @@ function Library:CreateAccentGradient(Parent, Options)
     local Gradient = Instance.new("UIGradient")
     Gradient.Name = "AccentGradient"
     Gradient.Rotation = Options.Rotation or 135
+
+    local c1 = Library.AccentColor
+    local c2 = Library.AccentColor2 or Library.AccentColor
+
     Gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Library.AccentColor),
-        ColorSequenceKeypoint.new(1, Library.AccentColor2 or Library.AccentColor)
+        ColorSequenceKeypoint.new(0, c1),
+        ColorSequenceKeypoint.new(1, c2)
     })
 
     pcall(function() Gradient.Parent = Parent end)
@@ -1105,26 +1109,17 @@ function Library:CreateAccentGradient(Parent, Options)
     return Gradient
 end
 
+function Library:SetAccentColor(Color1, Color2)
+    if typeof(Color1) == "Color3" then
+        Library.AccentColor = Color1
+    end
+    if typeof(Color2) == "Color3" then
+        Library.AccentColor2 = Color2
+    end
+    Library:UpdateColorsUsingRegistry()
+end
+
 function Library:UpdateAccentGradients()
-    local mainFrame = LibraryMainOuterFrame
-    if not mainFrame or not mainFrame.Parent then
-        if Library.Window and Library.Window.Holder then
-            mainFrame = Library.Window.Holder
-        end
-    end
-
-    local winPos, winSize
-    if mainFrame and mainFrame.Parent then
-        pcall(function()
-            winPos = mainFrame.AbsolutePosition
-            winSize = mainFrame.AbsoluteSize
-        end)
-    end
-    if not winPos or not winSize or winSize.X < 5 or winSize.Y < 5 then
-        winPos = Vector2.new(0, 0)
-        winSize = Vector2.new(600, 400)
-    end
-
     local c1 = Library.AccentColor
     local c2 = Library.AccentColor2 or Library.AccentColor
 
@@ -1137,55 +1132,14 @@ function Library:UpdateAccentGradients()
 
             if isVisible then
                 grad.Enabled = true
-                if Library.AccentSpinEnabled then
-                    grad.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, c1),
-                        ColorSequenceKeypoint.new(1, c2)
-                    })
-                    grad.Rotation = Library.AccentSpinAngle or 135
+                grad.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, c1),
+                    ColorSequenceKeypoint.new(1, c2)
+                })
+                if parent.Name == "VerticalLine" or parent.Name == "SideColor" then
+                    grad.Rotation = 90
                 else
-                    local ePos, eSize
-                    pcall(function()
-                        ePos = parent.AbsolutePosition
-                        eSize = parent.AbsoluteSize
-                    end)
-
-                    if ePos and eSize then
-                        local x0 = math.clamp((ePos.X - winPos.X) / winSize.X, 0, 1)
-                        local y0 = math.clamp((ePos.Y - winPos.Y) / winSize.Y, 0, 1)
-                        local x1 = math.clamp((ePos.X + eSize.X - winPos.X) / winSize.X, 0, 1)
-                        local y1 = math.clamp((ePos.Y + eSize.Y - winPos.Y) / winSize.Y, 0, 1)
-
-                        local t0 = math.clamp((x0 + y0) / 2, 0, 1)
-                        local t1 = math.clamp((x1 + y1) / 2, 0, 1)
-
-                        if math.abs(t1 - t0) < 0.05 then
-                            t1 = math.clamp(t0 + 0.05, 0, 1)
-                            if t1 == t0 then t0 = math.clamp(t1 - 0.05, 0, 1) end
-                        end
-
-                        local colorStart = c1:Lerp(c2, t0)
-                        local colorEnd = c1:Lerp(c2, t1)
-
-                        grad.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, colorStart),
-                            ColorSequenceKeypoint.new(1, colorEnd)
-                        })
-
-                        if parent.Name == "VerticalLine" or parent.Name == "SideColor" then
-                            grad.Rotation = 90
-                        elseif parent.Name == "Highlight" or parent.Name == "TabGlider" or parent.Name == "Fill" or parent.Name == "ColorFrame" then
-                            grad.Rotation = 0
-                        else
-                            grad.Rotation = 135
-                        end
-                    else
-                        grad.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, c1),
-                            ColorSequenceKeypoint.new(1, c2)
-                        })
-                        grad.Rotation = 135
-                    end
+                    grad.Rotation = 135
                 end
             end
         else
@@ -6593,7 +6547,20 @@ do
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = "AccentColor";
     })
-    Library:CreateAccentGradient(WatermarkInner)
+
+    local WatermarkAccentLine = Library:Create("Frame", {
+        Name = "AccentLine",
+        BackgroundColor3 = Library.AccentColor,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 2),
+        ZIndex = 205,
+        Parent = WatermarkInner,
+    })
+    Library:CreateAccentGradient(WatermarkAccentLine, { Rotation = 135 })
+    Library:AddToRegistry(WatermarkAccentLine, {
+        BackgroundColor3 = "AccentColor",
+    })
 
     local InnerFrame = Library:Create("Frame", {
         BackgroundColor3 = Color3.new(1, 1, 1);
@@ -7054,11 +7021,24 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Outer;
     })
-    Library:CreateAccentGradient(Inner)
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = "MainColor";
         BorderColor3 = "AccentColor";
+    })
+
+    local WindowAccentLine = Library:Create("Frame", {
+        Name = "AccentLine",
+        BackgroundColor3 = Library.AccentColor,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 2),
+        ZIndex = 10,
+        Parent = Inner,
+    })
+    Library:CreateAccentGradient(WindowAccentLine, { Rotation = 135 })
+    Library:AddToRegistry(WindowAccentLine, {
+        BackgroundColor3 = "AccentColor",
     })
 
     local WindowLabel = Library:CreateLabel({
