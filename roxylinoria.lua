@@ -1,4 +1,4 @@
---d233
+--d2
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -1096,7 +1096,7 @@ function Library:CreateAccentGradient(Parent, Options)
 
     if Parent:IsA("UIStroke") then
         Gradient.Rotation = Options.Rotation or 135
-    elif Parent.Name == "VerticalLine" or Parent.Name == "SideColor" then
+    elseif Parent.Name == "VerticalLine" or Parent.Name == "SideColor" then
         Gradient.Rotation = Options.Rotation or 90
     else
         Gradient.Rotation = Options.Rotation or 0
