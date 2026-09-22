@@ -1,4 +1,4 @@
---d2
+--d233
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -7,6 +7,11 @@ if not LPH_OBFUSCATED then
 end
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
+end)
+pcall(function()
+    if getgenv().Linoria and typeof(getgenv().Linoria) == "table" and typeof(getgenv().Linoria.Unload) == "function" then
+        getgenv().Linoria:Unload()
+    end
 end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"))
 local TextService: TextService = cloneref(game:GetService("TextService"))
@@ -9261,9 +9266,6 @@ function Library.PlayerList:UpdateSelection()
 end
 
 ----
-if getgenv().Linoria and typeof(getgenv().Linoria) == "table" and typeof(getgenv().Linoria.Unload) == "function" then
-    pcall(function() getgenv().Linoria:Unload() end)
-end
 getgenv().Linoria = Library
 if getgenv().skip_getgenv_linoria ~= true then getgenv().Library = Library end
 return Library
