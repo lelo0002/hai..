@@ -48,7 +48,7 @@ if typeof(clonefunction) == "function" then
 end
 
 local ThemeManager = {} do
-	local ThemeFields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor", "VideoLink" }
+	local ThemeFields = { "FontColor", "MainColor", "AccentColor", "AccentColor2", "BackgroundColor", "OutlineColor", "VideoLink" }
 	ThemeManager.Folder = "LinoriaLibSettings"
 	-- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
 
@@ -214,6 +214,15 @@ ThemeManager.BuiltInThemes = {
 			end
 		end
 
+		if not (customThemeData and customThemeData.AccentColor2) and not (scheme and scheme.AccentColor2) then
+			local accent1 = self.Library.AccentColor
+			local accent2 = self.Library:GetDarkerColor(accent1):Lerp(Color3.new(1, 1, 1), 0.3)
+			self.Library.AccentColor2 = accent2
+			if self.Library.Options and self.Library.Options.AccentColor2 then
+				self.Library.Options.AccentColor2:SetValueRGB(accent2)
+			end
+		end
+
 		self:ThemeUpdate()
 	end
 
@@ -344,7 +353,16 @@ ThemeManager.BuiltInThemes = {
 	function ThemeManager:CreateThemeManager(groupbox)
 		groupbox:AddLabel('Background color'):AddColorPicker('BackgroundColor', { Default = self.Library.BackgroundColor });
 		groupbox:AddLabel('Main color')	:AddColorPicker('MainColor', { Default = self.Library.MainColor });
-		groupbox:AddLabel('Accent color'):AddColorPicker('AccentColor', { Default = self.Library.AccentColor });
+		local AccentLabel = groupbox:AddLabel('Accent color')
+		AccentLabel:AddColorPicker('AccentColor', { Default = self.Library.AccentColor, Title = 'Accent Color 1' })
+		AccentLabel:AddColorPicker('AccentColor2', { Default = self.Library.AccentColor2 or Color3.fromRGB(130, 120, 200), Title = 'Accent Color 2' })
+
+		local SpinToggle = groupbox:AddToggle('AccentSpin', { Text = 'spins', Default = false })
+		local SpinDepbox = groupbox:AddDependencyBox()
+		SpinDepbox:AddSlider('AccentSpinSpeed', { Text = 'Spin speed', Default = 1, Min = 0.1, Max = 10, Rounding = 1, Compact = false })
+		SpinDepbox:SetupDependencies({
+			{ SpinToggle, true }
+		})
 		groupbox:AddLabel('Outline color'):AddColorPicker('OutlineColor', { Default = self.Library.OutlineColor });
 		groupbox:AddLabel('Font color')	:AddColorPicker('FontColor', { Default = self.Library.FontColor });
 		groupbox:AddInput('VideoLink', { Text = '.webm Video Background (Link)', Default = self.Library.VideoLink });
@@ -441,6 +459,23 @@ ThemeManager.BuiltInThemes = {
 		self.Library.Options.BackgroundColor:OnChanged(UpdateTheme)
 		self.Library.Options.MainColor:OnChanged(UpdateTheme)
 		self.Library.Options.AccentColor:OnChanged(UpdateTheme)
+		if self.Library.Options.AccentColor2 then
+			self.Library.Options.AccentColor2:OnChanged(UpdateTheme)
+		end
+		if self.Library.Options.AccentSpin then
+			self.Library.Options.AccentSpin:OnChanged(function()
+				self.Library.AccentSpinEnabled = self.Library.Options.AccentSpin.Value
+				if not self.Library.AccentSpinEnabled then
+					self.Library.AccentSpinAngle = 135
+					self.Library:UpdateAccentGradients()
+				end
+			end)
+		end
+		if self.Library.Options.AccentSpinSpeed then
+			self.Library.Options.AccentSpinSpeed:OnChanged(function()
+				self.Library.AccentSpinSpeed = self.Library.Options.AccentSpinSpeed.Value
+			end)
+		end
 		self.Library.Options.OutlineColor:OnChanged(UpdateTheme)
 		self.Library.Options.FontColor:OnChanged(UpdateTheme)
 	end
