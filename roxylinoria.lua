@@ -1,4 +1,4 @@
---d2
+--d3333
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -1061,7 +1061,7 @@ function Library:CreateAccentGradient(Parent, Options)
     Options = Options or {}
     local Gradient = Instance.new("UIGradient")
     Gradient.Name = "AccentGradient"
-    Gradient.Rotation = Options.Rotation or Library.AccentSpinAngle or 135
+    Gradient.Rotation = Options.Rotation or 135
     Gradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Library.AccentColor),
         ColorSequenceKeypoint.new(1, Library.AccentColor2 or Library.AccentColor)
@@ -1083,30 +1083,85 @@ function Library:CreateAccentGradient(Parent, Options)
 end
 
 function Library:UpdateAccentGradients()
-    local colorSeq = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Library.AccentColor),
-        ColorSequenceKeypoint.new(1, Library.AccentColor2 or Library.AccentColor)
-    })
+    local mainFrame = LibraryMainOuterFrame
+    if not mainFrame or not mainFrame.Parent then
+        if Library.Window and Library.Window.Holder then
+            mainFrame = Library.Window.Holder
+        end
+    end
+
+    local winPos, winSize
+    if mainFrame and mainFrame.Parent then
+        pcall(function()
+            winPos = mainFrame.AbsolutePosition
+            winSize = mainFrame.AbsoluteSize
+        end)
+    end
+    if not winPos or not winSize or winSize.X < 5 or winSize.Y < 5 then
+        winPos = Vector2.new(0, 0)
+        winSize = Vector2.new(600, 400)
+    end
+
+    local c1 = Library.AccentColor
+    local c2 = Library.AccentColor2 or Library.AccentColor
 
     for i = #Library.AccentGradients, 1, -1 do
         local grad = Library.AccentGradients[i]
         if grad and grad.Parent then
-            grad.Color = colorSeq
-            if not Library.AccentSpinEnabled then
-                grad.Rotation = 135
-            end
-
             local parent = grad.Parent
-            local regData = Library.RegistryMap[parent]
-            if regData then
-                local isAccentActive = false
-                for _, propVal in next, regData.Properties do
-                    if propVal == "AccentColor" or propVal == "AccentColor2" then
-                        isAccentActive = true
-                        break
+            local isVisible = true
+            pcall(function() isVisible = parent.Visible end)
+
+            if isVisible then
+                grad.Enabled = true
+                if Library.AccentSpinEnabled then
+                    grad.Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, c1),
+                        ColorSequenceKeypoint.new(1, c2)
+                    })
+                    grad.Rotation = Library.AccentSpinAngle or 135
+                else
+                    local ePos, eSize
+                    pcall(function()
+                        ePos = parent.AbsolutePosition
+                        eSize = parent.AbsoluteSize
+                    end)
+
+                    if ePos and eSize then
+                        local x0 = math.clamp((ePos.X - winPos.X) / winSize.X, 0, 1)
+                        local y0 = math.clamp((ePos.Y - winPos.Y) / winSize.Y, 0, 1)
+                        local x1 = math.clamp((ePos.X + eSize.X - winPos.X) / winSize.X, 0, 1)
+                        local y1 = math.clamp((ePos.Y + eSize.Y - winPos.Y) / winSize.Y, 0, 1)
+
+                        local t0 = math.clamp((x0 + y0) / 2, 0, 1)
+                        local t1 = math.clamp((x1 + y1) / 2, 0, 1)
+
+                        if math.abs(t1 - t0) < 0.05 then
+                            t1 = math.clamp(t0 + 0.05, 0, 1)
+                            if t1 == t0 then t0 = math.clamp(t1 - 0.05, 0, 1) end
+                        end
+
+                        local colorStart = c1:Lerp(c2, t0)
+                        local colorEnd = c1:Lerp(c2, t1)
+
+                        grad.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, colorStart),
+                            ColorSequenceKeypoint.new(1, colorEnd)
+                        })
+
+                        if parent.Name == "VerticalLine" then
+                            grad.Rotation = 90
+                        else
+                            grad.Rotation = 135
+                        end
+                    else
+                        grad.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, c1),
+                            ColorSequenceKeypoint.new(1, c2)
+                        })
+                        grad.Rotation = 135
                     end
                 end
-                grad.Enabled = isAccentActive
             end
         else
             table.remove(Library.AccentGradients, i)
@@ -1127,15 +1182,6 @@ function Library:AddToRegistry(Instance, Properties, IsHud)
 
     if IsHud then
         table.insert(Library.HudRegistry, Data)
-    end
-
-    if Instance and (Instance:IsA("GuiObject") or Instance:IsA("UIStroke")) then
-        for Prop, Val in next, Properties do
-            if Val == "AccentColor" or Val == "AccentColor2" then
-                Library:CreateAccentGradient(Instance)
-                break
-            end
-        end
     end
 end
 
@@ -1161,23 +1207,20 @@ end
 
 function Library:UpdateColorsUsingRegistry()
     Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor)
-    Library:UpdateAccentGradients()
 
     for _, Object in next, Library.Registry do
         local inst = Object.Instance
         if not inst or not inst.Parent then continue end
         for Property, ColorIdx in next, Object.Properties do
             if typeof(ColorIdx) == "string" then
-                if (ColorIdx == "AccentColor" or ColorIdx == "AccentColor2") and inst:FindFirstChild("AccentGradient") then
-                    pcall(function() inst[Property] = Color3.new(1, 1, 1) end)
-                else
-                    pcall(function() inst[Property] = Library[ColorIdx] end)
-                end
+                pcall(function() inst[Property] = Library[ColorIdx] end)
             elseif typeof(ColorIdx) == "function" then
                 pcall(function() inst[Property] = ColorIdx() end)
             end
         end
     end
+
+    Library:UpdateAccentGradients()
 end
 
 function Library:GiveSignal(Connection: RBXScriptConnection | RBXScriptSignal) -- Only used for signals not attached to library instances, as those should be cleaned up on object destruction by Roblox
@@ -6155,6 +6198,7 @@ function BaseGroupboxFuncs:AddDependencyBox()
     })
 
     local LineGradient = Library:Create("UIGradient", {
+        Name = "AccentGradient",
         Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 1),
             NumberSequenceKeypoint.new(0.3, 0),
@@ -6164,6 +6208,7 @@ function BaseGroupboxFuncs:AddDependencyBox()
         Rotation = 90,
         Parent = VerticalLine
     })
+    table.insert(Library.AccentGradients, LineGradient)
 
     Library:AddToRegistry(VerticalLine, {
         BackgroundColor3 = "AccentColor";
@@ -6421,12 +6466,13 @@ do
     }, true)
 
     local ColorFrame = Library:Create("Frame", {
-        BackgroundColor3 = Library.AccentColor;
+        BackgroundColor3 = Color3.new(1, 1, 1);
         BorderSizePixel = 0;
         Size = UDim2.new(1, 0, 0, 2);
         ZIndex = 102;
         Parent = KeybindInner;
     })
+    Library:CreateAccentGradient(ColorFrame)
 
     Library:AddToRegistry(ColorFrame, {
         BackgroundColor3 = "AccentColor";
@@ -6492,6 +6538,7 @@ do
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = "AccentColor";
     })
+    Library:CreateAccentGradient(WatermarkInner)
 
     local InnerFrame = Library:Create("Frame", {
         BackgroundColor3 = Color3.new(1, 1, 1);
@@ -6769,6 +6816,7 @@ do
         Library:AddToRegistry(SideColor, {
             BackgroundColor3 = "AccentColor";
         }, true)
+        Library:CreateAccentGradient(SideColor)
 
         function Data:Resize()
             XSize, YSize = Library:GetTextBounds(NotifyLabel.Text, Library.Font, 14)
@@ -6951,6 +6999,7 @@ function Library:CreateWindow(...)
         ZIndex = 1;
         Parent = Outer;
     })
+    Library:CreateAccentGradient(Inner)
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = "MainColor";
@@ -7026,7 +7075,7 @@ function Library:CreateWindow(...)
     })
 
     local TabGlider = Library:Create("Frame", {
-        BackgroundColor3 = Library.AccentColor;
+        BackgroundColor3 = Color3.new(1, 1, 1);
         BorderSizePixel = 0;
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(0, 0, 0, 1);
@@ -7034,6 +7083,7 @@ function Library:CreateWindow(...)
         Parent = TabArea;
         Visible = false;
     })
+    Library:CreateAccentGradient(TabGlider)
 
     Window.TabGlider = TabGlider
 
