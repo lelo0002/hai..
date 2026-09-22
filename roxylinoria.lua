@@ -1,4 +1,4 @@
---d3333
+--d2
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -1149,8 +1149,10 @@ function Library:UpdateAccentGradients()
                             ColorSequenceKeypoint.new(1, colorEnd)
                         })
 
-                        if parent.Name == "VerticalLine" then
+                        if parent.Name == "VerticalLine" or parent.Name == "SideColor" then
                             grad.Rotation = 90
+                        elif parent.Name == "Highlight" or parent.Name == "TabGlider" or parent.Name == "Fill" or parent.Name == "ColorFrame" then
+                            grad.Rotation = 0
                         else
                             grad.Rotation = 135
                         end
@@ -1233,6 +1235,9 @@ function Library:GiveSignal(Connection: RBXScriptConnection | RBXScriptSignal) -
 end
 
 function Library:Unload()
+    pcall(function() RunService:UnbindFromRenderStep("LinoriaCursor") end)
+    pcall(function() InputService.MouseIconEnabled = true end)
+
     for Idx = #Library.Signals, 1, -1 do
         local Connection = table.remove(Library.Signals, Idx)
         if Connection and Connection.Connected then
@@ -4554,12 +4559,13 @@ do
         })
 
         local Fill = Library:Create("Frame", {
-            BackgroundColor3 = Library.AccentColor;
+            BackgroundColor3 = Color3.new(1, 1, 1);
             BorderColor3 = Library.AccentColorDark;
             Size = UDim2.new(0, 0, 1, 0);
             ZIndex = 7;
             Parent = SliderInner;
         })
+        Library:CreateAccentGradient(Fill)
 
         Library:AddToRegistry(Fill, {
             BackgroundColor3 = "AccentColor";
@@ -6356,12 +6362,13 @@ function BaseGroupboxFuncs:AddDependencyBox()
         })
 
         local Highlight = Library:Create("Frame", {
-            BackgroundColor3 = Library.AccentColor;
+            BackgroundColor3 = Color3.new(1, 1, 1);
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 0, 2);
             ZIndex = 5;
             Parent = BoxInner;
         })
+        Library:CreateAccentGradient(Highlight)
 
         Library:AddToRegistry(Highlight, {
             BackgroundColor3 = "AccentColor";
@@ -8086,12 +8093,13 @@ end
             })
 
             local Highlight = Library:Create("Frame", {
-                BackgroundColor3 = Library.AccentColor;
+                BackgroundColor3 = Color3.new(1, 1, 1);
                 BorderSizePixel = 0;
                 Size = UDim2.new(1, 0, 0, 2);
                 ZIndex = 5;
                 Parent = BoxInner;
             })
+            Library:CreateAccentGradient(Highlight)
 
             Library:AddToRegistry(Highlight, {
                 BackgroundColor3 = "AccentColor";
@@ -8187,12 +8195,13 @@ end
             })
 
             local Highlight = Library:Create("Frame", {
-                BackgroundColor3 = Library.AccentColor;
+                BackgroundColor3 = Color3.new(1, 1, 1);
                 BorderSizePixel = 0;
                 Size = UDim2.new(1, 0, 0, 2);
                 ZIndex = 10;
                 Parent = BoxInner;
             })
+            Library:CreateAccentGradient(Highlight)
 
             Library:AddToRegistry(Highlight, {
                 BackgroundColor3 = "AccentColor";
@@ -8438,11 +8447,11 @@ end
                         CursorOutline.PointC = Cursor.PointC
                         CursorOutline.Visible = Library.ShowCustomCursor
 
-                        if not Toggled or (not ScreenGui or not ScreenGui.Parent) then
-                            InputService.MouseIconEnabled = OldMouseIconState
-                            if Cursor then Cursor:Destroy() end
-                            if CursorOutline then CursorOutline:Destroy() end
-                            RunService:UnbindFromRenderStep("LinoriaCursor")
+                        if not Toggled or (not ScreenGui or not ScreenGui.Parent) or Library.Unloaded then
+                            pcall(function() InputService.MouseIconEnabled = true end)
+                            if Cursor then pcall(function() Cursor:Destroy() end) end
+                            if CursorOutline then pcall(function() CursorOutline:Destroy() end) end
+                            pcall(function() RunService:UnbindFromRenderStep("LinoriaCursor") end)
                         end
                     end)
                 end))
@@ -9252,6 +9261,9 @@ function Library.PlayerList:UpdateSelection()
 end
 
 ----
+if getgenv().Linoria and typeof(getgenv().Linoria) == "table" and typeof(getgenv().Linoria.Unload) == "function" then
+    pcall(function() getgenv().Linoria:Unload() end)
+end
 getgenv().Linoria = Library
 if getgenv().skip_getgenv_linoria ~= true then getgenv().Library = Library end
 return Library
