@@ -1,17 +1,6 @@
---d233
-if not LPH_OBFUSCATED then
-    local fallback = function(...) return (...) end
-    pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
-    _G.LPH_NO_VIRTUALIZE = fallback
-    LPH_NO_VIRTUALIZE = fallback
-end
+-- fuck roblox, fuck rivals22222
 local cloneref = (cloneref or clonereference or function(instance: any)
 	return instance
-end)
-pcall(function()
-    if getgenv().Linoria and typeof(getgenv().Linoria) == "table" and typeof(getgenv().Linoria.Unload) == "function" then
-        getgenv().Linoria:Unload()
-    end
 end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"))
 local TextService: TextService = cloneref(game:GetService("TextService"))
@@ -31,8 +20,7 @@ if typeof(getgenv) == "function" and typeof(getgenv().Drawing) == "table" then
     DrawingLib = getgenv().Drawing
 end
 
-local setclipboard = setclipboard or toclipboard or set_clipboard or (syn and syn.write_clipboard) or (Clipboard and Clipboard.set) or function(...) end
-local getclipboard = getclipboard or get_clipboard or (syn and syn.read_clipboard) or (Clipboard and Clipboard.get) or nil
+local setclipboard = setclipboard or nil
 local getgenv = getgenv or function()
 	return shared
 end
@@ -244,29 +232,22 @@ local Library = {
     HudRegistry = {};
 
     -- colors and font --
-		FontColor = Color3.fromRGB(255, 255, 255),
-		MainColor = Color3.fromRGB(27, 27, 27),
-		BackgroundColor = Color3.fromRGB(28, 28, 28),
+	FontColor = Color3.fromRGB(255, 255, 255),
+	MainColor = Color3.fromRGB(30, 31, 41),
+	BackgroundColor = Color3.fromRGB(18, 19, 25),
 
-		AccentColor = Color3.fromRGB(210, 207, 231),
-		AccentColor2 = Color3.fromRGB(130, 120, 200),
-		DisabledAccentColor = Color3.fromRGB(142, 142, 142),
+	AccentColor = Color3.fromRGB(123, 132, 255),
+	DisabledAccentColor = Color3.fromRGB(80, 80, 80),
 
-		AccentGradientEnabled = true,
-		AccentSpinEnabled = false,
-		AccentSpinSpeed = 1,
-		AccentSpinAngle = 135,
-		AccentGradients = {},
+	OutlineColor = Color3.fromRGB(45, 46, 55),
+	DisabledOutlineColor = Color3.fromRGB(35, 35, 45),
 
-		OutlineColor = Color3.fromRGB(55,55,55),
-		DisabledOutlineColor = Color3.fromRGB(70, 70, 70),
+	DisabledTextColor = Color3.fromRGB(142, 142, 142),
 
-		DisabledTextColor = Color3.fromRGB(142, 142, 142),
+	RiskColor = Color3.fromRGB(255, 50, 50),
 
-		RiskColor = Color3.fromRGB(255, 50, 50),
-
-		Black = Color3.new(0, 0, 0),
-    Font = Enum.Font.Nunito,
+    Black = Color3.new(0, 0, 0),
+    Font = Enum.Font.Gotham,
 
     -- frames --
     OpenedFrames = {};
@@ -306,7 +287,6 @@ local Library = {
     ShowCustomCursor = true;
     HideImages = false;
     ShowToggleFrameInKeybinds = false;
-    ShowUntoggledKeybinds = false;
     NotifyOnError = false; -- true = Library:Notify for SafeCallback (still warns in the developer console)
 
     -- addons --
@@ -691,11 +671,11 @@ function Library:MakeDraggable(UIInstance, Cutoff, IsMainWindow, Smooth, DragHea
         end
     end)
 
-    Library:GiveSignal(RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
+    Library:GiveSignal(RunService.RenderStepped:Connect(function()
         if Dragging and DragInput then
             Update(DragInput)
         end
-    end)))
+    end))
 end
 
 function Library:MakeDraggableUsingParent(Instance, Parent, Cutoff, IsMainWindow)
@@ -1056,126 +1036,6 @@ function Library:GetDarkerColor(Color)
 end
 Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor)
 
-function Library:CreateAccentGradient(Parent, Options)
-    if not Parent or typeof(Parent) ~= "Instance" then return nil end
-    local existing = Parent:FindFirstChild("AccentGradient")
-    if existing and existing:IsA("UIGradient") then
-        return existing
-    end
-
-    Options = Options or {}
-    local Gradient = Instance.new("UIGradient")
-    Gradient.Name = "AccentGradient"
-    Gradient.Rotation = Options.Rotation or 135
-    Gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Library.AccentColor),
-        ColorSequenceKeypoint.new(1, Library.AccentColor2 or Library.AccentColor)
-    })
-
-    pcall(function() Gradient.Parent = Parent end)
-    table.insert(Library.AccentGradients, Gradient)
-
-    pcall(function()
-        Parent.Destroying:Connect(function()
-            local idx = table.find(Library.AccentGradients, Gradient)
-            if idx then
-                table.remove(Library.AccentGradients, idx)
-            end
-        end)
-    end)
-
-    return Gradient
-end
-
-function Library:UpdateAccentGradients()
-    local mainFrame = LibraryMainOuterFrame
-    if not mainFrame or not mainFrame.Parent then
-        if Library.Window and Library.Window.Holder then
-            mainFrame = Library.Window.Holder
-        end
-    end
-
-    local winPos, winSize
-    if mainFrame and mainFrame.Parent then
-        pcall(function()
-            winPos = mainFrame.AbsolutePosition
-            winSize = mainFrame.AbsoluteSize
-        end)
-    end
-    if not winPos or not winSize or winSize.X < 5 or winSize.Y < 5 then
-        winPos = Vector2.new(0, 0)
-        winSize = Vector2.new(600, 400)
-    end
-
-    local c1 = Library.AccentColor
-    local c2 = Library.AccentColor2 or Library.AccentColor
-
-    for i = #Library.AccentGradients, 1, -1 do
-        local grad = Library.AccentGradients[i]
-        if grad and grad.Parent then
-            local parent = grad.Parent
-            local isVisible = true
-            pcall(function() isVisible = parent.Visible end)
-
-            if isVisible then
-                grad.Enabled = true
-                if Library.AccentSpinEnabled then
-                    grad.Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, c1),
-                        ColorSequenceKeypoint.new(1, c2)
-                    })
-                    grad.Rotation = Library.AccentSpinAngle or 135
-                else
-                    local ePos, eSize
-                    pcall(function()
-                        ePos = parent.AbsolutePosition
-                        eSize = parent.AbsoluteSize
-                    end)
-
-                    if ePos and eSize then
-                        local x0 = math.clamp((ePos.X - winPos.X) / winSize.X, 0, 1)
-                        local y0 = math.clamp((ePos.Y - winPos.Y) / winSize.Y, 0, 1)
-                        local x1 = math.clamp((ePos.X + eSize.X - winPos.X) / winSize.X, 0, 1)
-                        local y1 = math.clamp((ePos.Y + eSize.Y - winPos.Y) / winSize.Y, 0, 1)
-
-                        local t0 = math.clamp((x0 + y0) / 2, 0, 1)
-                        local t1 = math.clamp((x1 + y1) / 2, 0, 1)
-
-                        if math.abs(t1 - t0) < 0.05 then
-                            t1 = math.clamp(t0 + 0.05, 0, 1)
-                            if t1 == t0 then t0 = math.clamp(t1 - 0.05, 0, 1) end
-                        end
-
-                        local colorStart = c1:Lerp(c2, t0)
-                        local colorEnd = c1:Lerp(c2, t1)
-
-                        grad.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, colorStart),
-                            ColorSequenceKeypoint.new(1, colorEnd)
-                        })
-
-                        if parent.Name == "VerticalLine" or parent.Name == "SideColor" then
-                            grad.Rotation = 90
-                        elif parent.Name == "Highlight" or parent.Name == "TabGlider" or parent.Name == "Fill" or parent.Name == "ColorFrame" then
-                            grad.Rotation = 0
-                        else
-                            grad.Rotation = 135
-                        end
-                    else
-                        grad.Color = ColorSequence.new({
-                            ColorSequenceKeypoint.new(0, c1),
-                            ColorSequenceKeypoint.new(1, c2)
-                        })
-                        grad.Rotation = 135
-                    end
-                end
-            end
-        else
-            table.remove(Library.AccentGradients, i)
-        end
-    end
-end
-
 function Library:AddToRegistry(Instance, Properties, IsHud)
     local Idx = #Library.Registry + 1
     local Data = {
@@ -1213,7 +1073,15 @@ function Library:RemoveFromRegistry(Instance)
 end
 
 function Library:UpdateColorsUsingRegistry()
-    Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor)
+    -- TODO: Could have an "active" list of objects
+    -- where the active list only contains Visible objects.
+
+    -- IMPL: Could setup .Changed events on the AddToRegistry function
+    -- that listens for the "Visible" propert being changed.
+    -- Visible: true => Add to active list, and call UpdateColors function
+    -- Visible: false => Remove from active list.
+
+    -- The above would be especially efficient for a rainbow menu color or live color-changing.
 
     for _, Object in next, Library.Registry do
         local inst = Object.Instance
@@ -1226,8 +1094,6 @@ function Library:UpdateColorsUsingRegistry()
             end
         end
     end
-
-    Library:UpdateAccentGradients()
 end
 
 function Library:GiveSignal(Connection: RBXScriptConnection | RBXScriptSignal) -- Only used for signals not attached to library instances, as those should be cleaned up on object destruction by Roblox
@@ -1240,9 +1106,6 @@ function Library:GiveSignal(Connection: RBXScriptConnection | RBXScriptSignal) -
 end
 
 function Library:Unload()
-    pcall(function() RunService:UnbindFromRenderStep("LinoriaCursor") end)
-    pcall(function() InputService.MouseIconEnabled = true end)
-
     for Idx = #Library.Signals, 1, -1 do
         local Connection = table.remove(Library.Signals, Idx)
         if Connection and Connection.Connected then
@@ -1256,6 +1119,11 @@ function Library:Unload()
 
     for _, Tooltip in Tooltips do
         Library:SafeCallback(Tooltip.Destroy, Tooltip)
+    end
+
+    if Library.BlurEffect then
+        pcall(function() Library.BlurEffect:Destroy() end)
+        Library.BlurEffect = nil
     end
 
     Library.Unloaded = true
@@ -1663,13 +1531,10 @@ do
 
         local function UpdateMenuOuterPos()
             if not ModeSelectOuter.Visible then return end
-            ModeSelectOuter.Position = UDim2.fromOffset(PickOuter.AbsolutePosition.X + PickOuter.AbsoluteSize.X + 4, PickOuter.AbsolutePosition.Y)
+            ModeSelectOuter.Position = UDim2.fromOffset(ToggleLabel.AbsolutePosition.X + ToggleLabel.AbsoluteSize.X + 4, ToggleLabel.AbsolutePosition.Y)
         end
 
         UpdateMenuOuterPos()
-        if PickOuter then
-            PickOuter:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateMenuOuterPos)
-        end
         if ToggleLabel then
             ToggleLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateMenuOuterPos)
         end
@@ -1723,9 +1588,6 @@ do
                 Library.RegistryMap[Label].Properties.TextColor3 = "AccentColor"
 
                 ModeSelectOuter.Visible = false
-                if type(KeyPicker.Update) == "function" then
-                    KeyPicker:Update()
-                end
             end
 
             function ModeButton:Deselect()
@@ -1742,9 +1604,7 @@ do
             end)
 
             if Mode == KeyPicker.Mode then
-                KeyPicker.Mode = Mode
-                Label.TextColor3 = Library.AccentColor
-                Library.RegistryMap[Label].Properties.TextColor3 = "AccentColor"
+                ModeButton:Select()
             end
 
             ModeButtons[Mode] = ModeButton
@@ -1814,7 +1674,7 @@ do
             if KeybindsToggle.Loaded then
                 KeybindsToggle:SetNormal(not ShowToggle)
 
-                local ShowKeybind = (State or Library.ShowUntoggledKeybinds) and KeyPicker.Value ~= "None" and KeyPicker.Value ~= "Unknown"
+                local ShowKeybind = State and KeyPicker.Value ~= "None" and KeyPicker.Value ~= "Unknown"
                 KeybindsToggle:SetVisibility(ShowKeybind)
                 KeybindsToggle:SetText(string.format("[%s] %s (%s)", tostring(KeyPicker.DisplayValue), Info.Text, KeyPicker.Mode))
                 KeybindsToggle:Display(State)
@@ -1951,9 +1811,6 @@ do
 
         function KeyPicker:SetModePickerVisibility(bool)
             ModeSelectOuter.Visible = bool
-            if bool then
-                UpdateMenuOuterPos()
-            end
         end
 
         function KeyPicker:GetModePickerVisibility()
@@ -2046,56 +1903,40 @@ do
         
             if (not Picking) and (not InputService:GetFocusedTextBox()) then
                 local Key = KeyPicker.Value
-                
-                local IsOurKey = false
-                if Input.UserInputType == Enum.UserInputType.Keyboard then
-                    if Input.KeyCode.Name == Key or table.find(KeyPicker.Modifiers or {}, Input.KeyCode.Name) then
-                        IsOurKey = true
-                    end
-                elseif SpecialKeysInput[Input.UserInputType] == Key then
-                    IsOurKey = true
-                end
+                local HoldingModifiers = AreModifiersHeld(KeyPicker.Modifiers)
+                local HoldingKey = false
 
-                if IsOurKey then
-                    local HoldingModifiers = AreModifiersHeld(KeyPicker.Modifiers)
-                    local HoldingKey = false
-
-                    if HoldingModifiers then
-                        if Input.UserInputType == Enum.UserInputType.Keyboard then
-                            if Input.KeyCode.Name == Key then
-                                HoldingKey = true
-                            end
-                        elseif SpecialKeysInput[Input.UserInputType] == Key then
+                if HoldingModifiers then
+                    if Input.UserInputType == Enum.UserInputType.Keyboard then
+                        if Input.KeyCode.Name == Key then
                             HoldingKey = true
                         end
-                    end
-
-                    if KeyPicker.Mode == "Toggle" then
-                        if HoldingKey then
-                            KeyPicker.Toggled = not KeyPicker.Toggled
-                            KeyPicker:DoClick()
-                            KeyPicker:Update()
-                        end
-                    elseif KeyPicker.Mode == "Press" then
-                        if HoldingKey then
-                            KeyPicker:DoClick()
-                            KeyPicker:Update()
-                        end
-                    else
-                        KeyPicker:Update()
+                    elseif SpecialKeysInput[Input.UserInputType] == Key then
+                        HoldingKey = true
                     end
                 end
+
+                if KeyPicker.Mode == "Toggle" then
+                    if HoldingKey then
+                        KeyPicker.Toggled = not KeyPicker.Toggled
+                        KeyPicker:DoClick()
+                    end
+                elseif KeyPicker.Mode == "Press" then
+                    if HoldingKey then
+                        KeyPicker:DoClick()
+                    end
+                end
+
+                KeyPicker:Update()
             end
 
             if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                if ModeSelectOuter.Visible then
-                    local AbsPos, AbsSize = ModeSelectOuter.AbsolutePosition, ModeSelectOuter.AbsoluteSize
+                local AbsPos, AbsSize = ModeSelectOuter.AbsolutePosition, ModeSelectOuter.AbsoluteSize
 
-                    if Mouse.X < AbsPos.X or Mouse.X > AbsPos.X + AbsSize.X
-                        or Mouse.Y < (AbsPos.Y - 20 - 1) or Mouse.Y > AbsPos.Y + AbsSize.Y then
+                if Mouse.X < AbsPos.X or Mouse.X > AbsPos.X + AbsSize.X
+                    or Mouse.Y < (AbsPos.Y - 20 - 1) or Mouse.Y > AbsPos.Y + AbsSize.Y then
 
-                        KeyPicker:SetModePickerVisibility(false)
-                    end
+                    KeyPicker:SetModePickerVisibility(false)
                 end
             end
         end))
@@ -2106,19 +1947,7 @@ do
             end
 
             if (not Picking) then
-                local Key = KeyPicker.Value
-                local IsOurKey = false
-                if Input.UserInputType == Enum.UserInputType.Keyboard then
-                    if Input.KeyCode.Name == Key or table.find(KeyPicker.Modifiers or {}, Input.KeyCode.Name) then
-                        IsOurKey = true
-                    end
-                elseif SpecialKeysInput[Input.UserInputType] == Key then
-                    IsOurKey = true
-                end
-
-                if IsOurKey then
-                    KeyPicker:Update()
-                end
+                KeyPicker:Update()
             end
         end))
         
@@ -2488,7 +2317,6 @@ do
                 end
 
                 self.Container.Visible = true
-                updateMenuPosition()
             end
 
             function ContextMenu:Hide()
@@ -2520,12 +2348,11 @@ do
                 )
 
                 Button.InputBegan:Connect(function(Input)
-                    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch then
+                    if Input.UserInputType ~= Enum.UserInputType.MouseButton1 or Input.UserInputType ~= Enum.UserInputType.Touch then
                         return
                     end
 
                     Callback()
-                    ContextMenu:Hide()
                 end)
             end
 
@@ -2536,34 +2363,12 @@ do
 
             ColorPicker.SetValueRGB = function(...) end --// make luau lsp shut up
             ContextMenu:AddOption("Paste color", function()
-                if Library.ColorClipboard then
-                    ColorPicker:SetValueRGB(Library.ColorClipboard, ColorPicker.Transparency)
-                    Library:Notify("Pasted color!", 2)
+                if not Library.ColorClipboard then
+                    Library:Notify("You have not copied a color!", 2)
                     return
                 end
 
-                if getclipboard then
-                    local success, text = pcall(getclipboard)
-                    if success and typeof(text) == "string" then
-                        text = text:gsub("%s+", "")
-                        local hexSuccess, hexColor = pcall(Color3.fromHex, text)
-                        if hexSuccess and typeof(hexColor) == "Color3" then
-                            ColorPicker:SetValueRGB(hexColor, ColorPicker.Transparency)
-                            Library:Notify("Pasted color from clipboard!", 2)
-                            return
-                        end
-
-                        local r, g, b = text:match("(%d+),(%d+),(%d+)")
-                        if r and g and b then
-                            local rgbColor = Color3.fromRGB(tonumber(r), tonumber(g), tonumber(b))
-                            ColorPicker:SetValueRGB(rgbColor, ColorPicker.Transparency)
-                            Library:Notify("Pasted color from clipboard!", 2)
-                            return
-                        end
-                    end
-                end
-
-                Library:Notify("You have not copied a color!", 2)
+                ColorPicker:SetValueRGB(Library.ColorClipboard)
             end)
 
             ContextMenu:AddOption("Copy HEX", function()
@@ -2664,7 +2469,7 @@ do
         end
 
         function ColorPicker:SetValueRGB(Color, Transparency)
-            ColorPicker.Transparency = Transparency or ColorPicker.Transparency or 0
+            ColorPicker.Transparency = Transparency or 0
             ColorPicker:SetHSVFromRGB(Color)
             ColorPicker:Display()
 
@@ -4262,22 +4067,19 @@ do
         })
 
         local ToggleOuter = Library:Create("Frame", {
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderColor3 = Color3.new(0, 0, 0);
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
             Size = UDim2.new(0, 13, 0, 13);
             Visible = Toggle.Visible;
             ZIndex = 5;
             Parent = ToggleContainer;
         })
 
-        Library:AddToRegistry(ToggleOuter, {
-            BorderColor3 = "Black";
-        })
+        Library:AddToRegistry(ToggleOuter, {})
 
         local ToggleInner = Library:Create("Frame", {
             BackgroundColor3 = Library.MainColor;
-            BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
+            BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 6;
             Parent = ToggleOuter;
@@ -4285,7 +4087,6 @@ do
 
         Library:AddToRegistry(ToggleInner, {
             BackgroundColor3 = "MainColor";
-            BorderColor3 = "OutlineColor";
         })
 
         local ToggleLabel = Library:CreateLabel({
@@ -4533,8 +4334,8 @@ do
         end
 
         local SliderOuter = Library:Create("Frame", {
-            BackgroundColor3 = Color3.new(0, 0, 0);
-            BorderColor3 = Color3.new(0, 0, 0);
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
             Size = UDim2.new(1, -4, 0, 13);
             Visible = Slider.Visible;
             ZIndex = 5;
@@ -4545,32 +4346,28 @@ do
             Slider.MaxSize = SliderOuter.AbsoluteSize.X - 2
         end)
 
-        Library:AddToRegistry(SliderOuter, {
-            BorderColor3 = "Black";
-        })
+        Library:AddToRegistry(SliderOuter, {})
 
         local SliderInner = Library:Create("Frame", {
-            BackgroundColor3 = Library.MainColor;
+            BackgroundTransparency = 1;
             BorderColor3 = Library.OutlineColor;
-            BorderMode = Enum.BorderMode.Inset;
+            BorderSizePixel = 1;
             Size = UDim2.new(1, 0, 1, 0);
             ZIndex = 6;
             Parent = SliderOuter;
         })
 
         Library:AddToRegistry(SliderInner, {
-            BackgroundColor3 = "MainColor";
             BorderColor3 = "OutlineColor";
         })
 
         local Fill = Library:Create("Frame", {
-            BackgroundColor3 = Color3.new(1, 1, 1);
+            BackgroundColor3 = Library.AccentColor;
             BorderColor3 = Library.AccentColorDark;
             Size = UDim2.new(0, 0, 1, 0);
             ZIndex = 7;
             Parent = SliderInner;
         })
-        Library:CreateAccentGradient(Fill)
 
         Library:AddToRegistry(Fill, {
             BackgroundColor3 = "AccentColor";
@@ -6209,7 +6006,6 @@ function BaseGroupboxFuncs:AddDependencyBox()
     })
 
     local LineGradient = Library:Create("UIGradient", {
-        Name = "AccentGradient",
         Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 1),
             NumberSequenceKeypoint.new(0.3, 0),
@@ -6219,7 +6015,6 @@ function BaseGroupboxFuncs:AddDependencyBox()
         Rotation = 90,
         Parent = VerticalLine
     })
-    table.insert(Library.AccentGradients, LineGradient)
 
     Library:AddToRegistry(VerticalLine, {
         BackgroundColor3 = "AccentColor";
@@ -6367,13 +6162,12 @@ function BaseGroupboxFuncs:AddDependencyBox()
         })
 
         local Highlight = Library:Create("Frame", {
-            BackgroundColor3 = Color3.new(1, 1, 1);
+            BackgroundColor3 = Library.AccentColor;
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 0, 2);
             ZIndex = 5;
             Parent = BoxInner;
         })
-        Library:CreateAccentGradient(Highlight)
 
         Library:AddToRegistry(Highlight, {
             BackgroundColor3 = "AccentColor";
@@ -6478,13 +6272,12 @@ do
     }, true)
 
     local ColorFrame = Library:Create("Frame", {
-        BackgroundColor3 = Color3.new(1, 1, 1);
+        BackgroundColor3 = Library.AccentColor;
         BorderSizePixel = 0;
         Size = UDim2.new(1, 0, 0, 2);
         ZIndex = 102;
         Parent = KeybindInner;
     })
-    Library:CreateAccentGradient(ColorFrame)
 
     Library:AddToRegistry(ColorFrame, {
         BackgroundColor3 = "AccentColor";
@@ -6550,7 +6343,6 @@ do
     Library:AddToRegistry(WatermarkInner, {
         BorderColor3 = "AccentColor";
     })
-    Library:CreateAccentGradient(WatermarkInner)
 
     local InnerFrame = Library:Create("Frame", {
         BackgroundColor3 = Color3.new(1, 1, 1);
@@ -6594,15 +6386,6 @@ do
 
     function Library:SetWatermarkVisibility(Bool)
         Library.Watermark.Visible = Bool
-    end
-
-    function Library:SetShowUntoggledKeybinds(Bool)
-        Library.ShowUntoggledKeybinds = Bool
-        for _, Option in next, Options do
-            if Option.Type == "KeyPicker" then
-                Option:Update()
-            end
-        end
     end
 
     function Library:SetWatermark(Text)
@@ -6828,7 +6611,6 @@ do
         Library:AddToRegistry(SideColor, {
             BackgroundColor3 = "AccentColor";
         }, true)
-        Library:CreateAccentGradient(SideColor)
 
         function Data:Resize()
             XSize, YSize = Library:GetTextBounds(NotifyLabel.Text, Library.Font, 14)
@@ -7003,57 +6785,61 @@ function Library:CreateWindow(...)
     Library:AddGlow(Glow2, 0.85)
 
     local Inner = Library:Create("Frame", {
-        BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.AccentColor;
+        BackgroundColor3 = Library.BackgroundColor;
+        BorderColor3 = Library.OutlineColor;
         BorderMode = Enum.BorderMode.Inset;
         Position = UDim2.new(0, 1, 0, 1);
         Size = UDim2.new(1, -2, 1, -2);
         ZIndex = 1;
         Parent = Outer;
     })
-    Library:CreateAccentGradient(Inner)
 
     Library:AddToRegistry(Inner, {
-        BackgroundColor3 = "MainColor";
-        BorderColor3 = "AccentColor";
+        BackgroundColor3 = "BackgroundColor";
+        BorderColor3 = "OutlineColor";
     })
 
     local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 0, 0, 0);
-        Size = UDim2.new(1, 0, 0, 25);
+        Position = UDim2.new(0, 8, 0, 0);
+        Size = UDim2.new(1, -8, 0, 25);
         Text = WindowInfo.Title or "";
-        TextXAlignment = Enum.TextXAlignment.Center;
+        TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
         Parent = Inner;
     })
+    
+    local TitleSeparator = Library:Create("Frame", {
+        BackgroundTransparency = 1;
+        BorderSizePixel = 0;
+        Position = UDim2.new(0, 0, 0, 25);
+        Size = UDim2.new(1, 0, 0, 1);
+        ZIndex = 1;
+        Parent = Inner;
+    })
+    Library:AddToRegistry(TitleSeparator, {})
 
     local MainSectionOuter = Library:Create("Frame", {
-        BackgroundColor3 = Library.BackgroundColor;
-        BorderColor3 = Library.OutlineColor;
+        BackgroundTransparency = 1;
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 8, 0, 25);
         Size = UDim2.new(1, -16, 1, -33);
         ZIndex = 1;
         Parent = Inner;
     })
 
-    Library:AddToRegistry(MainSectionOuter, {
-        BackgroundColor3 = "BackgroundColor";
-        BorderColor3 = "OutlineColor";
-    })
+    -- Keep registry but dummy out colors since it's transparent now
+    Library:AddToRegistry(MainSectionOuter, {})
 
     local MainSectionInner = Library:Create("Frame", {
-        BackgroundColor3 = Library.BackgroundColor;
-        BorderColor3 = Color3.new(0, 0, 0);
-        BorderMode = Enum.BorderMode.Inset;
+        BackgroundTransparency = 1;
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(1, 0, 1, 0);
         ZIndex = 1;
         Parent = MainSectionOuter;
     })
 
-    Library:AddToRegistry(MainSectionInner, {
-        BackgroundColor3 = "BackgroundColor";
-    })
+    Library:AddToRegistry(MainSectionInner, {})
 
     local TabArea = Library:Create("ScrollingFrame", {
         ScrollingDirection = Enum.ScrollingDirection.X;
@@ -7087,7 +6873,7 @@ function Library:CreateWindow(...)
     })
 
     local TabGlider = Library:Create("Frame", {
-        BackgroundColor3 = Color3.new(1, 1, 1);
+        BackgroundColor3 = Library.AccentColor;
         BorderSizePixel = 0;
         Position = UDim2.new(0, 0, 0, 0);
         Size = UDim2.new(0, 0, 0, 1);
@@ -7095,7 +6881,6 @@ function Library:CreateWindow(...)
         Parent = TabArea;
         Visible = false;
     })
-    Library:CreateAccentGradient(TabGlider)
 
     Window.TabGlider = TabGlider
 
@@ -7123,27 +6908,13 @@ function Library:CreateWindow(...)
     })
 
     local TabContainer = Library:Create("Frame", {
-        BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.OutlineColor;
+        BackgroundTransparency = 1;
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 8, 0, 30);
         Size = UDim2.new(1, -16, 1, -38);
         ZIndex = 2;
         Parent = MainSectionInner;
     })
-
-    local TabContainerGlow = Library:Create("ImageLabel", {
-        Name = "TabContainerGlow",
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://1316045217",
-        ImageColor3 = Library.AccentColor,
-        ImageTransparency = 0.75,
-        Position = UDim2.new(0, -20, 0, -20),
-        Size = UDim2.new(1, 40, 1, 40),
-        ZIndex = 1,
-        Parent = TabContainer,
-    })
-    Library:AddToRegistry(TabContainerGlow, { ImageColor3 = "AccentColor" })
-    Library:AddGlow(TabContainerGlow, 0.75)
     
     local InnerVideoBackground = Library:Create("VideoFrame", {
         BackgroundColor3 = Library.MainColor;
@@ -7705,17 +7476,14 @@ function Library:CreateWindow(...)
         local TabButtonWidth = Library:GetTextBounds(Tab.Name, Library.Font, 16)
 
         local TabButton = Library:Create("Frame", {
-            BackgroundColor3 = Library.BackgroundColor;
-            BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 0.85, 0);
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
+            Size = UDim2.new(0, TabButtonWidth + 8 + 4, 1, 0);
             ZIndex = 1;
             Parent = Window.TabButtonContainer;
         })
 
-        Library:AddToRegistry(TabButton, {
-            BackgroundColor3 = "BackgroundColor";
-            BorderColor3 = "OutlineColor";
-        })
+        Library:AddToRegistry(TabButton, {})
 
         local TabButtonLabel = Library:CreateLabel({
             Position = UDim2.new(0, 0, 0, 0);
@@ -7725,7 +7493,13 @@ function Library:CreateWindow(...)
             Parent = TabButton;
         })
 
-        -- TabButton:GetPropertyChangedSignal removed to optimize dragging
+        TabButton:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+            if Library.ActiveTab == Tab.Name then
+                local TargetX = TabButton.AbsolutePosition.X - Window.TabButtonContainer.AbsolutePosition.X
+                Window.TabGlider.Position = UDim2.new(0, TargetX, 0, 0)
+                Window.TabGlider.Size = UDim2.new(0, TabButton.Size.X.Offset, 0, 1)
+            end
+        end)
 
         local Blocker = Library:Create("Frame", {
             BackgroundColor3 = Library.MainColor;
@@ -8070,56 +7844,50 @@ end
             }
 
             local BoxOuter = Library:Create("Frame", {
-                BackgroundColor3 = Library.BackgroundColor;
-                BorderColor3 = Library.OutlineColor;
-                BorderMode = Enum.BorderMode.Inset;
+                BackgroundTransparency = 1;
+                BorderSizePixel = 0;
                 Size = UDim2.new(1, 0, 0, 507 + 2);
                 ZIndex = 2;
                 Parent = Info.Side == 1 and LeftSide or RightSide;
             })
 
-            Library:AddToRegistry(BoxOuter, {
-                BackgroundColor3 = "BackgroundColor";
-                BorderColor3 = "OutlineColor";
-            })
+            Library:AddToRegistry(BoxOuter, {})
 
             local BoxInner = Library:Create("Frame", {
-                BackgroundColor3 = Library.BackgroundColor;
-                BorderColor3 = Color3.new(0, 0, 0);
-                -- BorderMode = Enum.BorderMode.Inset;
-                Size = UDim2.new(1, -2, 1, -2);
-                Position = UDim2.new(0, 1, 0, 1);
+                BackgroundTransparency = 1;
+                BorderSizePixel = 0;
+                Size = UDim2.new(1, 0, 1, 0);
+                Position = UDim2.new(0, 0, 0, 0);
                 ZIndex = 4;
                 Parent = BoxOuter;
             })
 
-            Library:AddToRegistry(BoxInner, {
-                BackgroundColor3 = "BackgroundColor";
-            })
+            Library:AddToRegistry(BoxInner, {})
 
-            local Highlight = Library:Create("Frame", {
-                BackgroundColor3 = Color3.new(1, 1, 1);
+            local HeaderLine = Library:Create("Frame", {
+                BackgroundColor3 = Library.OutlineColor;
                 BorderSizePixel = 0;
-                Size = UDim2.new(1, 0, 0, 2);
+                Position = UDim2.new(0, 0, 0, 8);
+                Size = UDim2.new(1, 0, 0, 1);
+                ZIndex = 4;
+                Parent = BoxInner;
+            })
+            Library:AddToRegistry(HeaderLine, { BackgroundColor3 = "OutlineColor" })
+
+            local GroupboxLabel = Library:CreateLabel({
+                BackgroundColor3 = Library.BackgroundColor;
+                BackgroundTransparency = 0;
+                BorderSizePixel = 0;
+                Size = UDim2.new(0, 0, 0, 18);
+                AutomaticSize = Enum.AutomaticSize.X;
+                Position = UDim2.new(0, 4, 0, 0);
+                TextSize = 13;
+                Text = "- " .. Info.Name .. " ";
+                TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 5;
                 Parent = BoxInner;
             })
-            Library:CreateAccentGradient(Highlight)
-
-            Library:AddToRegistry(Highlight, {
-                BackgroundColor3 = "AccentColor";
-            })
-
-            -- local GroupboxLabel = 
-            Library:CreateLabel({
-                Size = UDim2.new(1, 0, 0, 18);
-                Position = UDim2.new(0, 0, 0, 2);
-                TextSize = 14;
-                Text = Info.Name;
-                TextXAlignment = Enum.TextXAlignment.Center;
-                ZIndex = 5;
-                Parent = BoxInner;
-            })
+            Library:AddToRegistry(GroupboxLabel, { BackgroundColor3 = "BackgroundColor" })
 
             local Container = Library:Create("Frame", {
                 BackgroundTransparency = 1;
@@ -8200,13 +7968,12 @@ end
             })
 
             local Highlight = Library:Create("Frame", {
-                BackgroundColor3 = Color3.new(1, 1, 1);
+                BackgroundColor3 = Library.AccentColor;
                 BorderSizePixel = 0;
                 Size = UDim2.new(1, 0, 0, 2);
                 ZIndex = 10;
                 Parent = BoxInner;
             })
-            Library:CreateAccentGradient(Highlight)
 
             Library:AddToRegistry(Highlight, {
                 BackgroundColor3 = "AccentColor";
@@ -8452,11 +8219,11 @@ end
                         CursorOutline.PointC = Cursor.PointC
                         CursorOutline.Visible = Library.ShowCustomCursor
 
-                        if not Toggled or (not ScreenGui or not ScreenGui.Parent) or Library.Unloaded then
-                            pcall(function() InputService.MouseIconEnabled = true end)
-                            if Cursor then pcall(function() Cursor:Destroy() end) end
-                            if CursorOutline then pcall(function() CursorOutline:Destroy() end) end
-                            pcall(function() RunService:UnbindFromRenderStep("LinoriaCursor") end)
+                        if not Toggled or (not ScreenGui or not ScreenGui.Parent) then
+                            InputService.MouseIconEnabled = OldMouseIconState
+                            if Cursor then Cursor:Destroy() end
+                            if CursorOutline then CursorOutline:Destroy() end
+                            RunService:UnbindFromRenderStep("LinoriaCursor")
                         end
                     end)
                 end))
@@ -8478,86 +8245,44 @@ end
             end)
         end
 
-        local currentDescendants = Outer:GetDescendants()
-        if not Library.FadeCache or Library.FadeCache.Count ~= #currentDescendants then
-            Library.FadeCache = { Count = #currentDescendants, Elements = {} }
-            for _, Desc in next, currentDescendants do
-                local Properties = {}
+        for _, Desc in next, Outer:GetDescendants() do
+            local Properties = {}
 
-                if Desc:IsA("ImageLabel") then
-                    table.insert(Properties, "ImageTransparency")
-                    table.insert(Properties, "BackgroundTransparency")
-                elseif Desc:IsA("TextLabel") or Desc:IsA("TextBox") then
-                    table.insert(Properties, "TextTransparency")
-                elseif Desc:IsA("Frame") or Desc:IsA("ScrollingFrame") then
-                    table.insert(Properties, "BackgroundTransparency")
-                elseif Desc:IsA("UIStroke") then
-                    table.insert(Properties, "Transparency")
+            if Desc:IsA("ImageLabel") then
+                table.insert(Properties, "ImageTransparency")
+                table.insert(Properties, "BackgroundTransparency")
+
+            elseif Desc:IsA("TextLabel") or Desc:IsA("TextBox") then
+                table.insert(Properties, "TextTransparency")
+
+            elseif Desc:IsA("Frame") or Desc:IsA("ScrollingFrame") then
+                table.insert(Properties, "BackgroundTransparency")
+                
+            elseif Desc:IsA("UIStroke") then
+                table.insert(Properties, "Transparency")
+            end
+
+            local Cache = TransparencyCache[Desc]
+
+            if (not Cache) then
+                Cache = {}
+                TransparencyCache[Desc] = Cache
+            end
+
+            for _, Prop in next, Properties do
+                if not Cache[Prop] then
+                    Cache[Prop] = Desc[Prop]
                 end
 
-                if #Properties > 0 then
-                    local Cache = TransparencyCache[Desc]
-                    if not Cache then
-                        Cache = {}
-                        TransparencyCache[Desc] = Cache
-                    end
-
-                    for _, Prop in next, Properties do
-                        if not Cache[Prop] then
-                            Cache[Prop] = Desc[Prop]
-                        end
-                        if Cache[Prop] < 1 then
-                            table.insert(Library.FadeCache.Elements, { Desc = Desc, Prop = Prop, Target = Cache[Prop] })
-                        end
-                    end
+                if Cache[Prop] == 1 then
+                    continue
                 end
+
+                TweenService:Create(Desc, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { [Prop] = Toggled and Cache[Prop] or 1 }):Play()
             end
         end
 
-        if FadeTime == 0 then
-            local finalAlpha = Toggled and 1 or 0
-            for _, data in next, Library.FadeCache.Elements do
-                if data.Desc.Parent then
-                    data.Desc[data.Prop] = 1 + finalAlpha * (data.Target - 1)
-                end
-            end
-            Outer.Visible = Toggled
-            Fading = false
-            return
-        end
-
-        if not Library.FadeProxy then
-            Library.FadeProxy = Instance.new("NumberValue")
-        end
-        Library.FadeProxy.Value = Toggled and 0 or 1
-
-        local fadeTween = TweenService:Create(Library.FadeProxy, TweenInfo.new(FadeTime, Enum.EasingStyle.Linear), { Value = Toggled and 1 or 0 })
-        
-        if Library.FadeConnection then Library.FadeConnection:Disconnect() end
-        Library.FadeConnection = RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
-            local alpha = Library.FadeProxy.Value
-            for _, data in next, Library.FadeCache.Elements do
-                if data.Desc.Parent then
-                    data.Desc[data.Prop] = 1 + alpha * (data.Target - 1)
-                end
-            end
-        end))
-
-        fadeTween:Play()
         task.wait(FadeTime)
-        
-        if Library.FadeConnection then
-            Library.FadeConnection:Disconnect()
-            Library.FadeConnection = nil
-        end
-        
-        local finalAlpha = Toggled and 1 or 0
-        for _, data in next, Library.FadeCache.Elements do
-            if data.Desc.Parent then
-                data.Desc[data.Prop] = 1 + finalAlpha * (data.Target - 1)
-            end
-        end
-
         Outer.Visible = Toggled
         Fading = false
     end
@@ -8773,7 +8498,7 @@ Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
 local RainbowStep = 0
 local Hue = 0
 
-Library:GiveSignal(RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function(Delta)
+Library:GiveSignal(RunService.RenderStepped:Connect(function(Delta)
     if Library.Unloaded then
         return
     end
@@ -8791,7 +8516,7 @@ Library:GiveSignal(RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function(D
         Library.CurrentRainbowHue = Hue
         Library.CurrentRainbowColor = Color3.fromHSV(Hue, 0.8, 1)
     end
-end)))
+end))
 
 --// Player List Addon \\--
 Library.PlayerList = {
