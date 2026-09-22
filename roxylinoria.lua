@@ -1,4 +1,4 @@
---d2
+--d233
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -1084,15 +1084,23 @@ function Library:CreateAccentGradient(Parent, Options)
     Options = Options or {}
     local Gradient = Instance.new("UIGradient")
     Gradient.Name = "AccentGradient"
-    Gradient.Rotation = Options.Rotation or 135
 
     local c1 = Library.AccentColor
     local c2 = Library.AccentColor2 or Library.AccentColor
 
     Gradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, c1),
+        ColorSequenceKeypoint.new(0.5, c1:Lerp(c2, 0.5)),
         ColorSequenceKeypoint.new(1, c2)
     })
+
+    if Parent:IsA("UIStroke") then
+        Gradient.Rotation = Options.Rotation or 135
+    elif Parent.Name == "VerticalLine" or Parent.Name == "SideColor" then
+        Gradient.Rotation = Options.Rotation or 90
+    else
+        Gradient.Rotation = Options.Rotation or 0
+    end
 
     pcall(function() Gradient.Parent = Parent end)
     table.insert(Library.AccentGradients, Gradient)
@@ -1134,12 +1142,16 @@ function Library:UpdateAccentGradients()
                 grad.Enabled = true
                 grad.Color = ColorSequence.new({
                     ColorSequenceKeypoint.new(0, c1),
+                    ColorSequenceKeypoint.new(0.5, c1:Lerp(c2, 0.5)),
                     ColorSequenceKeypoint.new(1, c2)
                 })
-                if parent.Name == "VerticalLine" or parent.Name == "SideColor" then
+
+                if parent:IsA("UIStroke") then
+                    grad.Rotation = 135
+                elseif parent.Name == "VerticalLine" or parent.Name == "SideColor" then
                     grad.Rotation = 90
                 else
-                    grad.Rotation = 135
+                    grad.Rotation = 0
                 end
             end
         else
@@ -6548,18 +6560,17 @@ do
         BorderColor3 = "AccentColor";
     })
 
-    local WatermarkAccentLine = Library:Create("Frame", {
-        Name = "AccentLine",
-        BackgroundColor3 = Library.AccentColor,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 0, 2),
-        ZIndex = 205,
-        Parent = WatermarkInner,
-    })
-    Library:CreateAccentGradient(WatermarkAccentLine, { Rotation = 135 })
-    Library:AddToRegistry(WatermarkAccentLine, {
-        BackgroundColor3 = "AccentColor",
+    local WatermarkStroke = Instance.new("UIStroke")
+    WatermarkStroke.Name = "AccentBorder"
+    WatermarkStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    WatermarkStroke.Color = Library.AccentColor
+    WatermarkStroke.Thickness = 1
+    WatermarkStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    WatermarkStroke.Parent = WatermarkInner
+
+    Library:CreateAccentGradient(WatermarkStroke, { Rotation = 135 })
+    Library:AddToRegistry(WatermarkStroke, {
+        Color = "AccentColor",
     })
 
     local InnerFrame = Library:Create("Frame", {
@@ -7027,18 +7038,17 @@ function Library:CreateWindow(...)
         BorderColor3 = "AccentColor";
     })
 
-    local WindowAccentLine = Library:Create("Frame", {
-        Name = "AccentLine",
-        BackgroundColor3 = Library.AccentColor,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 0, 2),
-        ZIndex = 10,
-        Parent = Inner,
-    })
-    Library:CreateAccentGradient(WindowAccentLine, { Rotation = 135 })
-    Library:AddToRegistry(WindowAccentLine, {
-        BackgroundColor3 = "AccentColor",
+    local WindowAccentStroke = Instance.new("UIStroke")
+    WindowAccentStroke.Name = "AccentBorder"
+    WindowAccentStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    WindowAccentStroke.Color = Library.AccentColor
+    WindowAccentStroke.Thickness = 1.5
+    WindowAccentStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    WindowAccentStroke.Parent = Inner
+
+    Library:CreateAccentGradient(WindowAccentStroke, { Rotation = 135 })
+    Library:AddToRegistry(WindowAccentStroke, {
+        Color = "AccentColor",
     })
 
     local WindowLabel = Library:CreateLabel({
