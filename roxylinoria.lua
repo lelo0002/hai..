@@ -1,4 +1,4 @@
---d223
+--d32323232323
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -4572,10 +4572,10 @@ do
             ZIndex = 7;
             Parent = SliderInner;
         })
+        Fill.BackgroundColor3 = Color3.new(1, 1, 1)
         Library:CreateAccentGradient(Fill)
 
         Library:AddToRegistry(Fill, {
-            BackgroundColor3 = "AccentColor";
             BorderColor3 = "AccentColorDark";
         })
 
@@ -4621,9 +4621,9 @@ do
             end
             DisplayLabel.TextColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
 
-            HideBorderRight.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Library.AccentColor
+            HideBorderRight.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
 
-            Fill.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Library.AccentColor
+            Fill.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
             Fill.BorderColor3 = Slider.Disabled and Library.DisabledOutlineColor or Library.AccentColorDark
 
             Library.RegistryMap[HideBorderRight].Properties.BackgroundColor3 = Slider.Disabled and "DisabledAccentColor" or "AccentColor"
@@ -6210,22 +6210,17 @@ function BaseGroupboxFuncs:AddDependencyBox()
         Parent = Holder;
     })
 
+    VerticalLine.BackgroundColor3 = Color3.new(1, 1, 1)
+
     local LineGradient = Library:Create("UIGradient", {
         Name = "AccentGradient",
-        Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.3, 0),
-            NumberSequenceKeypoint.new(0.7, 0),
-            NumberSequenceKeypoint.new(1, 1)
-        }),
+        Transparency = NumberSequence.new(0),
         Rotation = 90,
         Parent = VerticalLine
     })
     table.insert(Library.AccentGradients, LineGradient)
 
-    Library:AddToRegistry(VerticalLine, {
-        BackgroundColor3 = "AccentColor";
-    })
+    Library:AddToRegistry(VerticalLine, {})
 
     local Frame = Library:Create("Frame", {
         BackgroundTransparency = 1;
@@ -6299,11 +6294,12 @@ function BaseGroupboxFuncs:AddDependencyBox()
             
             VerticalLine.Size = UDim2.new(0, 1, 1, HasNext and 2 or -5)
 
+            local fade = 0.12
             LineGradient.Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, HasPrev and 0 or 1),
-                NumberSequenceKeypoint.new(HasPrev and 0 or 0.3, 0),
-                NumberSequenceKeypoint.new(HasNext and 1 or 0.7, 0),
-                NumberSequenceKeypoint.new(1, HasNext and 0 or 1)
+                NumberSequenceKeypoint.new(0,         HasPrev and 0 or 1),
+                NumberSequenceKeypoint.new(fade,      0),
+                NumberSequenceKeypoint.new(1 - fade,  0),
+                NumberSequenceKeypoint.new(1,         HasNext and 0 or 1),
             })
         end)
     end
@@ -6377,9 +6373,7 @@ function BaseGroupboxFuncs:AddDependencyBox()
         })
         Library:CreateAccentGradient(Highlight)
 
-        Library:AddToRegistry(Highlight, {
-            BackgroundColor3 = "AccentColor";
-        })
+        Library:AddToRegistry(Highlight, {})
 
         local Container = Library:Create("Frame", {
             BackgroundTransparency = 1;
@@ -6495,9 +6489,7 @@ do
     })
     Library:CreateAccentGradient(ColorFrame)
 
-    Library:AddToRegistry(ColorFrame, {
-        BackgroundColor3 = "AccentColor";
-    }, true)
+    Library:AddToRegistry(ColorFrame, {}, true)
 
     local _KeybindLabel = Library:CreateLabel({
         Size = UDim2.new(1, 0, 0, 20);
@@ -7025,8 +7017,7 @@ function Library:CreateWindow(...)
 
     local Inner = Library:Create("Frame", {
         BackgroundColor3 = Library.MainColor;
-        BorderColor3 = Library.AccentColor;
-        BorderMode = Enum.BorderMode.Inset;
+        BorderSizePixel = 0;
         Position = UDim2.new(0, 1, 0, 1);
         Size = UDim2.new(1, -2, 1, -2);
         ZIndex = 1;
@@ -7035,7 +7026,6 @@ function Library:CreateWindow(...)
 
     Library:AddToRegistry(Inner, {
         BackgroundColor3 = "MainColor";
-        BorderColor3 = "AccentColor";
     })
 
     local WindowAccentStroke = Instance.new("UIStroke")
@@ -7128,13 +7118,12 @@ function Library:CreateWindow(...)
         Parent = TabArea;
         Visible = false;
     })
+    TabGlider.BackgroundColor3 = Color3.new(1, 1, 1)
     Library:CreateAccentGradient(TabGlider)
 
     Window.TabGlider = TabGlider
 
-    Library:AddToRegistry(TabGlider, {
-        BackgroundColor3 = "AccentColor";
-    })
+    Library:AddToRegistry(TabGlider, {})
 
     Library:Create("Frame", {
         BackgroundColor3 = Library.BackgroundColor;
@@ -8137,11 +8126,10 @@ end
                 ZIndex = 5;
                 Parent = BoxInner;
             })
+            Highlight.BackgroundColor3 = Color3.new(1, 1, 1)
             Library:CreateAccentGradient(Highlight)
 
-            Library:AddToRegistry(Highlight, {
-                BackgroundColor3 = "AccentColor";
-            })
+            Library:AddToRegistry(Highlight, {})
 
             -- local GroupboxLabel = 
             Library:CreateLabel({
@@ -8239,11 +8227,10 @@ end
                 ZIndex = 10;
                 Parent = BoxInner;
             })
+            Highlight.BackgroundColor3 = Color3.new(1, 1, 1)
             Library:CreateAccentGradient(Highlight)
 
-            Library:AddToRegistry(Highlight, {
-                BackgroundColor3 = "AccentColor";
-            })
+            Library:AddToRegistry(Highlight, {})
 
             local TabboxButtons = Library:Create("Frame", {
                 BackgroundTransparency = 1;
