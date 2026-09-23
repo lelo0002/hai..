@@ -1,4 +1,4 @@
---d32323232323
+--d223
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -1094,12 +1094,15 @@ function Library:CreateAccentGradient(Parent, Options)
         ColorSequenceKeypoint.new(1, c2)
     })
 
-    if Parent:IsA("UIStroke") then
-        Gradient.Rotation = Options.Rotation or 135
+    if Options.Rotation then
+        Gradient.Rotation = Options.Rotation
+        pcall(function() Gradient:SetAttribute("CustomRotation", Options.Rotation) end)
+    elseif Parent:IsA("UIStroke") then
+        Gradient.Rotation = 135
     elseif Parent.Name == "VerticalLine" or Parent.Name == "SideColor" then
-        Gradient.Rotation = Options.Rotation or 90
+        Gradient.Rotation = 90
     else
-        Gradient.Rotation = Options.Rotation or 0
+        Gradient.Rotation = 0
     end
 
     pcall(function() Gradient.Parent = Parent end)
@@ -1135,24 +1138,24 @@ function Library:UpdateAccentGradients()
         local grad = Library.AccentGradients[i]
         if grad and grad.Parent then
             local parent = grad.Parent
-            local isVisible = true
-            pcall(function() isVisible = parent.Visible end)
+            grad.Enabled = true
+            grad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, c1),
+                ColorSequenceKeypoint.new(0.5, c1:Lerp(c2, 0.5)),
+                ColorSequenceKeypoint.new(1, c2)
+            })
 
-            if isVisible then
-                grad.Enabled = true
-                grad.Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, c1),
-                    ColorSequenceKeypoint.new(0.5, c1:Lerp(c2, 0.5)),
-                    ColorSequenceKeypoint.new(1, c2)
-                })
+            local customRot = nil
+            pcall(function() customRot = grad:GetAttribute("CustomRotation") end)
 
-                if parent:IsA("UIStroke") then
-                    grad.Rotation = 135
-                elseif parent.Name == "VerticalLine" or parent.Name == "SideColor" then
-                    grad.Rotation = 90
-                else
-                    grad.Rotation = 0
-                end
+            if customRot ~= nil then
+                grad.Rotation = customRot
+            elseif parent:IsA("UIStroke") then
+                grad.Rotation = 135
+            elseif parent.Name == "VerticalLine" or parent.Name == "SideColor" then
+                grad.Rotation = 90
+            else
+                grad.Rotation = 0
             end
         else
             table.remove(Library.AccentGradients, i)
@@ -2215,12 +2218,13 @@ do
         })
 
         local Highlight = Library:Create("Frame", {
-            BackgroundColor3 = Library.AccentColor;
+            BackgroundColor3 = Color3.new(1, 1, 1);
             BorderSizePixel = 0;
             Size = UDim2.new(1, 0, 0, 2);
             ZIndex = 17;
             Parent = PickerFrameInner;
         })
+        Library:CreateAccentGradient(Highlight)
 
         local SatVibMapOuter = Library:Create("Frame", {
             BorderColor3 = Color3.new(0, 0, 0);
@@ -2563,7 +2567,7 @@ do
         ColorPicker.ContextMenu = ContextMenu
 
         Library:AddToRegistry(PickerFrameInner, { BackgroundColor3 = "BackgroundColor"; BorderColor3 = "OutlineColor"; })
-        Library:AddToRegistry(Highlight, { BackgroundColor3 = "AccentColor"; })
+        Library:AddToRegistry(Highlight, {})
         Library:AddToRegistry(SatVibMapInner, { BackgroundColor3 = "BackgroundColor"; BorderColor3 = "OutlineColor"; })
 
         Library:AddToRegistry(HueBoxInner, { BackgroundColor3 = "MainColor"; BorderColor3 = "OutlineColor"; })
@@ -4626,10 +4630,15 @@ do
             Fill.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
             Fill.BorderColor3 = Slider.Disabled and Library.DisabledOutlineColor or Library.AccentColorDark
 
-            Library.RegistryMap[HideBorderRight].Properties.BackgroundColor3 = Slider.Disabled and "DisabledAccentColor" or "AccentColor"
-
-            Library.RegistryMap[Fill].Properties.BackgroundColor3 = Slider.Disabled and "DisabledAccentColor" or "AccentColor"
-            Library.RegistryMap[Fill].Properties.BorderColor3 = Slider.Disabled and "DisabledOutlineColor" or "AccentColorDark"
+            if Slider.Disabled then
+                Library.RegistryMap[HideBorderRight].Properties.BackgroundColor3 = "DisabledAccentColor"
+                Library.RegistryMap[Fill].Properties.BackgroundColor3 = "DisabledAccentColor"
+                Library.RegistryMap[Fill].Properties.BorderColor3 = "DisabledOutlineColor"
+            else
+                Library.RegistryMap[HideBorderRight].Properties.BackgroundColor3 = nil
+                Library.RegistryMap[Fill].Properties.BackgroundColor3 = nil
+                Library.RegistryMap[Fill].Properties.BorderColor3 = "AccentColorDark"
+            end
         end
         
         function Slider:Display()
@@ -6549,21 +6558,19 @@ do
 
 
     Library:AddToRegistry(WatermarkInner, {
-        BorderColor3 = "AccentColor";
+        BorderColor3 = "OutlineColor";
     })
 
     local WatermarkStroke = Instance.new("UIStroke")
     WatermarkStroke.Name = "AccentBorder"
     WatermarkStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    WatermarkStroke.Color = Library.AccentColor
+    WatermarkStroke.Color = Color3.new(1, 1, 1)
     WatermarkStroke.Thickness = 1
     WatermarkStroke.LineJoinMode = Enum.LineJoinMode.Miter
     WatermarkStroke.Parent = WatermarkInner
 
     Library:CreateAccentGradient(WatermarkStroke, { Rotation = 135 })
-    Library:AddToRegistry(WatermarkStroke, {
-        Color = "AccentColor",
-    })
+    Library:AddToRegistry(WatermarkStroke, {})
 
     local InnerFrame = Library:Create("Frame", {
         BackgroundColor3 = Color3.new(1, 1, 1);
@@ -6831,16 +6838,14 @@ do
         local SideColor = Library:Create("Frame", {
             AnchorPoint = Side == "left" and Vector2.new(0, 0) or Side == "right" and Vector2.new(1, 0) or Vector2.new(0, 1);
             Position = Side == "left" and UDim2.new(0, -1, 0, -1) or Side == "right" and UDim2.new(1, -1, 0, -1) or UDim2.new(0, -1, 1, 1);
-            BackgroundColor3 = Library.AccentColor;
+            BackgroundColor3 = Color3.new(1, 1, 1);
             BorderSizePixel = 0;
             Size = (Side == "left" or Side == "right") and UDim2.new(0, 3, 1, 2) or UDim2.new(1, 2, 0, 2);
             ZIndex = 11004;
             Parent = NotifyOuter;
         })
 
-        Library:AddToRegistry(SideColor, {
-            BackgroundColor3 = "AccentColor";
-        }, true)
+        Library:AddToRegistry(SideColor, {}, true)
         Library:CreateAccentGradient(SideColor)
 
         function Data:Resize()
@@ -7031,15 +7036,13 @@ function Library:CreateWindow(...)
     local WindowAccentStroke = Instance.new("UIStroke")
     WindowAccentStroke.Name = "AccentBorder"
     WindowAccentStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    WindowAccentStroke.Color = Library.AccentColor
+    WindowAccentStroke.Color = Color3.new(1, 1, 1)
     WindowAccentStroke.Thickness = 1.5
     WindowAccentStroke.LineJoinMode = Enum.LineJoinMode.Miter
     WindowAccentStroke.Parent = Inner
 
     Library:CreateAccentGradient(WindowAccentStroke, { Rotation = 135 })
-    Library:AddToRegistry(WindowAccentStroke, {
-        Color = "AccentColor",
-    })
+    Library:AddToRegistry(WindowAccentStroke, {})
 
     local WindowLabel = Library:CreateLabel({
         Position = UDim2.new(0, 0, 0, 0);
@@ -8796,6 +8799,19 @@ local Hue = 0
 Library:GiveSignal(RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function(Delta)
     if Library.Unloaded then
         return
+    end
+
+    if Library.AccentSpinEnabled then
+        local speed = typeof(Library.AccentSpinSpeed) == "number" and Library.AccentSpinSpeed or 1
+        Library.AccentSpinAngle = ((Library.AccentSpinAngle or 135) + Delta * 180 * speed) % 360
+        for i = #Library.AccentGradients, 1, -1 do
+            local grad = Library.AccentGradients[i]
+            if grad and grad.Parent then
+                grad.Rotation = Library.AccentSpinAngle
+            else
+                table.remove(Library.AccentGradients, i)
+            end
+        end
     end
 
     RainbowStep = RainbowStep + Delta
