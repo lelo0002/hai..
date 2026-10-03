@@ -1,4 +1,4 @@
---d223
+--d223444
 if not LPH_OBFUSCATED then
     local fallback = function(...) return (...) end
     pcall(function() getgenv().LPH_NO_VIRTUALIZE = fallback end)
@@ -349,7 +349,7 @@ else
     Library.IsMobile = (Library.DevicePlatform == Enum.Platform.Android or Library.DevicePlatform == Enum.Platform.IOS)
 end
 
-Library.MinSize = if Library.IsMobile then Vector2.new(550, 200) else Vector2.new(550, 300)
+Library.MinSize = if Library.IsMobile then Vector2.new(350, 200) else Vector2.new(550, 300)
 
 --// Functions \\--
 local function ApplyDPIScale(Position)
@@ -518,7 +518,7 @@ function Library:SetDPIScale(value: number)
     assert(type(value) == "number", "Expected type number for DPI scale but got " .. typeof(value))
     
     DPIScale = value / 100
-    Library.MinSize = (if Library.IsMobile then Vector2.new(550, 200) else Vector2.new(550, 300)) * DPIScale
+    Library.MinSize = (if Library.IsMobile then Vector2.new(350, 200) else Vector2.new(550, 300)) * DPIScale
 end
 
 function Library:SafeCallback(Func, ...)
@@ -6960,8 +6960,12 @@ function Library:CreateWindow(...)
         until ViewportSize.X > 5 and ViewportSize.Y > 5
     end
 
-    if WindowInfo.Size == UDim2.fromOffset(0, 0) then
-        WindowInfo.Size = if Library.IsMobile then UDim2.fromOffset(550, math.clamp(ViewportSize.Y - 35, 200, 600)) else UDim2.fromOffset(550, 600)
+    if Library.IsMobile then
+        local mobileWidth = math.clamp(ViewportSize.X * 0.9, 300, 450)
+        local mobileHeight = math.clamp(ViewportSize.Y * 0.85, 250, 350)
+        WindowInfo.Size = UDim2.fromOffset(mobileWidth, mobileHeight)
+    elseif WindowInfo.Size == UDim2.fromOffset(0, 0) then
+        WindowInfo.Size = UDim2.fromOffset(550, 600)
     end
 
     Library.NotifySide = WindowInfo.NotifySide
